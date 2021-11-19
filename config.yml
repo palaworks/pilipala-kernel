@@ -1,0 +1,18 @@
+database:
+  dataSource: localhost
+  port: 3306
+  
+  user: root
+  password: 65a1561425f744e2b541303f628963f8
+
+  poolSize: 32
+
+  schema: pilipala_fs
+
+  table: 
+    record: record
+    stack: stack
+    comment: comment
+    token: token
+
+cacheSize: 1024

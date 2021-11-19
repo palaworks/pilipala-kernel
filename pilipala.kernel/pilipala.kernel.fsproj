@@ -1,0 +1,72 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <TargetFramework>net5.0</TargetFramework>
+        <GenerateDocumentationFile>true</GenerateDocumentationFile>
+        <LangVersion>preview</LangVersion>
+        <WarnOn>3390;$(WarnOn)</WarnOn>
+    </PropertyGroup>
+
+    <ItemGroup>
+        
+        <Compile Include="src\data\type\option.fs" />
+        <Compile Include="src\data\type\result.fs" />
+        <Compile Include="src\data\type\ord.fs" />
+        <Compile Include="src\data\type\list.fs" />
+        <Compile Include="src\data\fn.fs" />
+        
+        <Compile Include="src\data\op.fs" />
+        <Compile Include="src\data\casting.fs" />
+        
+        <Compile Include="src\util\io.fs" />
+        <Compile Include="src\util\hash.fs" />
+        <Compile Include="src\util\html.fs" />
+        <Compile Include="src\util\json.fs" />
+        <Compile Include="src\util\markdown.fs" />
+        <Compile Include="src\util\palaflake.fs" />
+        <Compile Include="src\util\uuid.fs" />
+        <Compile Include="src\util\yaml.fs" />
+        <Compile Include="src\util\encoding.fs" />
+        <Compile Include="src\util\socket\tcp.fs" />
+        <Compile Include="src\util\crypto\rsa.fs" />
+        <Compile Include="src\util\crypto\aes.fs" />
+        
+        <Compile Include="src\database\mysql\ext.fs" />
+        <Compile Include="src\database\mysql\pool.fs" />
+        <Compile Include="src\database\mysql\manager.fs" />
+        
+        <Compile Include="src\kernel\launcher.fs" />
+        
+        <Compile Include="src\kernel\container\err.fs" />
+        <Compile Include="src\kernel\container\cache\kvPool.fs" />
+        <Compile Include="src\kernel\container\cache\relationTree.fs" />
+        <Compile Include="src\kernel\container\post\record.fs" />
+        <Compile Include="src\kernel\container\post\stack.fs" />
+        <Compile Include="src\kernel\container\comment\comment.fs" />
+        
+        <Compile Include="src\kernel\tag.fs" />
+        
+        <Compile Include="src\kernel\auth\token.fs" />
+        <Compile Include="src\kernel\auth\auth.fs" />
+        
+        <Compile Include="src\kernel\palang.fs" />
+       
+        <Compile Include="src\assembly.fs" />
+    </ItemGroup>
+
+    <ItemGroup>
+        <PackageReference Include="FSharp.Interop.Dynamic" Version="5.0.1.268" />
+        <PackageReference Include="Markdig" Version="0.26.0" />
+        <PackageReference Include="Microsoft.IdentityModel.Tokens" Version="6.13.1" />
+        <PackageReference Include="MySql.Data" Version="8.0.26" />
+        <PackageReference Include="Newtonsoft.Json" Version="13.0.1" />
+        <PackageReference Include="YamlDotNet" Version="11.2.1" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <Reference Include="RSA, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null">
+        <HintPath>..\RSA\bin\Debug\net5.0\RSA.dll</HintPath>
+      </Reference>
+    </ItemGroup>
+
+</Project>
