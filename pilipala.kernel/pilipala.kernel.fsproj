@@ -9,6 +9,10 @@
 
     <ItemGroup>
         
+        <Compile Include="src\data\casting.fs" />
+        
+        <Compile Include="src\data\object.fs" />
+        
         <Compile Include="src\data\type\option.fs" />
         <Compile Include="src\data\type\result.fs" />
         <Compile Include="src\data\type\ord.fs" />
@@ -16,7 +20,6 @@
         <Compile Include="src\data\fn.fs" />
         
         <Compile Include="src\data\op.fs" />
-        <Compile Include="src\data\casting.fs" />
         
         <Compile Include="src\util\io.fs" />
         <Compile Include="src\util\hash.fs" />
@@ -65,7 +68,7 @@
 
     <ItemGroup>
       <Reference Include="RSA, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null">
-        <HintPath>..\RSA\bin\Debug\net5.0\RSA.dll</HintPath>
+        <HintPath>..\project\pilipala_fs\pilipala.kernel\bin\Debug\net5.0\RSA.dll</HintPath>
       </Reference>
     </ItemGroup>
 

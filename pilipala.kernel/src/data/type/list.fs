@@ -51,17 +51,14 @@ module enhList =
             "["
             + (foldr
                 (fun x acc ->
-                    let str =
+                    //下一级调试信息
+                    let msg: string =
                         try
-                            x
-                                .GetType()
-                                .GetMethod("debug")
-                                .Invoke(x, [||])
-                                .ToString()
+                            x.tryInvoke "debug"
                         with
                         | _ -> x.ToString()
 
-                    $"; {str}{acc}")
+                    $"; {msg}{acc}")
                 " ]"
                 self.list)
-                .Remove(0, 1)
+                .Remove(0, 1)//去除首部分号

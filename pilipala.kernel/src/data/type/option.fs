@@ -37,4 +37,15 @@ module enhOption =
             | Some x -> x
             | None -> f ()
 
-        member inline self.debug() = self.ToString()
+        member inline self.debug() =
+            match self with
+            | Some x ->
+                //下一级调试信息
+                let msg: string =
+                    try
+                        $"""({(x.tryInvoke "debug")})"""
+                    with
+                    | _ -> x.ToString()
+
+                $"Some {msg}"
+            | None -> "None"

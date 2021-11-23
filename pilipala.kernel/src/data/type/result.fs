@@ -33,4 +33,45 @@ module enhResult =
             | Ok x -> x
             | _ -> f ()
 
-        member inline self.debug() = self.ToString()
+        member inline self.debug() =
+            match self with
+            | Ok x ->
+                //下一级调试信息
+                let msg: string =
+                    try
+                        $"""({(x.tryInvoke "debug")})"""
+                    with
+                    | _ -> x.ToString()
+
+                $"Ok {msg}"
+            | Err e ->
+                //下一级调试信息
+                let msg: string =
+                    try
+                        $"""({(e.tryInvoke "debug")})"""
+                    with
+                    | _ -> e.ToString()
+
+                $"Err {msg}"
+
+
+(*
+        member self.debug() =
+            "["
+            + (foldr
+                (fun x acc ->
+                    let str =
+                        try
+                            x
+                                .GetType()
+                                .GetMethod("debug")
+                                .Invoke(x, [||])
+                                .ToString()
+                        with
+                        | _ -> x.ToString()
+
+                    $"; {str}{acc}")
+                " ]"
+                self.list)
+                .Remove(0, 1)
+        *)
