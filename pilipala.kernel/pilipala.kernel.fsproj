@@ -9,18 +9,6 @@
 
     <ItemGroup>
         
-        <Compile Include="src\data\casting.fs" />
-        
-        <Compile Include="src\data\object.fs" />
-        
-        <Compile Include="src\data\type\option.fs" />
-        <Compile Include="src\data\type\result.fs" />
-        <Compile Include="src\data\type\ord.fs" />
-        <Compile Include="src\data\type\list.fs" />
-        <Compile Include="src\data\fn.fs" />
-        
-        <Compile Include="src\data\op.fs" />
-        
         <Compile Include="src\util\io.fs" />
         <Compile Include="src\util\hash.fs" />
         <Compile Include="src\util\html.fs" />
@@ -58,7 +46,6 @@
     </ItemGroup>
 
     <ItemGroup>
-        <PackageReference Include="FSharp.Interop.Dynamic" Version="5.0.1.268" />
         <PackageReference Include="Markdig" Version="0.26.0" />
         <PackageReference Include="Microsoft.IdentityModel.Tokens" Version="6.13.1" />
         <PackageReference Include="MySql.Data" Version="8.0.26" />
@@ -67,8 +54,11 @@
     </ItemGroup>
 
     <ItemGroup>
+      <Reference Include="fsharper, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null">
+        <HintPath>D:\ghrepo\fsharper\fsharper\bin\Debug\net5.0\fsharper.dll</HintPath>
+      </Reference>
       <Reference Include="RSA, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null">
-        <HintPath>..\project\pilipala_fs\pilipala.kernel\bin\Debug\net5.0\RSA.dll</HintPath>
+        <HintPath>..\RSA\bin\Debug\net5.0\RSA.dll</HintPath>
       </Reference>
     </ItemGroup>
 

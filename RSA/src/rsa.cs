@@ -1,4 +1,4 @@
-﻿namespace pilipala.kernel.cslib
+﻿namespace pilipala.util.crypto
 {
     using System;
     using System.IO;
@@ -34,7 +34,7 @@
         /// </summary>
         public byte[] Encode(byte[] data)
         {
-            int blockLen = rsa.KeySize / 8 - 11;
+            var blockLen = rsa.KeySize / 8 - 11;
             if (data.Length <= blockLen)
             {
                 return rsa.Encrypt(data, RSAEncryptionPadding.Pkcs1);
@@ -69,27 +69,26 @@
                 return null;
             }
 
-            byte[] byts = null;
+            byte[] bytes = null;
             try
             {
-                byts = Convert.FromBase64String(str);
+                bytes = Convert.FromBase64String(str);
             }
             catch
             {
             }
 
-            if (byts == null)
+            if (bytes == null)
             {
                 return null;
             }
 
-            var val = DecodeOrNull(byts);
+            var val = DecodeOrNull(bytes);
+
             if (val == null)
-            {
                 return null;
-            }
-
-            return Encoding.UTF8.GetString(val);
+            else
+                return Encoding.UTF8.GetString(val);
         }
 
         /// <summary>
@@ -99,7 +98,7 @@
         {
             try
             {
-                int blockLen = rsa.KeySize / 8;
+                var blockLen = rsa.KeySize / 8;
                 if (data.Length <= blockLen)
                 {
                     return rsa.Decrypt(data, RSAEncryptionPadding.Pkcs1);
@@ -134,18 +133,13 @@
         /// <summary>
         /// 最底层的RSACryptoServiceProvider对象
         /// </summary>
-        public System.Security.Cryptography.RSA RSAObject
-        {
-            get { return rsa; }
-        }
+        public System.Security.Cryptography.RSA RSAObject => rsa;
+
 
         /// <summary>
         /// 密钥位数
         /// </summary>
-        public int KeySize
-        {
-            get { return rsa.KeySize; }
-        }
+        public int KeySize => rsa.KeySize;
 
         /// <summary>
         /// 用指定密钥大小创建一个新的RSA，出错抛异常
