@@ -1,68 +1,64 @@
-﻿namespace pilipala.util.socket
+﻿module pilipala.util.socket.tcp
 
-open K4os.Compression.LZ4.Internal
+open System
+open System.Text
+open System.Net
+open System.Net.Sockets
+open pilipala.util.encoding
 
-module tcp =
+/// 与指定ip端口建立tcp连接
+let connect (ip: string) (port: uint16) =
+    let socket =
+        new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp)
 
-    open System
-    open System.Text
-    open System.Net
-    open System.Net.Sockets
-    open pilipala.util.encoding
+    let endPoint = IPEndPoint(IPAddress.Parse ip, int port)
 
-    /// 与指定ip端口建立tcp连接
-    let connect (ip: string) (port: uint16) =
-        let socket =
-            new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp)
+    try
+        socket.Connect endPoint
+        Ok socket
+    with
+    | e -> Error e
 
-        let endPoint = IPEndPoint(IPAddress.Parse ip, int port)
+/// 持续监听本机指定端口的tcp连接
+/// 闭包 f 生命期结束后其连接会被自动销毁
+/// 此函数会永久性阻塞当前线程
+let listen (port: uint16) f =
+    let listenSocket =
+        new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp)
 
-        try
-            socket.Connect endPoint
-            Ok socket
-        with
-        | e -> Error e
+    let endPoint = IPEndPoint(IPAddress.Any, int port)
 
-    /// 持续监听本机指定端口的tcp连接
-    /// 闭包 f 生命期结束后其连接会被自动销毁
-    /// 此函数会永久性阻塞当前线程
-    let listen (port: uint16) f =
-        let listenSocket =
-            new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp)
+    listenSocket.Bind endPoint
+    listenSocket.Listen 0 //TODO
 
-        let endPoint = IPEndPoint(IPAddress.Any, int port)
+    try
+        while true do
+            let s = listenSocket.Accept()
+            f s
+            s.Dispose()
 
-        listenSocket.Bind endPoint
-        listenSocket.Listen 0 //TODO
+        Ok()
+    with
+    | e ->
+        listenSocket.Dispose()
+        Error e
 
-        try
-            while true do
-                let s = listenSocket.Accept()
-                f s
-                s.Dispose()
+type Socket with
 
-            Ok()
-        with
-        | e ->
-            listenSocket.Dispose()
-            Error e
+    /// 发送文本消息
+    member self.send(msg: string) = msg |> getBytes |> self.Send |> ignore
 
-    type Socket with
+    /// 接收文本消息
+    member self.recv =
+        let buf = Array.zeroCreate<byte> 4096
 
-        /// 发送文本消息
-        member self.send(msg: string) = msg |> getBytes |> self.Send |> ignore
+        let rec f (sb: StringBuilder) =
+            match self.Receive buf with
+            | n when n = buf.Length ->
+                Encoding.UTF8.GetString(buf, 0, n)
+                |> sb.Append
+                |> f
+            | n -> //缓冲区未满，说明全部接收完毕
+                Encoding.UTF8.GetString(buf, 0, n) |> sb.Append
 
-        /// 接收文本消息
-        member self.recv =
-            let buf = Array.zeroCreate<byte> 4096
-
-            let rec f (sb: StringBuilder) =
-                match self.Receive buf with
-                | n when n = buf.Length ->
-                    Encoding.UTF8.GetString(buf, 0, n)
-                    |> sb.Append
-                    |> f
-                | n -> //缓冲区未满，说明全部接收完毕
-                    Encoding.UTF8.GetString(buf, 0, n) |> sb.Append
-
-            (StringBuilder() |> f).ToString()
+        (StringBuilder() |> f).ToString()

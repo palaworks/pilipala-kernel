@@ -1,14 +1,12 @@
-﻿namespace pilipala.util
+﻿module pilipala.util.json
 
-module json =
+open System
+open Newtonsoft.Json
+open Newtonsoft.Json.Linq
+open Newtonsoft.Json.Converters
 
-    open System
-    open Newtonsoft.Json
-    open Newtonsoft.Json.Linq
-    open Newtonsoft.Json.Converters
-
-    type Object with
-        /// 序列化到json
-        member self.json =
-            (self, IsoDateTimeConverter(DateTimeFormat = "yyyy-MM-dd HH:mm:ss"))
-            |> JsonConvert.SerializeObject
+type Object with
+    /// 序列化到json
+    member self.json =
+        (self, IsoDateTimeConverter(DateTimeFormat = "yyyy-MM-dd HH:mm:ss"))
+        |> JsonConvert.SerializeObject

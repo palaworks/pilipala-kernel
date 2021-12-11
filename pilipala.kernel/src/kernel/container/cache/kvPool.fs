@@ -1,46 +1,41 @@
-namespace pilipala.container.cache
+module internal pilipala.container.cache.KVPool
 
+open System
+open System.Collections.Generic
+open MySql.Data.MySqlClient
+open fsharper.fn
+open fsharper.op
+open fsharper.ethType
+open fsharper.typeExt
+open fsharper.moreType
+open pilipala.util
+open pilipala.util.hash
+open pilipala.container
 
+//let cacheSize = 1024
 
-module internal KVPool =
+//TODO 需考虑线程安全
 
-    open System
-    open System.Collections.Generic
-    open MySql.Data.MySqlClient
-    open fsharper.fn
-    open fsharper.op
-    open fsharper.ethType
-    open fsharper.typeExt
-    open fsharper.moreType
-    open pilipala.util
-    open pilipala.util.hash
-    open pilipala.kernel
-    open pilipala.container
+//使用基于时间的缓存清理策略
+//老旧的缓存在超出容量限制后将被清除
 
-    //let cacheSize = 1024
+let private cache =
+    Dictionary<string * uint64 * string, uint64 * obj>()
 
-    //TODO 需考虑线程安全
+/// 取字段值
+let inline get pool id key =
+    if cache.ContainsKey(pool, id, key) then
+        let value = cache.[(pool, id, key)] |> snd
 
-    //使用基于时间的缓存清理策略
-    //老旧的缓存在超出容量限制后将被清除
+        cache.[(pool, id, key)] <- (palaflake.gen (), value) //更新权重
 
-    let private cache =
-        Dictionary<string * uint64 * string, uint64 * obj>()
+        value |> cast |> Some
+    else
+        None
 
-    /// 取字段值
-    let inline get pool id key =
-        if cache.ContainsKey(pool, id, key) then
-            let value = cache.[(pool, id, key)] |> snd
-
-            cache.[(pool, id, key)] <- (palaflake.gen (), value) //更新权重
-
-            value |> cast |> Some
-        else
-            None
-
-    /// 写字段值
-    let inline set pool id key value =
-        if cache.ContainsKey(pool, id, key) then
-            cache.[(pool, id, key)] <- (palaflake.gen (), value)
-        else
-            cache.Add((pool, id, key), (palaflake.gen (), value))
+/// 写字段值
+let inline set pool id key value =
+    if cache.ContainsKey(pool, id, key) then
+        cache.[(pool, id, key)] <- (palaflake.gen (), value)
+    else
+        cache.Add((pool, id, key), (palaflake.gen (), value))

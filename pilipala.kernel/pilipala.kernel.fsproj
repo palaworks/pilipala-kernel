@@ -23,22 +23,25 @@
         <Compile Include="src\util\crypto\aes.fs" />
         
         <Compile Include="src\database\mysql\ext.fs" />
-        <Compile Include="src\database\mysql\pool.fs" />
-        <Compile Include="src\database\mysql\manager.fs" />
+        <Compile Include="src\database\mysql\MySqlConnPool.fs" />
+        <Compile Include="src\database\mysql\MySqlManager.fs" />
         
         <Compile Include="src\kernel\launcher.fs" />
         
         <Compile Include="src\kernel\container\err.fs" />
         <Compile Include="src\kernel\container\cache\kvPool.fs" />
         <Compile Include="src\kernel\container\cache\relationTree.fs" />
-        <Compile Include="src\kernel\container\post\record.fs" />
-        <Compile Include="src\kernel\container\post\stack.fs" />
-        <Compile Include="src\kernel\container\comment\comment.fs" />
+        <Compile Include="src\kernel\container\post\PostRecord.fs" />
+        <Compile Include="src\kernel\container\post\PostStack.fs" />
+        <Compile Include="src\kernel\container\comment\Comment.fs" />
+        <Compile Include="src\kernel\container\op.fs" />
         
         <Compile Include="src\kernel\tag.fs" />
         
         <Compile Include="src\kernel\auth\token.fs" />
-        <Compile Include="src\kernel\auth\auth.fs" />
+        
+        <Compile Include="src\kernel\auth\SecureChannel.fs" />
+        <Compile Include="src\kernel\auth\serv.fs" />
         
         <Compile Include="src\kernel\palang.fs" />
        
