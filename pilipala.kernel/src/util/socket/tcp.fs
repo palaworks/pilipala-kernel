@@ -54,13 +54,23 @@ type Socket with
     member self.recv =
         let buf = Array.zeroCreate<byte> 4096
 
-        let rec f (sb: StringBuilder) =
+        let rec fetch (sb: StringBuilder) =
             match self.Receive buf with
             | n when n = buf.Length ->
                 Encoding.UTF8.GetString(buf, 0, n)
                 |> sb.Append
-                |> f
+                |> fetch
             | n -> //缓冲区未满，说明全部接收完毕
                 Encoding.UTF8.GetString(buf, 0, n) |> sb.Append
 
-        (StringBuilder() |> f).ToString()
+        (StringBuilder() |> fetch).ToString()
+    /// 接收字节消息
+    member self.recvBytes =
+        let buf = Array.zeroCreate<byte> 4096
+
+        let rec fetch bl =
+            match self.Receive buf with
+            | n when n = buf.Length -> bl @ (buf |> Array.toList) |> fetch
+            | n -> bl @ (buf.[0..n - 1] |> Array.toList)
+
+        [] |> fetch |> List.toArray
