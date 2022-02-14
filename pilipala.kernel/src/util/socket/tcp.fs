@@ -46,7 +46,9 @@ let listen (port: uint16) f =
 type Socket with
 
     /// 发送文本消息
-    member self.send(msg: string) = msg |> getBytes |> self.Send |> ignore
+    member self.send: string -> unit = getBytes >> self.Send >> ignore
+    /// 发送字节消息
+    member self.sendBytes: byte [] -> unit = self.Send >> ignore
 
     /// 接收文本消息
     member self.recv =
