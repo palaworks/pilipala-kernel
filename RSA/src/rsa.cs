@@ -35,10 +35,10 @@
         public byte[] Encode(byte[] data)
         {
             var blockLen = rsa.KeySize / 8 - 11;
+
             if (data.Length <= blockLen)
-            {
                 return rsa.Encrypt(data, RSAEncryptionPadding.Pkcs1);
-            }
+
 
             using var dataStream = new MemoryStream(data);
             using var enStream = new MemoryStream();
@@ -65,9 +65,7 @@
         public string DecodeOrNull(string str)
         {
             if (string.IsNullOrEmpty(str))
-            {
                 return null;
-            }
 
             byte[] bytes = null;
             try
@@ -79,16 +77,14 @@
             }
 
             if (bytes == null)
-            {
                 return null;
-            }
 
             var val = DecodeOrNull(bytes);
 
             if (val == null)
                 return null;
-            else
-                return Encoding.UTF8.GetString(val);
+
+            return Encoding.UTF8.GetString(val);
         }
 
         /// <summary>
@@ -100,9 +96,8 @@
             {
                 var blockLen = rsa.KeySize / 8;
                 if (data.Length <= blockLen)
-                {
                     return rsa.Decrypt(data, RSAEncryptionPadding.Pkcs1);
-                }
+
 
                 using var dataStream = new MemoryStream(data);
                 using var deStream = new MemoryStream();
@@ -302,18 +297,15 @@
                 BigInteger d = BigX(dOrNull);
                 BigInteger p = FindFactor(e, d, n);
                 BigInteger q = n / p;
+
                 if (p.CompareTo(q) > 0)
-                {
-                    BigInteger t = p;
-                    p = q;
-                    q = t;
-                }
+                    (p, q) = (q, p);
 
                 BigInteger exp1 = d % (p - BigInteger.One);
                 BigInteger exp2 = d % (q - BigInteger.One);
                 BigInteger coeff = BigInteger.ModPow(q, p - 2, p);
 
-                int keyLen = modulus.Length / 2;
+                var keyLen = modulus.Length / 2;
                 Val_P = BigL(BigB(p), keyLen); //prime1
                 Val_Q = BigL(BigB(q), keyLen); //prime2
                 Val_DP = BigL(BigB(exp1), keyLen); //exponent1
@@ -410,34 +402,27 @@
         static private BigInteger FindFactor(BigInteger e, BigInteger d, BigInteger n)
         {
             BigInteger edMinus1 = e * d - BigInteger.One;
-            int s = -1;
+
+            var s = -1;
+
             if (edMinus1 != BigInteger.Zero)
-            {
                 s = (int) (BigInteger.Log(edMinus1 & -edMinus1) / BigInteger.Log(2));
-            }
+
 
             BigInteger t = edMinus1 >> s;
 
-            long now = DateTime.Now.Ticks;
-            for (int aInt = 2; true; aInt++)
+            var now = DateTime.Now.Ticks;
+            for (var aInt = 2; true; aInt++)
             {
                 if (aInt % 10 == 0 && DateTime.Now.Ticks - now > 3000 * 10000)
-                {
                     throw new Exception("推算RSA.P超时"); //测试最多循环2次，1024位的速度很快 8ms
-                }
+
 
                 BigInteger aPow = BigInteger.ModPow(new BigInteger(aInt), t, n);
-                for (int i = 1; i <= s; i++)
+                for (var i = 1; i <= s; i++)
                 {
-                    if (aPow == BigInteger.One)
-                    {
+                    if (aPow == BigInteger.One || aPow == n - BigInteger.One)
                         break;
-                    }
-
-                    if (aPow == n - BigInteger.One)
-                    {
-                        break;
-                    }
 
                     BigInteger aPowSquared = aPow * aPow % n;
                     if (aPowSquared == BigInteger.One)
@@ -469,9 +454,7 @@
             }
 
             if (data == null)
-            {
                 throw new Exception("PEM内容无效");
-            }
 
             var idx = 0;
 
@@ -481,17 +464,20 @@
                 if (data[idx] == first)
                 {
                     idx++;
+
                     if (data[idx] == 0x81)
                     {
                         idx++;
                         return data[idx++];
                     }
-                    else if (data[idx] == 0x82)
+
+                    if (data[idx] == 0x82)
                     {
                         idx++;
                         return (data[idx++] << 8) + data[idx++];
                     }
-                    else if (data[idx] < 0x80)
+
+                    if (data[idx] < 0x80)
                     {
                         return data[idx++];
                     }
@@ -511,10 +497,9 @@
                 }
 
                 var val = new byte[len];
+
                 for (var i = 0; i < len; i++)
-                {
                     val[i] = data[idx + i];
-                }
 
                 idx += len;
                 return val;
@@ -526,14 +511,10 @@
                 for (var i = 0; i < byts.Length; i++, idx++)
                 {
                     if (idx >= data.Length)
-                    {
                         return false;
-                    }
 
                     if (byts[i] != data[idx])
-                    {
                         return false;
-                    }
                 }
 
                 return true;
@@ -575,9 +556,8 @@
 
                 //读取版本号
                 if (!eq(_Ver))
-                {
                     throw new Exception("PEM未知版本");
-                }
+
 
                 //检测PKCS8
                 var idx2 = idx;
@@ -590,19 +570,16 @@
 
                     //读取版本号
                     if (!eq(_Ver))
-                    {
                         throw new Exception("PEM版本无效");
-                    }
                 }
                 else
-                {
                     idx = idx2;
-                }
+
 
                 //读取数据
                 param.Key_Modulus = readBlock();
                 param.Key_Exponent = readBlock();
-                int keyLen = param.Key_Modulus.Length;
+                var keyLen = param.Key_Modulus.Length;
                 param.Key_D = BigL(readBlock(), keyLen);
                 keyLen /= 2;
                 param.Val_P = BigL(readBlock(), keyLen);
@@ -667,9 +644,7 @@
             void writeLenByte(int len)
             {
                 if (len < 0x80)
-                {
                     ms.WriteByte((byte) len);
-                }
                 else if (len <= 0xff)
                 {
                     ms.WriteByte(0x81);
@@ -692,9 +667,8 @@
                 writeLenByte(len);
 
                 if (addZero)
-                {
                     ms.WriteByte(0x00);
-                }
+
 
                 ms.Write(byts, 0, byts.Length);
             }
@@ -725,18 +699,12 @@
                 while (idx < len)
                 {
                     if (idx > 0)
-                    {
                         str.Append('\n');
-                    }
 
                     if (idx + line >= len)
-                    {
                         str.Append(text[idx..]);
-                    }
                     else
-                    {
                         str.Append(text.Substring(idx, line));
-                    }
 
                     idx += line;
                 }
@@ -792,12 +760,13 @@
 
                 var flag = " PUBLIC KEY";
                 if (!publicUsePKCS8)
-                {
-                    flag = " RSA" + flag;
-                }
 
-                return "-----BEGIN" + flag + "-----\n" + TextBreak(Convert.ToBase64String(byts), 64) + "\n-----END" +
-                       flag + "-----";
+                    flag += " RSA";
+
+
+                return $"-----BEGIN{flag}-----\n" +
+                       TextBreak(Convert.ToBase64String(byts), 64) +
+                       $"\n-----END{flag}-----";
             }
             else
             {
@@ -805,13 +774,14 @@
 
                 //写入总字节数，后续写入
                 ms.WriteByte(0x30);
-                int index1 = (int) ms.Length;
+                var index1 = (int) ms.Length;
 
                 //写入版本号
                 writeAll(ms, _Ver);
 
                 //PKCS8 多一段数据
-                int index2 = -1, index3 = -1;
+                var index2 = -1;
+                var index3 = -1;
                 if (privateUsePKCS8)
                 {
                     //固定内容
@@ -851,15 +821,13 @@
 
                 byts = writeLen(index1, byts);
 
-
                 var flag = " PRIVATE KEY";
                 if (!privateUsePKCS8)
-                {
-                    flag = " RSA" + flag;
-                }
+                    flag += " RSA";
 
-                return "-----BEGIN" + flag + "-----\n" + TextBreak(Convert.ToBase64String(byts), 64) + "\n-----END" +
-                       flag + "-----";
+                return $"-----BEGIN{flag}-----\n" +
+                       TextBreak(Convert.ToBase64String(byts), 64) +
+                       $"\n-----END{flag}-----";
             }
         }
     }
