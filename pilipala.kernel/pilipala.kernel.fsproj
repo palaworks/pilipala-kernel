@@ -58,7 +58,7 @@
 
     <ItemGroup>
       <Reference Include="fsharper, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null">
-        <HintPath>D:\ghrepo\fsharper\fsharper\bin\Debug\net5.0\fsharper.dll</HintPath>
+        <HintPath>..\..\fsharper\fsharper\bin\Debug\net5.0\fsharper.dll</HintPath>
       </Reference>
       <Reference Include="RSA, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null">
         <HintPath>..\RSA\bin\Debug\net5.0\RSA.dll</HintPath>

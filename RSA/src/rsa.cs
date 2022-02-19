@@ -24,20 +24,20 @@
         /// <summary>
         /// 加密字符串（utf-8），出错抛异常
         /// </summary>
-        public string Encode(string str)
+        public string Encode(string str, RSAEncryptionPadding paddingMode)
         {
-            return Convert.ToBase64String(Encode(Encoding.UTF8.GetBytes(str)));
+            return Convert.ToBase64String(Encode(Encoding.UTF8.GetBytes(str), paddingMode));
         }
 
         /// <summary>
         /// 加密数据，出错抛异常
         /// </summary>
-        public byte[] Encode(byte[] data)
+        public byte[] Encode(byte[] data, RSAEncryptionPadding paddingMode)
         {
             var blockLen = rsa.KeySize / 8 - 11;
 
             if (data.Length <= blockLen)
-                return rsa.Encrypt(data, RSAEncryptionPadding.Pkcs1);
+                return rsa.Encrypt(data, paddingMode);
 
 
             using var dataStream = new MemoryStream(data);
@@ -62,7 +62,7 @@
         /// <summary>
         /// 解密字符串（utf-8），解密异常返回null
         /// </summary>
-        public string DecodeOrNull(string str)
+        public string DecodeOrNull(string str, RSAEncryptionPadding paddingMode)
         {
             if (string.IsNullOrEmpty(str))
                 return null;
@@ -79,7 +79,7 @@
             if (bytes == null)
                 return null;
 
-            var val = DecodeOrNull(bytes);
+            var val = DecodeOrNull(bytes, paddingMode);
 
             if (val == null)
                 return null;
@@ -90,7 +90,7 @@
         /// <summary>
         /// 解密数据，解密异常返回null
         /// </summary>
-        public byte[] DecodeOrNull(byte[] data)
+        public byte[] DecodeOrNull(byte[] data, RSAEncryptionPadding paddingMode)
         {
             try
             {
@@ -109,7 +109,7 @@
                     var block = new byte[len];
                     Array.Copy(buffer, 0, block, 0, len);
 
-                    var deBlock = rsa.Decrypt(block, RSAEncryptionPadding.Pkcs1);
+                    var deBlock = rsa.Decrypt(block, paddingMode);
                     deStream.Write(deBlock, 0, deBlock.Length);
 
                     len = dataStream.Read(buffer, 0, blockLen);
@@ -760,8 +760,7 @@
 
                 var flag = " PUBLIC KEY";
                 if (!publicUsePKCS8)
-
-                    flag += " RSA";
+                    flag = " RSA" + flag;
 
 
                 return $"-----BEGIN{flag}-----\n" +
@@ -823,7 +822,7 @@
 
                 var flag = " PRIVATE KEY";
                 if (!privateUsePKCS8)
-                    flag += " RSA";
+                    flag = " RSA" + flag;
 
                 return $"-----BEGIN{flag}-----\n" +
                        TextBreak(Convert.ToBase64String(byts), 64) +
