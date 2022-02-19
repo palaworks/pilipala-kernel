@@ -200,18 +200,18 @@ let internal parse (cmd: string) =
     | e -> "op failed with : " + e.Message
 
 let palangService (channel: SecureChannel) =
-    let cli msg =
+    let log msg =
         Console.WriteLine $"palang service : {msg}"
 
-    cli "online"
+    log "online"
 
     while true do //持续执行命令
         let cmd = channel.recv ()
 
-        cli $"command received < {cmd}"
+        log $"command received < {cmd}"
 
         let result = parse cmd
 
         channel.send result
 
-        cli $"command executed > {result}"
+        log $"command executed > {result}"

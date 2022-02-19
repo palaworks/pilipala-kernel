@@ -1,4 +1,4 @@
-module internal pilipala.container.cache.KVPool
+module internal pilipala.container.cache
 
 open System
 open System.Collections.Generic

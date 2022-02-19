@@ -1,4 +1,4 @@
-﻿module pilipala.kernel.auth.serv
+﻿module internal pilipala.kernel.auth.serv
 
 open System
 open System.Net.Sockets

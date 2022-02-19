@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
     <PropertyGroup>
-        <TargetFramework>net5.0</TargetFramework>
+        <TargetFramework>net6.0</TargetFramework>
         <GenerateDocumentationFile>true</GenerateDocumentationFile>
         <LangVersion>preview</LangVersion>
         <WarnOn>3390;$(WarnOn)</WarnOn>
@@ -26,11 +26,11 @@
         <Compile Include="src\database\mysql\MySqlConnPool.fs" />
         <Compile Include="src\database\mysql\MySqlManager.fs" />
         
-        <Compile Include="src\kernel\launcher.fs" />
+        <Compile Include="src\kernel\builder.fs" />
         
         <Compile Include="src\kernel\container\err.fs" />
-        <Compile Include="src\kernel\container\cache\kvPool.fs" />
-        <Compile Include="src\kernel\container\cache\relationTree.fs" />
+        
+        <Compile Include="src\kernel\container\cache.fs" />
         <Compile Include="src\kernel\container\post\PostRecord.fs" />
         <Compile Include="src\kernel\container\post\PostStack.fs" />
         <Compile Include="src\kernel\container\comment\Comment.fs" />
@@ -40,7 +40,7 @@
         
         <Compile Include="src\kernel\auth\token.fs" />
         
-        <Compile Include="src\kernel\auth\SecureChannel.fs" />
+        <Compile Include="src\kernel\auth\channel.fs" />
         <Compile Include="src\kernel\auth\serv.fs" />
         
         <Compile Include="src\kernel\palang.fs" />
@@ -58,10 +58,7 @@
 
     <ItemGroup>
       <Reference Include="fsharper, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null">
-        <HintPath>..\..\fsharper\fsharper\bin\Debug\net5.0\fsharper.dll</HintPath>
-      </Reference>
-      <Reference Include="RSA, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null">
-        <HintPath>..\RSA\bin\Debug\net5.0\RSA.dll</HintPath>
+        <HintPath>..\..\fsharper\fsharper\bin\Debug\net6.0\fsharper.dll</HintPath>
       </Reference>
     </ItemGroup>
 

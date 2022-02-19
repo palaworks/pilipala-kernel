@@ -10,14 +10,13 @@ open fsharper.moreType
 open pilipala.util
 open pilipala.launcher
 open pilipala.container
-open pilipala.container.cache
 
 
 type PostStack(stackId: uint64) =
     //文章栈是一种单向栈（只进不出）
 
-    let fromCache key = KVPool.get "stack" stackId key
-    let intoCache key value = KVPool.set "stack" stackId key value
+    let fromCache key = cache.get "stack" stackId key
+    let intoCache key value = cache.set "stack" stackId key value
 
     /// 取字段值
     member inline private this.get key =

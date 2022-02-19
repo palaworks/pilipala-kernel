@@ -11,13 +11,11 @@ open pilipala.util
 open pilipala.util.hash
 open pilipala.launcher
 open pilipala.container
-open pilipala.container.cache
-
 
 type PostRecord(recordId: uint64) =
 
-    let fromCache key = KVPool.get "record" recordId key
-    let intoCache key value = KVPool.set "record" recordId key value
+    let fromCache key = cache.get "record" recordId key
+    let intoCache key value = cache.set "record" recordId key value
 
     /// 取字段值
     member inline private this.get key =
