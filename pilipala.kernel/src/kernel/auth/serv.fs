@@ -2,6 +2,7 @@
 
 open System
 open System.Net.Sockets
+open System.Security.Cryptography
 open fsharper.fn
 open fsharper.op
 open fsharper.ethType
@@ -29,27 +30,33 @@ let serveOn port f =
             cli "new client connected"
 
             try
-                match s.recv with
+                match s.recvText () with
                 | "hello" -> //客户端问候
-                    s.send "hi" //服务端问候
+                    s.sendText "hi" //服务端问候
                     cli "start authing"
 
-                    let pubKey = s.recv //接收客户公钥
+                    let pubKey = s.recvText () //接收客户公钥
                     cli "pubKey received"
 
                     let sessionKey = gen N //生成会话密钥
                     //将会话密钥使用客户公钥加密后送回
-                    sessionKey |> rsa.encrypt pubKey |> s.send
+                    sessionKey
+                    |> rsa.encrypt pubKey RSAEncryptionPadding.Pkcs1
+                    |> s.sendText
+
                     cli "sessionKey sent"
 
                     //接收密文解密到凭据
-                    let token = aes.decrypt sessionKey <| s.recv
+                    let token =
+                        aes.decrypt sessionKey PaddingMode.Zeros
+                        <| s.recvText ()
+
                     cli "token received"
 
                     //凭据校验
                     match check token with
                     | Ok true ->
-                        s.send "pass" //受信通告
+                        s.sendText "pass" //受信通告
                         cli "client certified"
 
                         SecureChannel(s, sessionKey) |> f

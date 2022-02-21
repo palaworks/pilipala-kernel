@@ -206,12 +206,12 @@ let palangService (channel: SecureChannel) =
     log "online"
 
     while true do //持续执行命令
-        let cmd = channel.recv ()
+        let cmd = channel.recvText ()
 
         log $"command received < {cmd}"
 
         let result = parse cmd
 
-        channel.send result
+        channel.sendText result
 
         log $"command executed > {result}"

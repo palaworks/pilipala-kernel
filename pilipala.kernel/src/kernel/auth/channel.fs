@@ -2,6 +2,7 @@
 
 open System
 open System.Net.Sockets
+open System.Security.Cryptography
 open fsharper.fn
 open fsharper.op
 open fsharper.ethType
@@ -16,9 +17,13 @@ open pilipala.kernel.auth.token
 type SecureChannel internal (s: Socket, sessionKey: string) =
 
     /// 向信道发送消息
-    member this.send message =
-        message |> aes.encrypt sessionKey |> s.send
+    member this.sendText message =
+        message
+        |> aes.encrypt sessionKey PaddingMode.Zeros
+        |> s.sendText
 
     /// 从信道接收消息
     /// 此方法阻塞当前线程
-    member this.recv() = s.recv |> aes.decrypt sessionKey
+    member this.recvText() =
+        s.recvText ()
+        |> aes.decrypt sessionKey PaddingMode.Zeros
