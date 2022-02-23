@@ -26,24 +26,24 @@
         <Compile Include="src\database\mysql\MySqlConnPool.fs" />
         <Compile Include="src\database\mysql\MySqlManager.fs" />
         
-        <Compile Include="src\kernel\builder.fs" />
+        <Compile Include="src\pilipala\builder.fs" />
         
-        <Compile Include="src\kernel\container\err.fs" />
+        <Compile Include="src\pilipala\container\err.fs" />
         
-        <Compile Include="src\kernel\container\cache.fs" />
-        <Compile Include="src\kernel\container\post\PostRecord.fs" />
-        <Compile Include="src\kernel\container\post\PostStack.fs" />
-        <Compile Include="src\kernel\container\comment\Comment.fs" />
-        <Compile Include="src\kernel\container\op.fs" />
+        <Compile Include="src\pilipala\container\cache.fs" />
+        <Compile Include="src\pilipala\container\post\PostRecord.fs" />
+        <Compile Include="src\pilipala\container\post\PostStack.fs" />
+        <Compile Include="src\pilipala\container\comment\Comment.fs" />
+        <Compile Include="src\pilipala\container\op.fs" />
         
-        <Compile Include="src\kernel\tag.fs" />
+        <Compile Include="src\pilipala\tag.fs" />
         
-        <Compile Include="src\kernel\auth\token.fs" />
+        <Compile Include="src\pilipala\auth\token.fs" />
         
-        <Compile Include="src\kernel\auth\channel.fs" />
-        <Compile Include="src\kernel\auth\serv.fs" />
+        <Compile Include="src\pilipala\auth\channel.fs" />
+        <Compile Include="src\pilipala\auth\serv.fs" />
         
-        <Compile Include="src\kernel\palang.fs" />
+        <Compile Include="src\pilipala\palang.fs" />
        
         <Compile Include="src\assembly.fs" />
     </ItemGroup>
