@@ -9,7 +9,6 @@ open fsharper.typeExt
 open fsharper.moreType
 open pilipala.util
 open pilipala.util.hash
-open pilipala.launcher
 open pilipala.container
 
 type PostRecord(recordId: uint64) =

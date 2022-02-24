@@ -13,7 +13,7 @@ open pilipala.container
 
 
 type PostStack(stackId: uint64) =
-    //文章栈是一种单向栈（只进不出）
+    //该数据结构用于存放文章元数据
 
     let fromCache key = cache.get "stack" stackId key
     let intoCache key value = cache.set "stack" stackId key value

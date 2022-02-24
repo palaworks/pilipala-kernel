@@ -9,20 +9,20 @@ open fsharper.typeExt
 open fsharper.moreType
 
 /// MySql数据库管理器
-type MySqlManager private (pool) =
+type MySqlManaged private (pool) =
 
     /// 以连接信息构造
     new(msg) =
         let pool = MySqlConnPool(msg, "", 32u)
-        MySqlManager(pool)
+        MySqlManaged(pool)
     /// 以连接信息构造，并指定使用的数据库
     new(msg, schema) =
         let pool = MySqlConnPool(msg, schema, 32u)
-        MySqlManager(pool)
+        MySqlManaged(pool)
     /// 以连接信息构造，并指定使用的数据库和连接池大小
     new(msg, schema, poolSize) =
         let pool = MySqlConnPool(msg, schema, poolSize)
-        MySqlManager(pool)
+        MySqlManaged(pool)
 
     member this.getConnection = pool.getConnection
 
@@ -167,7 +167,7 @@ type MySqlManager private (pool) =
 
 
 
-type MySqlManager with
+type MySqlManaged with
 
     /// 从连接池取用 MySqlConnection 并在其上调用同名方法
     member public self.execute sql =

@@ -1,7 +1,6 @@
 ﻿module pilipala.container.tag
 
 open MySql.Data.MySqlClient
-open pilipala.launcher
 open fsharper.fn
 open fsharper.op
 open fsharper.ethType

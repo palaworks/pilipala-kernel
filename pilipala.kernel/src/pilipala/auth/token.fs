@@ -9,7 +9,6 @@ open fsharper.typeExt
 open fsharper.moreType
 open pilipala.util.hash
 open pilipala.util.uuid
-open pilipala.launcher
 
 /// 无法创建凭据错误
 exception FailedToCreateToken
