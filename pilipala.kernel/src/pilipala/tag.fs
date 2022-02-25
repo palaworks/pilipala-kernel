@@ -6,6 +6,7 @@ open fsharper.op
 open fsharper.ethType
 open fsharper.typeExt
 open fsharper.moreType
+open pilipala
 open pilipala.container.post
 
 /// 无法创建标签错误
@@ -30,72 +31,66 @@ let create (tagName: string) =
     if tagName = "" then
         Err FailedToCreateTag //标签名不能为空
     else
-        pala ()
-        >>= fun p ->
-                let sql =
-                    $"CREATE TABLE tag_{tagName} \
+        let sql =
+            $"CREATE TABLE tag_{tagName} \
                           (stackId BIGINT PRIMARY KEY NOT NULL)"
 
-                p.database.execute sql
-                >>= fun f ->
-                        match f <| eq 0 with
-                        | 0 -> tagName.ToLower() |> Ok
-                        | _ -> Err FailedToCreateTag
+        schema.Managed().execute sql
+        >>= fun f ->
+                match f <| eq 0 with
+                | 0 -> tagName.ToLower() |> Ok
+                | _ -> Err FailedToCreateTag
 
 /// 抹除标签
 let erase (tagName: string) =
-    pala ()
-    >>= fun p ->
-            let sql = $"DROP TABLE tag_{tagName}"
 
-            p.database.execute sql
-            >>= fun f ->
-                    match (fun _ -> true) |> f with
-                    | 0 -> Ok()
-                    | _ -> Err FailedToEraseTag
+    let sql = $"DROP TABLE tag_{tagName}"
+
+    schema.Managed().execute sql
+    >>= fun f ->
+            match (fun _ -> true) |> f with
+            | 0 -> Ok()
+            | _ -> Err FailedToEraseTag
 
 /// 为文章栈加标签
 let tagTo (stackId: uint64) (tagName: string) =
-    pala ()
-    >>= fun p ->
-            let sql =
-                $"INSERT INTO tag_{tagName} (stackId) VALUES (?stackId)"
 
-            let para = [| MySqlParameter("stackId", stackId) |]
+    let sql =
+        $"INSERT INTO tag_{tagName} (stackId) VALUES (?stackId)"
 
-            p.database.execute (sql, para)
-            >>= fun f ->
-                    match f <| eq 1 with
-                    | 1 -> Ok()
-                    | _ -> Err FailedToTag
+    let para = [| MySqlParameter("stackId", stackId) |]
+
+    schema.Managed().execute (sql, para)
+    >>= fun f ->
+            match f <| eq 1 with
+            | 1 -> Ok()
+            | _ -> Err FailedToTag
 
 /// 为文章栈去除标签
 let detagFor (stackId: uint64) (tagName: string) =
-    pala ()
-    >>= fun p ->
-            p.database.executeDelete $"tag_{tagName}" ("stackId", stackId)
-            >>= fun f ->
-                    match f <| eq 1 with
-                    | 1 -> Ok()
-                    | _ -> Err FailedToDetag
+
+    schema.Managed().executeDelete $"tag_{tagName}" ("stackId", stackId)
+    >>= fun f ->
+            match f <| eq 1 with
+            | 1 -> Ok()
+            | _ -> Err FailedToDetag
 
 /// 取得标签
 let getTag (tagName: string) =
-    pala ()
-    >>= fun p ->
-            let sql = $"SELECT stackId FROM tag_{tagName}"
 
-            p.database.getFstCol sql
-            >>= fun r ->
-                    Ok
-                    <| match r with
-                       | Some list -> [ for x in list -> x :?> uint64 ]
-                       | None -> []
+    let sql = $"SELECT stackId FROM tag_{tagName}"
+
+    schema.Managed().getFstCol sql
+    >>= fun r ->
+            Ok
+            <| match r with
+               | Some list -> [ for x in list -> x :?> uint64 ]
+               | None -> []
 
 /// 过滤出是 tag 的文章
-let is (tag: Tag) (ps: PostStack list) =
+let is (tag: Tag) (ps: PostMeta list) =
     ps |> filter (fun p -> elem p.stackId tag)
 
 /// 过滤出不是 tag 的文章
-let not (tag: Tag) (ps: PostStack list) =
+let not (tag: Tag) (ps: PostMeta list) =
     ps |> filter (fun p -> not <| elem p.stackId tag)

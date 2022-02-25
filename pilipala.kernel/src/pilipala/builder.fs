@@ -14,7 +14,7 @@ open pilipala.database.mysql
 /// 构建器
 type palaBuilder() =
     let mutable buildPipeline = Pipe<unit>()
-    
+
     (*
     /// 使用全局缓存
     member self.useGlobalCache() = ()

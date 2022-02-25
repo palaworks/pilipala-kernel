@@ -7,8 +7,8 @@ open fsharper.op
 open fsharper.ethType
 open fsharper.typeExt
 open fsharper.moreType
+open pilipala
 open pilipala.util
-open pilipala.launcher
 open pilipala.container
 open pilipala.container.post
 
@@ -17,48 +17,52 @@ type Comment(commentId: uint64) =
 
     let fromCache key = cache.get "comment" commentId key
 
-    let intoCache key value =
-        cache.set "comment" commentId key value
+    let intoCache key value = cache.set "comment" commentId key value
 
     /// 取字段值
     member inline private this.get key =
         (fromCache key).unwarpOr
         <| fun _ ->
-            unwarp (
-                pala ()
-                >>= fun p ->
-                        let table = p.table.comment
+            schema.tables
+            >>= fun ts ->
+                    let table = ts.comment
 
-                        let sql =
-                            $"SELECT {key} FROM {table} WHERE commentId = ?commentId"
+                    let sql =
+                        $"SELECT {key} FROM {table} WHERE commentId = ?commentId"
 
-                        let para =
-                            [| MySqlParameter("commentId", commentId) |]
+                    let para =
+                        [| MySqlParameter("commentId", commentId) |]
 
-                        p.database.getFstVal (sql, para)
-                        >>= fun r ->
-                                let value = r.unwarp ()
+                    schema.Managed().getFstVal (sql, para)
+                    >>= fun r ->
+                            let value = r.unwarp ()
 
-                                intoCache key value //写入缓存并返回
-                                value |> cast |> Ok
-            )
+                            intoCache key value //写入缓存并返回
+                            value |> Ok
+
+                    |> unwarp
+                    |> cast
+                    |> Some
+            |> unwarp
+
 
 
     /// 写字段值
     member inline private this.set key value =
-        pala ()
-        >>= fun p ->
-                let table = p.table.comment
+        schema.tables
+        >>= fun ts ->
+                let table = ts.comment
 
                 (table, (key, value), ("commentId", commentId))
-                |> p.database.executeUpdate
+                |> schema.Managed().executeUpdate
                 >>= fun f ->
 
                         //当更改记录数为 1 时才会提交事务并追加到缓存头
                         match f <| eq 1 with
                         | 1 -> Ok <| intoCache key value
                         | _ -> Err FailedToWriteCache
-
+                |> Some
+        |> unwarp
 
     /// 评论id
     member this.commentId = commentId
@@ -96,9 +100,9 @@ type Comment with
     /// 创建评论
     /// 返回评论id
     static member create() =
-        pala ()
-        >>= fun p ->
-                let table = p.table.comment
+        schema.tables
+        >>= fun ts ->
+                let table = ts.comment
 
                 let sql =
                     $"INSERT INTO {table} \
@@ -118,49 +122,55 @@ type Comment with
                        MySqlParameter("site", "")
                        MySqlParameter("ctime", DateTime.Now) |]
 
-                p.database.execute (sql, para)
+                schema.Managed().execute (sql, para)
                 >>= fun f ->
 
                         match f <| eq 1 with
                         | 1 -> Ok commentId
                         | _ -> Err FailedToCreateComment
+                |> Some
+        |> unwarp
 
     /// 回收评论
     static member recycle(commentId: uint64) =
-        pala ()
-        >>= fun p ->
-                let table = p.table.comment
+        schema.tables
+        >>= fun ts ->
+                let table = ts.comment
 
                 //将评论归属到 0 号栈下
                 let set = ("ownerStackId", 0UL)
                 let where = ("commentId", commentId)
 
-                p.database.executeUpdate (table, set, where)
+                schema.Managed().executeUpdate (table, set, where)
                 >>= fun f -> eq 1 |> f |> ignore |> Ok
+                |> Some
+        |> unwarp
 
 
     /// 抹除评论
     static member erase(commentId: uint64) =
-        pala ()
-        >>= fun p ->
-                let table = p.table.comment
+        schema.tables
+        >>= fun ts ->
+                let table = ts.comment
 
-                p.database.executeDelete table ("commentId", commentId)
+                schema.Managed().executeDelete table ("commentId", commentId)
                 >>= fun f ->
 
                         match f <| eq 1 with
                         | 1 -> Ok()
                         | _ -> Err FailedToEraseComment
+                |> Some
+        |> unwarp
 
 module ext =
 
-    type PostStack with
+    type PostMeta with
 
         /// 评论
         member self.comments =
-            pala ()
-            >>= fun p ->
-                    let table = p.table.comment
+            schema.tables
+            >>= fun ts ->
+                    let table = ts.comment
 
                     //按时间排序
                     let sql =
@@ -170,7 +180,7 @@ module ext =
                     let para =
                         [| MySqlParameter("ownerStackId", self.stackId) |]
 
-                    p.database.getFstCol (sql, para)
+                    schema.Managed().getFstCol (sql, para)
                     >>= fun rows ->
 
                             match rows with
@@ -178,3 +188,5 @@ module ext =
                             | Some rows' ->
                                 Ok
                                 <| map (fun (r: obj) -> Comment(downcast r)) rows'
+                    |> unwarp
+                    |> Some

@@ -5,23 +5,75 @@ open pilipala.database.mysql
 open fsharper.ethType.ethOption
 open pilipala.config
 
+/// 数据库连接信息
+let mutable connMsg: Option<{| DataSource: string
+                               Port: uint16
+                               User: string
+                               Password: string |}> =
+    None
 
-let mutable mysqlManaged: Option<MySqlManaged> = None
+/// 连接池大小
+let mutable private poolSize: Option<uint> = None
 
-let initManaged () =
-    let config = config ()
 
-    let newMysqlManaged =
-        MySqlManaged(config.databaseConnMsg, config.schemaName, config.connPoolSize)
+/// 数据库名
+let mutable private name: Option<string> = None
 
-    mysqlManaged <- newMysqlManaged |> Some
 
-    newMysqlManaged
+/// 数据库表
+let mutable tables: Option<{| record: string
+                              stack: string
+                              comment: string
+                              token: string |}> =
+    None
 
-let provideManaged () = mysqlManaged.unwarp ()
+/// 管理器
+let mutable private managed: Option<MySqlManaged> = None
 
-let schemaPipeline =
-    GenericStatePipe(activate = initManaged, activated = provideManaged)
+let private initConfig () =
+    let config = JsonConfig()
+    let database = config.["database"] //database节点
+    let table = database.["table"] //database.table节点
+
+    connMsg <-
+        Some
+        <| {| DataSource = database.Value<string> "dataSource"
+              Port = database.Value<uint16> "port"
+              User = database.Value<string> "user"
+              Password = database.Value<string> "password" |}
+
+    poolSize <- Some <| database.Value<uint> "poolSize"
+
+    //TODO：配置文件应从database节点独立出schema节点
+
+    name <- Some <| database.Value<string> "schema"
+
+    tables <-
+        Some
+        <| {| record = table.Value<string> "record"
+              stack = table.Value<string> "stack"
+              comment = table.Value<string> "comment"
+              token = table.Value<string> "token" |}
+
+let private initManaged () =
+
+    let _managed =
+        MySqlManaged(connMsg.unwarp (), name.unwarp (), poolSize.unwarp ())
+
+    managed <- Some <| _managed
+
+    _managed
+
+let private provideManaged () = managed.unwarp ()
+
+let private schemaPipeline =
+    (GenericStatePipe(activate = initConfig, activated = id)
+     |> GenericStatePipe(
+         activate = initManaged,
+         activated = provideManaged
+     )
+         .import)
         .build ()
 
-let schema () = schemaPipeline.invoke ()
+
+let Managed = schemaPipeline.invoke

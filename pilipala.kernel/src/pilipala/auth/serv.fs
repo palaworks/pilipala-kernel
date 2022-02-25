@@ -1,4 +1,4 @@
-﻿module internal pilipala.kernel.auth.serv
+﻿module internal pilipala.auth.serv
 
 open System
 open System.Net.Sockets
@@ -11,7 +11,7 @@ open fsharper.moreType
 open pilipala.util.crypto
 open pilipala.util.socket.tcp
 open pilipala.util.uuid
-open pilipala.kernel.auth.token
+open pilipala.auth
 
 
 /// 在指定端口启动认证服务

@@ -1,4 +1,4 @@
-﻿namespace pilipala.kernel.auth
+﻿module pilipala.auth.channel
 
 open System
 open System.Net.Sockets
@@ -11,7 +11,7 @@ open fsharper.moreType
 open pilipala.util.crypto
 open pilipala.util.socket.tcp
 open pilipala.util.uuid
-open pilipala.kernel.auth.token
+open pilipala.auth.token
 
 /// 安全信道
 type SecureChannel internal (s: Socket, sessionKey: string) =

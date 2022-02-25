@@ -1,4 +1,4 @@
-﻿module pilipala.kernel.auth.token
+﻿module pilipala.auth.token
 
 open System
 open MySql.Data.MySqlClient
@@ -7,6 +7,7 @@ open fsharper.op
 open fsharper.ethType
 open fsharper.typeExt
 open fsharper.moreType
+open pilipala
 open pilipala.util.hash
 open pilipala.util.uuid
 
@@ -22,10 +23,10 @@ exception DuplicateToken
 /// 创建凭据
 /// 返回凭据值
 let create () =
-    pala ()
-    >>= fun p ->
+    schema.tables
+    >>= fun ts ->
 
-            let table = p.table.token
+            let table = ts.token
 
             let sql =
                 $"INSERT INTO {table} \
@@ -40,31 +41,34 @@ let create () =
                    MySqlParameter("ctime", DateTime.Now)
                    MySqlParameter("atime", DateTime.Now) |]
 
-            p.database.execute (sql, para)
+            schema.Managed().execute (sql, para)
             >>= fun f ->
                     match f <| eq 1 with
                     | 1 -> Ok uuid
                     | _ -> Err FailedToCreateToken
+            |> Some
+    |> unwarp
 
 /// 抹除凭据
 let erase (token: string) =
-    pala ()
-    >>= fun p ->
-            let table = p.table.token
+    schema.tables
+    >>= fun ts ->
+            let table = ts.token
             let tokenHash = token.sha1
 
-            p.database.executeDelete table ("tokenHash", tokenHash)
+            schema.Managed().executeDelete table ("tokenHash", tokenHash)
             >>= fun f ->
                     match f <| eq 1 with
                     | 1 -> Ok()
                     | _ -> Err FailedToEraseToken
+            |> Some
+    |> unwarp
 
 /// 检查token是否合法
 let check (token: string) =
-    pala ()
-    >>= fun p ->
-
-            let table = p.table.token
+    schema.tables
+    >>= fun ts ->
+            let table = ts.token
 
             let sql =
                 $"SELECT COUNT(*) FROM {table} WHERE tokenHash=?tokenHash"
@@ -74,16 +78,20 @@ let check (token: string) =
             let para =
                 [| MySqlParameter("tokenHash", tokenHash) |]
 
-            p.database.getFstVal (sql, para)
+            schema.Managed().getFstVal (sql, para)
             >>= fun n ->
                     //如果查询到的凭据记录唯一
                     match n with
+                    | Some x when x = 0 -> Ok false
                     | Some x when cast x = 1 ->
                         //更新凭据访问记录
                         (table, ("atime", DateTime.Now), ("tokenHash", tokenHash))
-                        |> p.database.executeUpdate
+                        |> schema.Managed().executeUpdate
                         >>= fun f ->
                                 match f <| eq 1 with
                                 | 1 -> Ok true
                                 | __ -> Err FailedToUpdateTokenAtime
                     | _ -> Err DuplicateToken
+            |> Some
+
+    |> unwarp
