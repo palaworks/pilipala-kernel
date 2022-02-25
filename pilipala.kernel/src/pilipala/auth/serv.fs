@@ -11,7 +11,8 @@ open fsharper.moreType
 open pilipala.util.crypto
 open pilipala.util.socket.tcp
 open pilipala.util.uuid
-open pilipala.auth
+open pilipala.auth.token
+open pilipala.auth.channel
 
 
 /// 在指定端口启动认证服务
@@ -39,6 +40,7 @@ let serveOn port f =
                     cli "pubKey received"
 
                     let sessionKey = gen N //生成会话密钥
+
                     //将会话密钥使用客户公钥加密后送回
                     sessionKey
                     |> rsa.encrypt pubKey RSAEncryptionPadding.Pkcs1
@@ -46,10 +48,11 @@ let serveOn port f =
 
                     cli "sessionKey sent"
 
+                    //TODO：应使用随机化IV+CBC以代替ECB模式以获得最佳安全性
                     //接收密文解密到凭据
                     let token =
-                        aes.decrypt sessionKey PaddingMode.Zeros
-                        <| s.recvText ()
+                        s.recvText ()
+                        |> aes.decrypt (Convert.FromHexString(sessionKey)) [||] CipherMode.ECB PaddingMode.Zeros
 
                     cli "token received"
 

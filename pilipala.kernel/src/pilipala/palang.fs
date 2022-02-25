@@ -1,6 +1,7 @@
 ﻿module pilipala.kernel.palang
 
-open pilipala.kernel.auth
+open System
+open pilipala.auth
 open System.Text.RegularExpressions
 open fsharper.fn
 open fsharper.op
@@ -11,8 +12,8 @@ open pilipala.container
 open pilipala.container.post
 open pilipala.container.comment
 open pilipala.util.encoding
-open pilipala.kernel
-open System
+open pilipala.auth.channel
+
 
 //TODO 有待减少样板代码
 /// 各类命令解析
@@ -29,7 +30,7 @@ let private create_parse (argv: string array) =
     let name, value =
         match argv.[1] with
         | "record" -> "id", create<PostRecord, _> <%> cast |> unwarp
-        | "stack" -> "id", create<PostStack, _> <%> cast |> unwarp
+        | "stack" -> "id", create<PostMeta, _> <%> cast |> unwarp
         | "comment" -> "id", create<Comment, _> <%> cast |> unwarp
         | "tag" when argv.Length = 3 ->
             let tag_name = argv.[2]
@@ -63,7 +64,7 @@ let private erase_parse (argv: string array) =
 
     match type_name with
     | "record" -> type_id |> erase<PostRecord, _, _>
-    | "stack" -> type_id |> erase<PostStack, _, _>
+    | "stack" -> type_id |> erase<PostMeta, _, _>
     | "comment" -> type_id |> erase<Comment, _, _>
     | "tag" -> type_id |> cast |> tag.erase //type_id此处为标签名
     | "token" -> type_id |> cast |> token.erase //type_id此处为凭据值
@@ -121,10 +122,10 @@ let private set_parse (argv: string array) =
         match attribute with
         | "view" ->
             Ok
-            <| (PostStack type_id).view <- cast <| attribute_value
+            <| (PostMeta type_id).view <- cast <| attribute_value
         | "star" ->
             Ok
-            <| (PostStack type_id).star <- cast <| attribute_value
+            <| (PostMeta type_id).star <- cast <| attribute_value
         | _ -> Err UnknownSyntax
     | "comment" ->
         match attribute with
@@ -148,7 +149,7 @@ let private rebase_parse (argv: string array) =
     let stack_id = argv.[1] |> cast
     let super_stack_id = argv.[3] |> cast
 
-    (PostStack stack_id).superStackId <- super_stack_id
+    (PostMeta stack_id).superStackId <- super_stack_id
 
     $"now stack {stack_id} is derived from {super_stack_id}"
 
@@ -159,7 +160,7 @@ let private push_parse (argv: string array) =
     let record_id = cast <| argv.[2]
     let stack_id = cast <| argv.[5]
 
-    (PostStack stack_id).currRecordId <- record_id
+    (PostMeta stack_id).currRecordId <- record_id
 
     $"now the top of stack {stack_id} is record {record_id}"
 
