@@ -18,7 +18,7 @@ let mutable private name: Option<string> = None
 
 /// 数据库表
 let mutable tables: Option<{| record: string
-                              stack: string
+                              meta: string
                               comment: string
                               token: string |}> =
     None
@@ -47,7 +47,7 @@ let private initConfig () =
     tables <-
         Some
         <| {| record = table.Value<string> "record"
-              stack = table.Value<string> "stack"
+              meta = table.Value<string> "meta"
               comment = table.Value<string> "comment"
               token = table.Value<string> "token" |}
 

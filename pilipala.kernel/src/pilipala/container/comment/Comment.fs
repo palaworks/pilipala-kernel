@@ -66,10 +66,10 @@ type Comment(commentId: uint64) =
 
     /// 评论id
     member this.commentId = commentId
-    /// 所属栈id
-    member this.ownerStackId
-        with get (): uint64 = this.get "ownerStackId"
-        and set (v: uint64) = (this.set "ownerStackId" v).unwarp ()
+    /// 所属元id
+    member this.ownerMetaId
+        with get (): uint64 = this.get "ownerMetaId"
+        and set (v: uint64) = (this.set "ownerMetaId" v).unwarp ()
     /// 回复到
     member this.replyTo
         with get (): uint64 = this.get "replyTo"
@@ -106,15 +106,15 @@ type Comment with
 
                 let sql =
                     $"INSERT INTO {table} \
-                    ( commentId, ownerStackId, replyTo, nick, content, email, site, ctime) \
+                    ( commentId, ownerMetaId, replyTo, nick, content, email, site, ctime) \
                     VALUES \
-                    (?commentId,?ownerStackId,?replyTo,?nick,?content,?email,?site,?ctime)"
+                    (?commentId,?ownerMetaId,?replyTo,?nick,?content,?email,?site,?ctime)"
 
                 let commentId = palaflake.gen ()
 
                 let para =
                     [| MySqlParameter("commentId", commentId)
-                       MySqlParameter("ownerStackId", 0)
+                       MySqlParameter("ownerMetaId", 0)
                        MySqlParameter("replyTo", 0)
                        MySqlParameter("nick", "")
                        MySqlParameter("content", "")
@@ -137,8 +137,8 @@ type Comment with
         >>= fun ts ->
                 let table = ts.comment
 
-                //将评论归属到 0 号栈下
-                let set = ("ownerStackId", 0UL)
+                //将评论归属到 0 号元下
+                let set = ("ownerMetaId", 0UL)
                 let where = ("commentId", commentId)
 
                 schema.Managed().executeUpdate (table, set, where)
@@ -174,11 +174,11 @@ module ext =
 
                     //按时间排序
                     let sql =
-                        $"SELECT commentId FROM {table} WHERE ownerStackId = ?ownerStackId \
+                        $"SELECT commentId FROM {table} WHERE ownerMetaId = ?ownerMetaId \
                           ORDER BY ctime"
 
                     let para =
-                        [| MySqlParameter("ownerStackId", self.stackId) |]
+                        [| MySqlParameter("ownerMetaId", self.metaId) |]
 
                     schema.Managed().getFstCol (sql, para)
                     >>= fun rows ->

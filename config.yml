@@ -14,5 +14,3 @@ database:
     stack: stack
     comment: comment
     token: token
-
-cacheSize: 1024

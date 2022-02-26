@@ -12,11 +12,11 @@ open pilipala.util
 open pilipala.container
 
 
-type PostMeta(stackId: uint64) =
+type PostMeta(metaId: uint64) =
     //该数据结构用于存放文章元数据
 
-    let fromCache key = cache.get "stack" stackId key
-    let intoCache key value = cache.set "stack" stackId key value
+    let fromCache key = cache.get "meta" metaId key
+    let intoCache key value = cache.set "meta" metaId key value
 
     /// 取字段值
     member inline private this.get key =
@@ -24,12 +24,12 @@ type PostMeta(stackId: uint64) =
         <| fun _ ->
             schema.tables
             >>= fun ts ->
-                    let table = ts.stack
+                    let table = ts.meta
 
                     let sql =
-                        $"SELECT {key} FROM {table} WHERE stackId = ?stackId"
+                        $"SELECT {key} FROM {table} WHERE metaId = ?metaId"
 
-                    let para = [| MySqlParameter("stackId", stackId) |]
+                    let para = [| MySqlParameter("metaId", metaId) |]
 
                     schema.Managed().getFstVal (sql, para)
                     >>= fun r ->
@@ -47,9 +47,9 @@ type PostMeta(stackId: uint64) =
     member inline private this.set key value =
         schema.tables
         >>= fun ts ->
-                let table = ts.stack
+                let table = ts.meta
 
-                (table, (key, value), ("stackId", stackId))
+                (table, (key, value), ("metaId", metaId))
                 |> schema.Managed().executeUpdate
                 >>= fun f ->
 
@@ -60,12 +60,12 @@ type PostMeta(stackId: uint64) =
                 |> Some
         |> unwarp
 
-    /// 栈id
-    member this.stackId = stackId
-    /// 上级栈id
-    member this.superStackId
-        with get (): uint64 = this.get "superStackId"
-        and set (v: uint64) = (this.set "superStackId" v).unwarp ()
+    /// 元id
+    member this.metaId = metaId
+    /// 上级元id
+    member this.superMetaId
+        with get (): uint64 = this.get "superMetaId"
+        and set (v: uint64) = (this.set "superMetaId" v).unwarp ()
     /// 当前记录id
     member this.currRecordId
         with get (): uint64 = this.get "currRecordId"
@@ -89,26 +89,26 @@ type PostMeta(stackId: uint64) =
 
 type PostMeta with
 
-    /// 创建文章栈
-    /// 返回文章栈id
+    /// 创建文章元
+    /// 返回文章元id
     static member create() =
         schema.tables
         >>= fun ts ->
-                let table = ts.stack
+                let table = ts.meta
 
                 let sql =
                     $"INSERT INTO {table} \
-                    ( stackId, superStackId, currRecordId, ctime, atime, view, star) \
+                    ( metaId, superMetaId, currRecordId, ctime, atime, view, star) \
                     VALUES \
-                    (?stackId,?superStackId,?currRecordId,?ctime,?atime,?view,?star)"
+                    (?metaId,?superMetaId,?currRecordId,?ctime,?atime,?view,?star)"
 
-                let stackId = palaflake.gen ()
+                let metaId = palaflake.gen ()
 
-                let recordId = 0 //初始栈空
+                let recordId = 0 //初始元空
 
                 let para =
-                    [| MySqlParameter("stackId", stackId)
-                       MySqlParameter("superStackId", 0)
+                    [| MySqlParameter("metaId", metaId)
+                       MySqlParameter("superMetaId", 0)
                        MySqlParameter("currRecordId", recordId)
                        MySqlParameter("ctime", DateTime.Now)
                        MySqlParameter("atime", DateTime.Now)
@@ -119,22 +119,22 @@ type PostMeta with
                 >>= fun f ->
 
                         match f <| eq 1 with
-                        | 1 -> Ok stackId
-                        | _ -> Err FailedToCreateStack
+                        | 1 -> Ok metaId
+                        | _ -> Err FailedToCreateMeta
                 |> Some
         |> unwarp
 
-    /// 抹除文章栈
-    static member erase(stackId: uint64) =
+    /// 抹除文章元
+    static member erase(metaId: uint64) =
         schema.tables
         >>= fun ts ->
-                let table = ts.stack
+                let table = ts.meta
 
-                schema.Managed().executeDelete table ("stackId", stackId)
+                schema.Managed().executeDelete table ("metaId", metaId)
                 >>= fun f ->
 
                         match f <| eq 1 with
                         | 1 -> Ok()
-                        | _ -> Err FailedToEraseStack
+                        | _ -> Err FailedToEraseMeta
                 |> Some
         |> unwarp

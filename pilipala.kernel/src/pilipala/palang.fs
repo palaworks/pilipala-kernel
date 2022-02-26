@@ -30,7 +30,7 @@ let private create_parse (argv: string array) =
     let name, value =
         match argv.[1] with
         | "record" -> "id", create<PostRecord, _> <%> cast |> unwarp
-        | "stack" -> "id", create<PostMeta, _> <%> cast |> unwarp
+        | "meta" -> "id", create<PostMeta, _> <%> cast |> unwarp
         | "comment" -> "id", create<Comment, _> <%> cast |> unwarp
         | "tag" when argv.Length = 3 ->
             let tag_name = argv.[2]
@@ -48,7 +48,7 @@ let private recycle_parse (argv: string array) =
     let type_id = argv.[2] |> cast
 
     match type_name with
-    | "stack" -> tag.tagTo type_id "invisible"
+    | "meta" -> tag.tagTo type_id "invisible"
     | "comment" -> recycle<Comment, _, _> type_id
     | _ -> Err UnknownSyntax //未知语法错误
     |> unwarp
@@ -64,7 +64,7 @@ let private erase_parse (argv: string array) =
 
     match type_name with
     | "record" -> type_id |> erase<PostRecord, _, _>
-    | "stack" -> type_id |> erase<PostMeta, _, _>
+    | "meta" -> type_id |> erase<PostMeta, _, _>
     | "comment" -> type_id |> erase<Comment, _, _>
     | "tag" -> type_id |> cast |> tag.erase //type_id此处为标签名
     | "token" -> type_id |> cast |> token.erase //type_id此处为凭据值
@@ -75,23 +75,23 @@ let private erase_parse (argv: string array) =
 
 let private tag_parse (argv: string array) =
     // 0      1       2   3       4
-    //tag <tag_name> to stack <stack_id>
+    //tag <tag_name> to meta <meta_id>
 
     let tagName = argv.[1].ToLower()
-    let stackId = argv.[4] |> cast
+    let metaId = argv.[4] |> cast
 
-    tag.tagTo stackId tagName |> unwarp
-    $"{tagName} was tagged to stack {stackId}"
+    tag.tagTo metaId tagName |> unwarp
+    $"{tagName} was tagged to meta {metaId}"
 
 let private detag_parse (argv: string array) =
     // 0         1      2    3       4
-    //detag <tag_name> for stack <stack_id>
+    //detag <tag_name> for meta <meta_id>
 
     let tagName = argv.[1]
-    let stackId = argv.[4] |> cast
+    let metaId = argv.[4] |> cast
 
-    tag.detagFor stackId tagName |> unwarp
-    $"tag {tagName} now removed from stack {stackId}"
+    tag.detagFor metaId tagName |> unwarp
+    $"tag {tagName} now removed from meta {metaId}"
 
 
 
@@ -118,7 +118,7 @@ let private set_parse (argv: string array) =
             <| (PostRecord type_id).summary <- attribute_value
         | "body" -> Ok <| (PostRecord type_id).body <- attribute_value
         | _ -> Err UnknownSyntax
-    | "stack" ->
+    | "meta" ->
         match attribute with
         | "view" ->
             Ok
@@ -144,25 +144,25 @@ let private set_parse (argv: string array) =
 
 let private rebase_parse (argv: string array) =
     //   0       1       2        3
-    //rebase <stack_id> to <super_stack_id>
+    //rebase <meta_id> to <super_meta_id>
 
-    let stack_id = argv.[1] |> cast
-    let super_stack_id = argv.[3] |> cast
+    let meta_id = argv.[1] |> cast
+    let super_meta_id = argv.[3] |> cast
 
-    (PostMeta stack_id).superStackId <- super_stack_id
+    (PostMeta meta_id).superMetaId <- super_meta_id
 
-    $"now stack {stack_id} is derived from {super_stack_id}"
+    $"now meta {meta_id} is derived from {super_meta_id}"
 
 let private push_parse (argv: string array) =
     //  0     1        2        3    4       5
-    //push record <record_id> into stack <stack_id>
+    //push record <record_id> into meta <meta_id>
 
     let record_id = cast <| argv.[2]
-    let stack_id = cast <| argv.[5]
+    let meta_id = cast <| argv.[5]
 
-    (PostMeta stack_id).currRecordId <- record_id
+    (PostMeta meta_id).currRecordId <- record_id
 
-    $"now the top of stack {stack_id} is record {record_id}"
+    $"now the top of meta {meta_id} is record {record_id}"
 
 
 let internal parse (cmd: string) =
@@ -187,7 +187,7 @@ let internal parse (cmd: string) =
            | 3, "erase" -> erase_parse
            //属性设置
            | 7, "set" -> set_parse
-           //文章栈
+           //文章元
            | 4, "rebase" -> rebase_parse
            | 6, "push" -> push_parse
            //标签

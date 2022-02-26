@@ -9,10 +9,10 @@ exception FailedToCreateRecord
 /// 无法抹除文章记录
 exception FailedToEraseRecord
 
-/// 无法创建文章栈
-exception FailedToCreateStack
-/// 无法抹除文章栈
-exception FailedToEraseStack
+/// 无法创建文章元
+exception FailedToCreateMeta
+/// 无法抹除文章元
+exception FailedToEraseMeta
 
 /// 无法创建评论
 exception FailedToCreateComment

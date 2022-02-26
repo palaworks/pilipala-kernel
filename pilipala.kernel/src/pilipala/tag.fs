@@ -20,7 +20,7 @@ exception FailedToTag
 exception FailedToDetag
 
 
-/// 标签本质上是stackId的列表
+/// 标签本质上是metaId的列表
 /// 可以根据该列表过滤出不同的文章
 
 /// 标签别名
@@ -34,7 +34,7 @@ let create (tagName: string) =
     else
         let sql =
             $"CREATE TABLE tag_{tagName} \
-                          (stackId BIGINT PRIMARY KEY NOT NULL)"
+                          (metaId BIGINT PRIMARY KEY NOT NULL)"
 
         schema.Managed().execute sql
         >>= fun f ->
@@ -53,13 +53,13 @@ let erase (tagName: string) =
             | 0 -> Ok()
             | _ -> Err FailedToEraseTag
 
-/// 为文章栈加标签
-let tagTo (stackId: uint64) (tagName: string) =
+/// 为文章元加标签
+let tagTo (metaId: uint64) (tagName: string) =
 
     let sql =
-        $"INSERT INTO tag_{tagName} (stackId) VALUES (?stackId)"
+        $"INSERT INTO tag_{tagName} (metaId) VALUES (?metaId)"
 
-    let para = [| MySqlParameter("stackId", stackId) |]
+    let para = [| MySqlParameter("metaId", metaId) |]
 
     schema.Managed().execute (sql, para)
     >>= fun f ->
@@ -67,10 +67,10 @@ let tagTo (stackId: uint64) (tagName: string) =
             | 1 -> Ok()
             | _ -> Err FailedToTag
 
-/// 为文章栈去除标签
-let detagFor (stackId: uint64) (tagName: string) =
+/// 为文章元去除标签
+let detagFor (metaId: uint64) (tagName: string) =
 
-    schema.Managed().executeDelete $"tag_{tagName}" ("stackId", stackId)
+    schema.Managed().executeDelete $"tag_{tagName}" ("metaId", metaId)
     >>= fun f ->
             match f <| eq 1 with
             | 1 -> Ok()
@@ -79,7 +79,7 @@ let detagFor (stackId: uint64) (tagName: string) =
 /// 取得标签
 let getTag (tagName: string) =
 
-    let sql = $"SELECT stackId FROM tag_{tagName}"
+    let sql = $"SELECT metaId FROM tag_{tagName}"
 
     schema.Managed().getFstCol sql
     >>= fun r ->
@@ -90,8 +90,8 @@ let getTag (tagName: string) =
 
 /// 过滤出是 tag 的文章
 let is (tag: Tag) (ps: PostMeta list) =
-    ps |> filter (fun p -> elem p.stackId tag)
+    ps |> filter (fun p -> elem p.metaId tag)
 
 /// 过滤出不是 tag 的文章
 let not (tag: Tag) (ps: PostMeta list) =
-    ps |> filter (fun p -> not <| elem p.stackId tag)
+    ps |> filter (fun p -> not <| elem p.metaId tag)
