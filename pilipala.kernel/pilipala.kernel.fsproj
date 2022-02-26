@@ -21,10 +21,6 @@
         <Compile Include="src\util\socket\tcp.fs" />
         <Compile Include="src\util\crypto\rsa.fs" />
         <Compile Include="src\util\crypto\aes.fs" />
-        
-        <Compile Include="src\database\mysql\ext.fs" />
-        <Compile Include="src\database\mysql\MySqlConnPool.fs" />
-        <Compile Include="src\database\mysql\MySqlManaged.fs" />
         <Compile Include="src\pilipala\config.fs" />
         <Compile Include="src\pilipala\schema.fs" />
         
@@ -59,7 +55,7 @@
     <ItemGroup>
         <PackageReference Include="Markdig" Version="0.26.0" />
         <PackageReference Include="Microsoft.IdentityModel.Tokens" Version="6.13.1" />
-        <PackageReference Include="MySql.Data" Version="8.0.26" />
+        <PackageReference Include="MySql.Data" Version="8.0.28" />
         <PackageReference Include="Newtonsoft.Json" Version="13.0.1" />
         <PackageReference Include="YamlDotNet" Version="11.2.1" />
     </ItemGroup>
@@ -67,6 +63,9 @@
     <ItemGroup>
       <Reference Include="fsharper, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null">
         <HintPath>..\..\fsharper\fsharper\bin\Debug\net6.0\fsharper.dll</HintPath>
+      </Reference>
+      <Reference Include="MySqlManaged, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null">
+        <HintPath>..\..\MySqlManaged\bin\Debug\net6.0\MySqlManaged.dll</HintPath>
       </Reference>
     </ItemGroup>
 

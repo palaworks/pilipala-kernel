@@ -1,5 +1,6 @@
 ﻿module pilipala.container.tag
 
+open MySqlManaged
 open MySql.Data.MySqlClient
 open fsharper.fn
 open fsharper.op

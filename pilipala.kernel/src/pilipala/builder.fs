@@ -9,7 +9,7 @@ open fsharper.op
 open fsharper.ethType
 open fsharper.typeExt
 open fsharper.moreType
-open pilipala.database.mysql
+open MySqlManaged
 
 /// 构建器
 type palaBuilder() =

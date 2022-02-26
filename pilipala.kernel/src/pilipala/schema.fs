@@ -1,16 +1,12 @@
 module internal pilipala.schema
 
+open MySqlManaged
 open fsharper.moreType.GenericPipable
-open pilipala.database.mysql
 open fsharper.ethType.ethOption
 open pilipala.config
 
 /// 数据库连接信息
-let mutable connMsg: Option<{| DataSource: string
-                               Port: uint16
-                               User: string
-                               Password: string |}> =
-    None
+let mutable connMsg: Option<MySqlConnMsg> = None
 
 /// 连接池大小
 let mutable private poolSize: Option<uint> = None
@@ -37,10 +33,10 @@ let private initConfig () =
 
     connMsg <-
         Some
-        <| {| DataSource = database.Value<string> "dataSource"
-              Port = database.Value<uint16> "port"
-              User = database.Value<string> "user"
-              Password = database.Value<string> "password" |}
+        <| { DataSource = database.Value<string> "dataSource"
+             Port = database.Value<uint16> "port"
+             User = database.Value<string> "user"
+             Password = database.Value<string> "password" }
 
     poolSize <- Some <| database.Value<uint> "poolSize"
 

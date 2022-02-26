@@ -2,6 +2,7 @@
 
 open System
 open MySql.Data.MySqlClient
+open MySqlManaged
 open fsharper.fn
 open fsharper.op
 open fsharper.ethType
