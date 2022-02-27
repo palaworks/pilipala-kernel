@@ -95,7 +95,7 @@ type Comment(commentId: uint64) =
         with get (): DateTime = this.get "ctime"
         and set (v: DateTime) = (this.set "ctime" v).unwarp ()
 
-type Comment with
+type public Comment with
 
     /// 创建评论
     /// 返回评论id
@@ -164,10 +164,10 @@ type Comment with
 
 module ext =
 
-    type PostMeta with
+    type Post with
 
         /// 评论
-        member self.comments =
+        member self.Comments() =
             schema.tables
             >>= fun ts ->
                     let table = ts.comment
@@ -178,7 +178,7 @@ module ext =
                           ORDER BY ctime"
 
                     let para =
-                        [| MySqlParameter("ownerMetaId", self.metaId) |]
+                        [| MySqlParameter("ownerMetaId", self.Id()) |]
 
                     schema.Managed().getFstCol (sql, para)
                     >>= fun rows ->

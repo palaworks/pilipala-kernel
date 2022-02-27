@@ -29,8 +29,8 @@ let private create_parse (argv: string array) =
 
     let name, value =
         match argv.[1] with
-        | "record" -> "id", create<PostRecord, _> <%> cast |> unwarp
-        | "meta" -> "id", create<PostMeta, _> <%> cast |> unwarp
+        | "record" -> "id", PostRecord.create () <%> cast |> unwarp
+        | "meta" -> "id", PostMeta.create () <%> cast |> unwarp
         | "comment" -> "id", create<Comment, _> <%> cast |> unwarp
         | "tag" when argv.Length = 3 ->
             let tag_name = argv.[2]
@@ -63,9 +63,9 @@ let private erase_parse (argv: string array) =
     let type_id = argv.[2] |> cast
 
     match type_name with
-    | "record" -> type_id |> erase<PostRecord, _, _>
-    | "meta" -> type_id |> erase<PostMeta, _, _>
-    | "comment" -> type_id |> erase<Comment, _, _>
+    | "record" -> type_id |> PostRecord.erase
+    | "meta" -> type_id |> PostMeta.erase
+    | "comment" -> type_id |> Comment.erase
     | "tag" -> type_id |> cast |> tag.erase //type_id此处为标签名
     | "token" -> type_id |> cast |> token.erase //type_id此处为凭据值
     | _ -> Err UnknownSyntax //未知语法错误

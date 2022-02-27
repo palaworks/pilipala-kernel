@@ -26,13 +26,17 @@
         
         <Compile Include="src\pilipala\builder.fs" />
         
+        <Compile Include="src\pilipala\pipeline.fs" />
+        
         <Compile Include="src\pilipala\container\err.fs" />
         
         <Compile Include="src\pilipala\container\cache.fs" />
         
+        <Compile Include="src\pilipala\container\post\PostRecord.fs" />
+        
+        <Compile Include="src\pilipala\container\post\PostMeta.fs" />
+        
         <Compile Include="src\pilipala\container\post\Post.fs" />
-        <Compile Include="src\pilipala\container\post\internal\PostRecord.fs" />
-        <Compile Include="src\pilipala\container\post\internal\PostMeta.fs" />
         <Compile Include="src\pilipala\container\comment\Comment.fs" />
         <Compile Include="src\pilipala\container\op.fs" />
         
@@ -44,8 +48,6 @@
         <Compile Include="src\pilipala\auth\serv.fs" />
         
         <Compile Include="src\pilipala\palang.fs" />
-        
-        <Compile Include="src\pilipala\pipeline.fs" />
         
         
        

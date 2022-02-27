@@ -12,11 +12,14 @@ open pilipala.util
 open pilipala.container
 
 
-type PostMeta(metaId: uint64) =
+//映射容器
+//对该容器的更改会立即反映到持久化层次
+type internal PostMeta(metaId: uint64) =
     //该数据结构用于存放文章元数据
 
     let fromCache key = cache.get "meta" metaId key
     let intoCache key value = cache.set "meta" metaId key value
+
 
     /// 取字段值
     member inline private this.get key =
@@ -42,7 +45,6 @@ type PostMeta(metaId: uint64) =
                     |> Some
             |> unwarp
 
-
     /// 写字段值
     member inline private this.set key value =
         schema.tables
@@ -59,6 +61,7 @@ type PostMeta(metaId: uint64) =
                         | _ -> Err FailedToWriteCache
                 |> Some
         |> unwarp
+
 
     /// 元id
     member this.metaId = metaId

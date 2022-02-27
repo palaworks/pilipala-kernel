@@ -13,11 +13,13 @@ open pilipala.util
 open pilipala.util.hash
 open pilipala.container
 
-type PostRecord(recordId: uint64) =
+
+//映射型容器
+//对该容器的更改会立即反映到持久化层次
+type internal PostRecord(recordId: uint64) =
 
     let fromCache key = cache.get "record" recordId key
     let intoCache key value = cache.set "record" recordId key value
-
 
 
     /// 取字段值
@@ -48,9 +50,6 @@ type PostRecord(recordId: uint64) =
                     |> Some
             |> unwarp
 
-
-
-
     /// 写字段值
     member inline private this.set key value =
         schema.tables
@@ -67,6 +66,7 @@ type PostRecord(recordId: uint64) =
                         | _ -> Err FailedToWriteCache
                 |> Some
         |> unwarp
+
 
     /// 记录id
     member this.recordId = recordId

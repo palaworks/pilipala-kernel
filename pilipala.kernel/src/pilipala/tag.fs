@@ -89,9 +89,9 @@ let getTag (tagName: string) =
                | None -> []
 
 /// 过滤出是 tag 的文章
-let is (tag: Tag) (ps: PostMeta list) =
-    ps |> filter (fun p -> elem p.metaId tag)
+let is (tag: Tag) (ps: Post list) =
+    ps |> filter (fun p -> elem (p.Id()) tag)
 
 /// 过滤出不是 tag 的文章
-let not (tag: Tag) (ps: PostMeta list) =
-    ps |> filter (fun p -> not <| elem p.metaId tag)
+let not (tag: Tag) (ps: Post list) =
+    ps |> filter (fun p -> not <| elem (p.Id()) tag)
