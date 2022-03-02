@@ -33,7 +33,7 @@ let private initConfig () =
 
     connMsg <-
         Some
-        <| { DataSource = database.Value<string> "dataSource"
+        <| { DataSource = database.Value<string> "datasource"
              Port = database.Value<uint16> "port"
              User = database.Value<string> "user"
              Password = database.Value<string> "password" }
