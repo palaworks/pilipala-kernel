@@ -1,16 +1,10 @@
 module internal pilipala.container.cache
 
-open System
 open System.Collections.Generic
-open MySql.Data.MySqlClient
-open fsharper.fn
 open fsharper.op
-open fsharper.ethType
-open fsharper.typeExt
-open fsharper.moreType
+open fsharper.enhType
 open pilipala.util
-open pilipala.util.hash
-open pilipala.container
+
 
 //let cacheSize = 1024
 

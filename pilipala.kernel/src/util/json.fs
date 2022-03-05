@@ -2,8 +2,8 @@
 
 open System
 open Newtonsoft.Json
-open Newtonsoft.Json.Linq
 open Newtonsoft.Json.Converters
+
 
 type Object with
     /// 序列化到json

@@ -4,6 +4,7 @@ open System
 open System.Text
 open System.Security.Cryptography
 
+
 type Object with
     /// 转换到指定哈希算法的字符串
     member self.hash(hasher: HashAlgorithm) =

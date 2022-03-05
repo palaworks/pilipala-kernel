@@ -1,15 +1,16 @@
 module internal pilipala.config
 
 open System.IO
-open fsharper.ethType.ethOption
+open fsharper.enhType
 open pilipala.util.yaml
 open Newtonsoft.Json.Linq
 open fsharper.moreType.GenericPipable
 
-//配置文件路径
-let mutable configFilePath: Option<string> = None
 
-let mutable private rootNode: Option<JObject> = None
+//配置文件路径
+let mutable configFilePath: Option'<string> = None
+
+let mutable private rootNode: Option'<JObject> = None
 
 let private fetchConfig () =
     let config =

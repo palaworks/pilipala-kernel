@@ -4,6 +4,7 @@ open System
 open System.Text
 open System.Security.Cryptography
 
+
 /// 加密明文
 let encrypt (pubKey: string) (paddingMode: RSAEncryptionPadding) (plainText: string) =
     let csp = new RSACryptoServiceProvider()

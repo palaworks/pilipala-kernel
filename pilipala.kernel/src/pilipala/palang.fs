@@ -5,9 +5,7 @@ open pilipala.auth
 open System.Text.RegularExpressions
 open fsharper.fn
 open fsharper.op
-open fsharper.ethType
-open fsharper.typeExt
-open fsharper.moreType
+open fsharper.enhType
 open pilipala.container
 open pilipala.container.post
 open pilipala.container.comment

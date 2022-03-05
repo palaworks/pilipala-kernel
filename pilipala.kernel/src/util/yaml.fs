@@ -4,6 +4,7 @@ open System
 open System.IO
 open YamlDotNet.Serialization
 
+
 type String with
     /// 将yaml字符串转换为json字符串
     member self.yamlInJson =

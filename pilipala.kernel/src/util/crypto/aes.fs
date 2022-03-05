@@ -2,9 +2,8 @@
 
 open System
 open System.IO
-open System.Text
 open System.Security.Cryptography
-open pilipala.util.encoding
+
 
 /// 加密明文
 /// key and iv is 128bit

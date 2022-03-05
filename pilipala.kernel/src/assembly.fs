@@ -3,11 +3,8 @@
 module assembly =
 
     open System.Reflection
-    open fsharper.fn
     open fsharper.op
-    open fsharper.ethType
-    open fsharper.typeExt
-    open fsharper.moreType
+    open fsharper.enhType
 
     /// 取得程序集属性
     let private getAttribute<'T when 'T :> System.Attribute> =

@@ -2,11 +2,8 @@
 
 open System
 open MySql.Data.MySqlClient
-open MySqlManaged
-open fsharper.fn
 open fsharper.op
-open fsharper.ethType
-open fsharper.typeExt
+open fsharper.enhType
 open fsharper.moreType
 open pilipala
 open pilipala.util.hash
@@ -20,6 +17,7 @@ exception FailedToEraseToken
 exception FailedToUpdateTokenAtime
 /// 凭据重复
 exception DuplicateToken
+
 
 /// 创建凭据
 /// 返回凭据值

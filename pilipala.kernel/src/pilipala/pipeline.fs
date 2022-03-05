@@ -3,6 +3,7 @@ module pilipala.pipeline.post
 open System
 open fsharper.moreType.Pipable
 
+
 let mutable coverRenderPipeline = Pipe<string>()
 let mutable titleRenderPipeline = Pipe<string>()
 let mutable summaryRenderPipeline = Pipe<string>()

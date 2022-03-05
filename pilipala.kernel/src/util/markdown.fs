@@ -2,12 +2,9 @@
 
 open System
 open fsharper.fn
-open fsharper.op
-open fsharper.ethType
-open fsharper.typeExt
-open fsharper.moreType
 open Markdig
 open Markdig.Extensions
+
 
 type String with
 

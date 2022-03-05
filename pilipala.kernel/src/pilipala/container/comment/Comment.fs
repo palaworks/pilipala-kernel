@@ -4,8 +4,7 @@ open System
 open MySql.Data.MySqlClient
 open fsharper.fn
 open fsharper.op
-open fsharper.ethType
-open fsharper.typeExt
+open fsharper.enhType
 open fsharper.moreType
 open pilipala
 open pilipala.util

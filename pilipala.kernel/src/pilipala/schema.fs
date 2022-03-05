@@ -2,32 +2,32 @@ module internal pilipala.schema
 
 open MySqlManaged
 open fsharper.moreType.GenericPipable
-open fsharper.ethType.ethOption
-open pilipala.config
+open fsharper.enhType
+
 
 /// 数据库连接信息
-let mutable connMsg: Option<MySqlConnMsg> = None
+let mutable connMsg: Option'<MySqlConnMsg> = None
 
 /// 连接池大小
-let mutable private poolSize: Option<uint> = None
+let mutable private poolSize: Option'<uint> = None
 
 
 /// 数据库名
-let mutable private name: Option<string> = None
+let mutable private name: Option'<string> = None
 
 
 /// 数据库表
-let mutable tables: Option<{| record: string
-                              meta: string
-                              comment: string
-                              token: string |}> =
+let mutable tables: Option'<{| record: string
+                               meta: string
+                               comment: string
+                               token: string |}> =
     None
 
 /// 管理器
-let mutable private managed: Option<MySqlManaged> = None
+let mutable private managed: Option'<MySqlManaged> = None
 
 let private initConfig () =
-    let config = JsonConfig()
+    let config = config.JsonConfig()
     let database = config.["database"] //database节点
     let table = database.["table"] //database.table节点
 

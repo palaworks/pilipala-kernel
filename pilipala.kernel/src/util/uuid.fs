@@ -2,6 +2,7 @@
 
 open System
 
+
 /// UUID格式
 type UuidFormat =
     | N //样例：087c731f27424cb58719759f95cb6432

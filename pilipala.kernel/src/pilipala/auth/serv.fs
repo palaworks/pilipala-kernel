@@ -3,11 +3,7 @@
 open System
 open System.Net.Sockets
 open System.Security.Cryptography
-open fsharper.fn
-open fsharper.op
-open fsharper.ethType
-open fsharper.typeExt
-open fsharper.moreType
+open fsharper.enhType
 open pilipala.util.crypto
 open pilipala.util.socket.tcp
 open pilipala.util.uuid

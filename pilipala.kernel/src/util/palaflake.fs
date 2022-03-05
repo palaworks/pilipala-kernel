@@ -5,6 +5,7 @@ open System.Threading
 open System.Diagnostics
 open fsharper.moreType
 
+
 type Generator(machineId: byte, startYear: uint16) =
     //暂不考虑State Monad
 

@@ -1,15 +1,9 @@
 ﻿[<AutoOpen>]
 module pilipala.builder
 
-open System
-open Newtonsoft.Json.Linq
-open fsharper.fn
 open fsharper.moreType.Pipable
-open fsharper.op
-open fsharper.ethType
-open fsharper.typeExt
-open fsharper.moreType
-open MySqlManaged
+open fsharper.enhType
+
 
 /// 构建器
 type palaBuilder() =
