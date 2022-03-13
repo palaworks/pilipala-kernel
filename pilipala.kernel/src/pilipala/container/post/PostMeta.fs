@@ -3,8 +3,8 @@
 open System
 open MySql.Data.MySqlClient
 open fsharper.op
-open fsharper.enhType
-open fsharper.moreType
+open fsharper.types
+open fsharper.types.Ord
 open pilipala
 open pilipala.util
 open pilipala.container
@@ -39,7 +39,7 @@ type internal PostMeta(metaId: uint64) =
                             intoCache key value //写入缓存并返回
                             value |> Ok
                     |> unwarp
-                    |> cast
+                    |> coerce
                     |> Some
             |> unwarp
 
@@ -122,8 +122,8 @@ type PostMeta with
                         match f <| eq 1 with
                         | 1 -> Ok metaId
                         | _ -> Err FailedToCreateMeta
+                |> unwarp
                 |> Some
-        |> unwarp
 
     /// 抹除文章元
     static member erase(metaId: uint64) =

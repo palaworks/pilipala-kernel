@@ -1,8 +1,8 @@
 ﻿[<AutoOpen>]
 module pilipala.builder
 
-open fsharper.moreType.Pipable
-open fsharper.enhType
+open fsharper.types
+open fsharper.types.Pipable
 
 
 /// 构建器

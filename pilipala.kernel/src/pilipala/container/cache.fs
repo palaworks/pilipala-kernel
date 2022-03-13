@@ -2,7 +2,7 @@ module internal pilipala.container.cache
 
 open System.Collections.Generic
 open fsharper.op
-open fsharper.enhType
+open fsharper.types
 open pilipala.util
 
 
@@ -23,7 +23,7 @@ let inline get pool id key =
 
         cache.[(pool, id, key)] <- (palaflake.gen (), value) //更新权重
 
-        value |> cast |> Some
+        value |> coerce |> Some
     else
         None
 

@@ -3,8 +3,8 @@
 open System
 open MySql.Data.MySqlClient
 open fsharper.op
-open fsharper.enhType
-open fsharper.moreType
+open fsharper.types
+open fsharper.types.Ord
 open pilipala
 open pilipala.util
 open pilipala.util.hash
@@ -43,7 +43,7 @@ type internal PostRecord(recordId: uint64) =
                             value |> Ok
 
                     |> unwarp
-                    |> cast
+                    |> coerce
                     |> Some
             |> unwarp
 
@@ -81,7 +81,7 @@ type internal PostRecord(recordId: uint64) =
         and set (v: string) = (this.set "summary" v).unwarp ()
     /// 正文
     member this.body
-        with get () = this.get "body"
+        with get (): string = this.get "body"
         and set (v: string) = (this.set "body" v).unwarp ()
     /// 修改时间
     member this.mtime

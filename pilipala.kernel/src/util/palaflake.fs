@@ -3,7 +3,7 @@
 open System
 open System.Threading
 open System.Diagnostics
-open fsharper.moreType
+open fsharper.types.Ord
 
 
 type Generator(machineId: byte, startYear: uint16) =

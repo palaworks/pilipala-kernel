@@ -4,7 +4,7 @@ module assembly =
 
     open System.Reflection
     open fsharper.op
-    open fsharper.enhType
+    open fsharper.types
 
     /// 取得程序集属性
     let private getAttribute<'T when 'T :> System.Attribute> =

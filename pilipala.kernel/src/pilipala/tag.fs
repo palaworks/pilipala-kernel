@@ -1,10 +1,9 @@
 ﻿module pilipala.container.tag
 
 open MySql.Data.MySqlClient
-open fsharper.fn
 open fsharper.op
-open fsharper.enhType
-open fsharper.moreType
+open fsharper.types
+open fsharper.types.Ord
 open pilipala
 open pilipala.container.post
 
@@ -87,9 +86,8 @@ let getTag (tagName: string) =
                | None -> []
 
 /// 过滤出是 tag 的文章
-let is (tag: Tag) (ps: Post list) =
-    ps |> filter (fun p -> elem (p.Id()) tag)
+let is (tag: Tag) (ps: Post list) = ps |> filter (fun p -> elem p.id tag)
 
 /// 过滤出不是 tag 的文章
 let not (tag: Tag) (ps: Post list) =
-    ps |> filter (fun p -> not <| elem (p.Id()) tag)
+    ps |> filter (fun p -> not <| elem p.id tag)

@@ -3,9 +3,8 @@
 open System
 open pilipala.auth
 open System.Text.RegularExpressions
-open fsharper.fn
 open fsharper.op
-open fsharper.enhType
+open fsharper.types
 open pilipala.container
 open pilipala.container.post
 open pilipala.container.comment
@@ -25,11 +24,11 @@ let private create_parse (argv: string array) =
 
     let type_name = argv.[1]
 
-    let name, value =
+    let name, (value: string) =
         match argv.[1] with
-        | "record" -> "id", PostRecord.create () <%> cast |> unwarp
-        | "meta" -> "id", PostMeta.create () <%> cast |> unwarp
-        | "comment" -> "id", create<Comment, _> <%> cast |> unwarp
+        | "record" -> "id", coerce <%> PostRecord.create () |> unwarp
+        | "meta" -> "id", coerce <%> PostMeta.create () |> unwarp
+        | "comment" -> "id", coerce <%> Comment.create () |> unwarp
         | "tag" when argv.Length = 3 ->
             let tag_name = argv.[2]
             "name", tag.create tag_name |> unwarp
@@ -43,7 +42,7 @@ let private recycle_parse (argv: string array) =
     //recycle <type_name> <type_id>
 
     let type_name = argv.[1]
-    let type_id = argv.[2] |> cast
+    let type_id = coerce argv.[2]
 
     match type_name with
     | "meta" -> tag.tagTo type_id "invisible"
@@ -58,14 +57,14 @@ let private erase_parse (argv: string array) =
     //erase <type_name> <1>
 
     let type_name = argv.[1]
-    let type_id = argv.[2] |> cast
+    let type_id = coerce argv.[2]
 
     match type_name with
     | "record" -> type_id |> PostRecord.erase
     | "meta" -> type_id |> PostMeta.erase
     | "comment" -> type_id |> Comment.erase
-    | "tag" -> type_id |> cast |> tag.erase //type_id此处为标签名
-    | "token" -> type_id |> cast |> token.erase //type_id此处为凭据值
+    | "tag" -> type_id |> coerce |> tag.erase //type_id此处为标签名
+    | "token" -> type_id |> coerce |> token.erase //type_id此处为凭据值
     | _ -> Err UnknownSyntax //未知语法错误
     |> unwarp
 
@@ -76,7 +75,7 @@ let private tag_parse (argv: string array) =
     //tag <tag_name> to meta <meta_id>
 
     let tagName = argv.[1].ToLower()
-    let metaId = argv.[4] |> cast
+    let metaId = coerce argv.[4]
 
     tag.tagTo metaId tagName |> unwarp
     $"{tagName} was tagged to meta {metaId}"
@@ -86,7 +85,7 @@ let private detag_parse (argv: string array) =
     //detag <tag_name> for meta <meta_id>
 
     let tagName = argv.[1]
-    let metaId = argv.[4] |> cast
+    let metaId = coerce argv.[4]
 
     tag.detagFor metaId tagName |> unwarp
     $"tag {tagName} now removed from meta {metaId}"
@@ -99,7 +98,7 @@ let private set_parse (argv: string array) =
 
     let attribute = argv.[1]
     let type_name = argv.[3]
-    let type_id = argv.[4] |> cast
+    let type_id = coerce argv.[4]
     let attribute_value = decodeBase64url argv.[6]
 
     match type_name with
@@ -120,16 +119,16 @@ let private set_parse (argv: string array) =
         match attribute with
         | "view" ->
             Ok
-            <| (PostMeta type_id).view <- cast <| attribute_value
+            <| (PostMeta type_id).view <- coerce attribute_value
         | "star" ->
             Ok
-            <| (PostMeta type_id).star <- cast <| attribute_value
+            <| (PostMeta type_id).star <- coerce attribute_value
         | _ -> Err UnknownSyntax
     | "comment" ->
         match attribute with
         | "reply_to" ->
             Ok
-            <| (Comment type_id).replyTo <- cast <| attribute_value
+            <| (Comment type_id).replyTo <- coerce attribute_value
         | "nick" -> Ok <| (Comment type_id).nick <- attribute_value
         | "content" -> Ok <| (Comment type_id).content <- attribute_value
         | "email" -> Ok <| (Comment type_id).email <- attribute_value
@@ -144,8 +143,8 @@ let private rebase_parse (argv: string array) =
     //   0       1       2        3
     //rebase <meta_id> to <super_meta_id>
 
-    let meta_id = argv.[1] |> cast
-    let super_meta_id = argv.[3] |> cast
+    let meta_id = coerce argv.[1]
+    let super_meta_id = coerce argv.[3]
 
     (PostMeta meta_id).superMetaId <- super_meta_id
 
@@ -155,8 +154,8 @@ let private push_parse (argv: string array) =
     //  0     1        2        3    4       5
     //push record <record_id> into meta <meta_id>
 
-    let record_id = cast <| argv.[2]
-    let meta_id = cast <| argv.[5]
+    let record_id = coerce argv.[2]
+    let meta_id = coerce argv.[5]
 
     (PostMeta meta_id).currRecordId <- record_id
 

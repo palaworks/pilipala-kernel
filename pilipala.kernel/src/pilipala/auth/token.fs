@@ -3,8 +3,8 @@
 open System
 open MySql.Data.MySqlClient
 open fsharper.op
-open fsharper.enhType
-open fsharper.moreType
+open fsharper.types
+open fsharper.types.Ord
 open pilipala
 open pilipala.util.hash
 open pilipala.util.uuid
@@ -82,7 +82,7 @@ let check (token: string) =
                     //如果查询到的凭据记录唯一
                     match n with
                     | Some x when x = 0 -> Ok false
-                    | Some x when cast x = 1 ->
+                    | Some x when coerce x = 1 ->
                         //更新凭据访问记录
                         (table, ("atime", DateTime.Now), ("tokenHash", tokenHash))
                         |> schema.Managed().executeUpdate

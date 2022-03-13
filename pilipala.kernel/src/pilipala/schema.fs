@@ -1,8 +1,8 @@
 module internal pilipala.schema
 
 open MySqlManaged
-open fsharper.moreType.GenericPipable
-open fsharper.enhType
+open fsharper.types
+open fsharper.types.GenericPipable
 
 
 /// 数据库连接信息
@@ -51,22 +51,22 @@ let private initConfig () =
               comment = table.Value<string> "comment"
               token = table.Value<string> "token" |}
 
-let private initManaged () =
-
-    let _managed =
-        MySqlManaged(connMsg.unwarp (), name.unwarp (), poolSize.unwarp ())
-
-    managed <- Some <| _managed
-
-    _managed
-
-let private provideManaged () = managed.unwarp ()
-
 let private schemaPipeline =
+
+    let fetch () =
+        let _managed =
+            MySqlManaged(connMsg.unwarp (), name.unwarp (), poolSize.unwarp ())
+
+        managed <- Some <| _managed
+
+        _managed
+
+    let provide () = managed.unwarp ()
+
     (GenericStatePipe(activate = initConfig, activated = id)
      |> GenericStatePipe(
-         activate = initManaged,
-         activated = provideManaged
+         activate = fetch,
+         activated = provide
      )
          .import)
         .build ()

@@ -7,41 +7,42 @@ open pilipala.pipeline.post
 type Post private (meta: PostMeta, record: PostRecord) =
     //惰性求值
 
-    let meta = meta
-    let record = record
-
     new(postId: uint64) =
         let meta = PostMeta(postId)
         let record = PostRecord(meta.currRecordId)
         Post(meta, record)
 
+    //属性字段惰性求值
+
     /// Id
-    member self.Id() = meta.metaId
+    member self.id = meta.metaId
     /// 封面
-    member self.Cover() =
+    member self.cover =
         record.cover |> coverRenderPipeline.build().invoke
     /// 标题
-    member self.Title() =
+    member self.title =
         record.title |> titleRenderPipeline.build().invoke
     /// 概要
-    member self.Summary() =
+    member self.summary =
         record.summary
         |> summaryRenderPipeline.build().invoke
     /// 正文
-    member self.Body() =
+    member self.body =
         record.body |> bodyRenderPipeline.build().invoke
+
     /// 创建时间
-    member self.Ctime() =
+    member self.ctime =
         meta.ctime |> ctimeRenderPipeline.build().invoke
     /// 修改时间
-    member self.Mtime() =
+    member self.mtime =
         record.mtime |> mtimeRenderPipeline.build().invoke
     /// 访问时间
-    member self.Atime() =
+    member self.atime =
         meta.atime |> atimeRenderPipeline.build().invoke
+
     /// 访问计数
-    member self.View() =
+    member self.siew =
         meta.view |> viewRenderPipeline.build().invoke
     /// 星星计数
-    member self.Star() =
+    member self.star =
         meta.star |> starRenderPipeline.build().invoke

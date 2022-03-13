@@ -2,10 +2,9 @@
 
 open System
 open MySql.Data.MySqlClient
-open fsharper.fn
 open fsharper.op
-open fsharper.enhType
-open fsharper.moreType
+open fsharper.types
+open fsharper.types.Ord
 open pilipala
 open pilipala.util
 open pilipala.container
@@ -40,7 +39,7 @@ type Comment(commentId: uint64) =
                             value |> Ok
 
                     |> unwarp
-                    |> cast
+                    |> coerce
                     |> Some
             |> unwarp
 
@@ -127,8 +126,8 @@ type public Comment with
                         match f <| eq 1 with
                         | 1 -> Ok commentId
                         | _ -> Err FailedToCreateComment
+                |> unwarp
                 |> Some
-        |> unwarp
 
     /// 回收评论
     static member recycle(commentId: uint64) =
@@ -177,7 +176,7 @@ module ext =
                           ORDER BY ctime"
 
                     let para =
-                        [| MySqlParameter("ownerMetaId", self.Id()) |]
+                        [| MySqlParameter("ownerMetaId", self.id) |]
 
                     schema.Managed().getFstCol (sql, para)
                     >>= fun rows ->
