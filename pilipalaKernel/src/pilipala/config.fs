@@ -2,7 +2,7 @@ module internal pilipala.config
 
 open System.IO
 open fsharper.types
-open fsharper.types.GenericPipable
+open fsharper.types.Pipe.GenericPipable
 open pilipala.util.yaml
 open Newtonsoft.Json.Linq
 

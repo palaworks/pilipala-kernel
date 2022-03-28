@@ -1,7 +1,7 @@
 module pilipala.pipeline.post
 
 open System
-open fsharper.types.Pipable
+open fsharper.types.Pipe.Pipable
 
 
 let mutable coverRenderPipeline = Pipe<string>()

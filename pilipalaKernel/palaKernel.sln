@@ -1,6 +1,6 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "pilipala.kernel", "pilipala.kernel.fsproj", "{559614A8-DBA0-43F5-BC6B-DD078F17BC9A}"
+Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "palaKernel", "palaKernel.fsproj", "{559614A8-DBA0-43F5-BC6B-DD078F17BC9A}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

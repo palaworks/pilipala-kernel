@@ -5,6 +5,7 @@
         <GenerateDocumentationFile>true</GenerateDocumentationFile>
         <LangVersion>preview</LangVersion>
         <WarnOn>3390;$(WarnOn)</WarnOn>
+        <RootNamespace>palaKernel</RootNamespace>
     </PropertyGroup>
 
     <ItemGroup>
@@ -23,8 +24,6 @@
         <Compile Include="src\util\crypto\aes.fs" />
         <Compile Include="src\pilipala\config.fs" />
         <Compile Include="src\pilipala\schema.fs" />
-        
-        <Compile Include="src\pilipala\builder.fs" />
         
         <Compile Include="src\pilipala\pipeline.fs" />
         
@@ -49,6 +48,10 @@
         
         <Compile Include="src\pilipala\palang.fs" />
         
+        <Compile Include="src\pilipala\plugin.fs" />
+        
+        <Compile Include="src\pilipala\builder.fs" />
+        
         
        
         <Compile Include="src\assembly.fs" />
@@ -64,7 +67,7 @@
 
     <ItemGroup>
       <Reference Include="fsharper, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null">
-        <HintPath>..\..\fsharper\fsharper\bin\Debug\net6.0\fsharper.dll</HintPath>
+        <HintPath>..\..\fsharper\bin\Debug\net6.0\fsharper.dll</HintPath>
       </Reference>
       <Reference Include="MySqlManaged, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null">
         <HintPath>..\..\MySqlManaged\bin\Debug\net6.0\MySqlManaged.dll</HintPath>

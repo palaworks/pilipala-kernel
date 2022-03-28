@@ -2,7 +2,7 @@ module internal pilipala.schema
 
 open MySqlManaged
 open fsharper.types
-open fsharper.types.GenericPipable
+open fsharper.types.Pipe.GenericPipable
 
 
 /// 数据库连接信息

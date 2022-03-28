@@ -2,8 +2,8 @@
 module pilipala.builder
 
 open fsharper.types
-open fsharper.types.Pipable
-
+open fsharper.types.Pipe.Pipable
+open pilipala
 
 /// 构建器
 type palaBuilder() =
@@ -32,6 +32,11 @@ type palaBuilder() =
 
         buildPipeline <- Pipe(func = func) |> buildPipeline.import
         self
-
+    ///使用插件目录
+    member self.usePluginDir pluginDir =
+        let func () = plugin.invokePlugins pluginDir
+        buildPipeline <- Pipe(func = func) |> buildPipeline.import
+        self
+        
     /// 构建
     member self.build = buildPipeline.build().invoke

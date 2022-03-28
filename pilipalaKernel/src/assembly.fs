@@ -1,4 +1,4 @@
-﻿namespace pilipala.kernel.assembly
+﻿namespace pilipala.assembly
 
 module assembly =
 
