@@ -11,6 +11,8 @@ open pilipala.auth.token
 open pilipala.auth.channel
 
 
+//TODO此模块存在问题，需要重构逻辑
+
 /// 在指定端口启动认证服务
 /// 认证通过后，会以 SecureChannel 为参数执行闭包 f
 let serveOn port f =
