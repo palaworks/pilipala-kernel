@@ -23,7 +23,7 @@ type internal PostRecord(recordId: uint64) =
     member inline private this.get key =
         (fromCache key).unwarpOr
         <| fun _ ->
-            schema.tables
+            db.tables
             >>= fun ts ->
                     let key = ""
                     let table = ts.record
@@ -35,7 +35,7 @@ type internal PostRecord(recordId: uint64) =
                         [| MySqlParameter("recordId", recordId) |]
 
 
-                    schema.Managed().getFstVal (sql, para)
+                    db.Managed().getFstVal (sql, para)
                     >>= fun r ->
                             let value = r.unwarp ()
 
@@ -49,12 +49,12 @@ type internal PostRecord(recordId: uint64) =
 
     /// 写字段值
     member inline private this.set key value =
-        schema.tables
+        db.tables
         >>= fun ts ->
                 let table = ts.record
 
                 (table, (key, value), ("recordId", recordId))
-                |> schema.Managed().executeUpdate
+                |> db.Managed().executeUpdate
                 >>= fun f ->
 
                         //当更改记录数为 1 时才会提交事务并追加到缓存头
@@ -103,7 +103,7 @@ type PostRecord with
     /// 创建文章记录
     /// 返回文章记录id
     static member create() =
-        schema.tables
+        db.tables
         >>= fun ts ->
                 let table = ts.record
 
@@ -123,7 +123,7 @@ type PostRecord with
                        MySqlParameter("body", "")
                        MySqlParameter("mtime", DateTime.Now) |]
 
-                schema.Managed().execute (sql, para)
+                db.Managed().execute (sql, para)
                 >>= fun f ->
 
                         match f <| eq 1 with
@@ -134,11 +134,11 @@ type PostRecord with
 
     /// 抹除文章记录
     static member erase(recordId: uint64) =
-        schema.tables
+        db.tables
         >>= fun ts ->
                 let table = ts.record
 
-                schema.Managed().executeDelete table ("recordId", recordId)
+                db.Managed().executeDelete table ("recordId", recordId)
                 >>= fun f ->
 
                         match f <| eq 1 with

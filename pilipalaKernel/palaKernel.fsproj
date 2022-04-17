@@ -13,17 +13,17 @@
         <Compile Include="src\util\io.fs" />
         <Compile Include="src\util\hash.fs" />
         <Compile Include="src\util\html.fs" />
-        <Compile Include="src\util\json.fs" />
         <Compile Include="src\util\markdown.fs" />
         <Compile Include="src\util\palaflake.fs" />
         <Compile Include="src\util\uuid.fs" />
         <Compile Include="src\util\yaml.fs" />
+        <Compile Include="src\util\json.fs" />
         <Compile Include="src\util\encoding.fs" />
         <Compile Include="src\util\socket\tcp.fs" />
         <Compile Include="src\util\crypto\rsa.fs" />
         <Compile Include="src\util\crypto\aes.fs" />
         <Compile Include="src\pilipala\config.fs" />
-        <Compile Include="src\pilipala\schema.fs" />
+        <Compile Include="src\pilipala\db.fs" />
         
         <Compile Include="src\pilipala\pipeline.fs" />
         
@@ -66,11 +66,11 @@
     </ItemGroup>
 
     <ItemGroup>
+      <Reference Include="DbManaged, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null">
+        <HintPath>..\..\DbManaged\bin\Debug\net6.0\DbManaged.dll</HintPath>
+      </Reference>
       <Reference Include="fsharper, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null">
         <HintPath>..\..\fsharper\bin\Debug\net6.0\fsharper.dll</HintPath>
-      </Reference>
-      <Reference Include="MySqlManaged, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null">
-        <HintPath>..\..\MySqlManaged\bin\Debug\net6.0\MySqlManaged.dll</HintPath>
       </Reference>
     </ItemGroup>
 

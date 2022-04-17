@@ -22,7 +22,7 @@ exception DuplicateToken
 /// 创建凭据
 /// 返回凭据值
 let create () =
-    schema.tables
+    db.tables
     >>= fun ts ->
 
             let table = ts.token
@@ -40,7 +40,7 @@ let create () =
                    MySqlParameter("ctime", DateTime.Now)
                    MySqlParameter("atime", DateTime.Now) |]
 
-            schema.Managed().execute (sql, para)
+            db.Managed().execute (sql, para)
             >>= fun f ->
                     match f <| eq 1 with
                     | 1 -> Ok uuid
@@ -50,12 +50,12 @@ let create () =
 
 /// 抹除凭据
 let erase (token: string) =
-    schema.tables
+    db.tables
     >>= fun ts ->
             let table = ts.token
             let tokenHash = token.sha1
 
-            schema.Managed().executeDelete table ("tokenHash", tokenHash)
+            db.Managed().executeDelete table ("tokenHash", tokenHash)
             >>= fun f ->
                     match f <| eq 1 with
                     | 1 -> Ok()
@@ -65,7 +65,7 @@ let erase (token: string) =
 
 /// 检查token是否合法
 let check (token: string) =
-    schema.tables
+    db.tables
     >>= fun ts ->
             let table = ts.token
 
@@ -77,7 +77,7 @@ let check (token: string) =
             let para =
                 [| MySqlParameter("tokenHash", tokenHash) |]
 
-            schema.Managed().getFstVal (sql, para)
+            db.Managed().getFstVal (sql, para)
             >>= fun n ->
                     //如果查询到的凭据记录唯一
                     match n with
@@ -85,7 +85,7 @@ let check (token: string) =
                     | Some x when coerce x = 1 ->
                         //更新凭据访问记录
                         (table, ("atime", DateTime.Now), ("tokenHash", tokenHash))
-                        |> schema.Managed().executeUpdate
+                        |> db.Managed().executeUpdate
                         >>= fun f ->
                                 match f <| eq 1 with
                                 | 1 -> Ok true

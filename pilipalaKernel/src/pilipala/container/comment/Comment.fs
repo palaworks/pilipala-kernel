@@ -21,7 +21,7 @@ type Comment(commentId: uint64) =
     member inline private this.get key =
         (fromCache key).unwarpOr
         <| fun _ ->
-            schema.tables
+            db.tables
             >>= fun ts ->
                     let table = ts.comment
 
@@ -31,7 +31,7 @@ type Comment(commentId: uint64) =
                     let para =
                         [| MySqlParameter("commentId", commentId) |]
 
-                    schema.Managed().getFstVal (sql, para)
+                    db.Managed().getFstVal (sql, para)
                     >>= fun r ->
                             let value = r.unwarp ()
 
@@ -47,12 +47,12 @@ type Comment(commentId: uint64) =
 
     /// 写字段值
     member inline private this.set key value =
-        schema.tables
+        db.tables
         >>= fun ts ->
                 let table = ts.comment
 
                 (table, (key, value), ("commentId", commentId))
-                |> schema.Managed().executeUpdate
+                |> db.Managed().executeUpdate
                 >>= fun f ->
 
                         //当更改记录数为 1 时才会提交事务并追加到缓存头
@@ -98,7 +98,7 @@ type public Comment with
     /// 创建评论
     /// 返回评论id
     static member create() =
-        schema.tables
+        db.tables
         >>= fun ts ->
                 let table = ts.comment
 
@@ -120,7 +120,7 @@ type public Comment with
                        MySqlParameter("site", "")
                        MySqlParameter("ctime", DateTime.Now) |]
 
-                schema.Managed().execute (sql, para)
+                db.Managed().execute (sql, para)
                 >>= fun f ->
 
                         match f <| eq 1 with
@@ -131,7 +131,7 @@ type public Comment with
 
     /// 回收评论
     static member recycle(commentId: uint64) =
-        schema.tables
+        db.tables
         >>= fun ts ->
                 let table = ts.comment
 
@@ -139,7 +139,7 @@ type public Comment with
                 let set = ("ownerMetaId", 0UL)
                 let where = ("commentId", commentId)
 
-                schema.Managed().executeUpdate (table, set, where)
+                db.Managed().executeUpdate (table, set, where)
                 >>= fun f -> eq 1 |> f |> ignore |> Ok
                 |> Some
         |> unwarp
@@ -147,11 +147,11 @@ type public Comment with
 
     /// 抹除评论
     static member erase(commentId: uint64) =
-        schema.tables
+        db.tables
         >>= fun ts ->
                 let table = ts.comment
 
-                schema.Managed().executeDelete table ("commentId", commentId)
+                db.Managed().executeDelete table ("commentId", commentId)
                 >>= fun f ->
 
                         match f <| eq 1 with
@@ -166,7 +166,7 @@ module ext =
 
         /// 评论
         member self.Comments() =
-            schema.tables
+            db.tables
             >>= fun ts ->
                     let table = ts.comment
 
@@ -178,7 +178,7 @@ module ext =
                     let para =
                         [| MySqlParameter("ownerMetaId", self.id) |]
 
-                    schema.Managed().getFstCol (sql, para)
+                    db.Managed().getFstCol (sql, para)
                     >>= fun rows ->
 
                             match rows with

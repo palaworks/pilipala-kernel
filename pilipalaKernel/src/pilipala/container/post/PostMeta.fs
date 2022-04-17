@@ -23,7 +23,7 @@ type internal PostMeta(metaId: uint64) =
     member inline private this.get key =
         (fromCache key).unwarpOr
         <| fun _ ->
-            schema.tables
+            db.tables
             >>= fun ts ->
                     let table = ts.meta
 
@@ -32,7 +32,7 @@ type internal PostMeta(metaId: uint64) =
 
                     let para = [| MySqlParameter("metaId", metaId) |]
 
-                    schema.Managed().getFstVal (sql, para)
+                    db.Managed().getFstVal (sql, para)
                     >>= fun r ->
                             let value = r.unwarp ()
 
@@ -45,12 +45,12 @@ type internal PostMeta(metaId: uint64) =
 
     /// 写字段值
     member inline private this.set key value =
-        schema.tables
+        db.tables
         >>= fun ts ->
                 let table = ts.meta
 
                 (table, (key, value), ("metaId", metaId))
-                |> schema.Managed().executeUpdate
+                |> db.Managed().executeUpdate
                 >>= fun f ->
 
                         //当更改记录数为 1 时才会提交事务并追加到缓存头
@@ -93,7 +93,7 @@ type PostMeta with
     /// 创建文章元
     /// 返回文章元id
     static member create() =
-        schema.tables
+        db.tables
         >>= fun ts ->
                 let table = ts.meta
 
@@ -116,7 +116,7 @@ type PostMeta with
                        MySqlParameter("view", 0)
                        MySqlParameter("star", 0) |]
 
-                schema.Managed().execute (sql, para)
+                db.Managed().execute (sql, para)
                 >>= fun f ->
 
                         match f <| eq 1 with
@@ -127,11 +127,11 @@ type PostMeta with
 
     /// 抹除文章元
     static member erase(metaId: uint64) =
-        schema.tables
+        db.tables
         >>= fun ts ->
                 let table = ts.meta
 
-                schema.Managed().executeDelete table ("metaId", metaId)
+                db.Managed().executeDelete table ("metaId", metaId)
                 >>= fun f ->
 
                         match f <| eq 1 with

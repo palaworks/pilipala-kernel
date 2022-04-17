@@ -33,7 +33,7 @@ let create (tagName: string) =
             $"CREATE TABLE tag_{tagName} \
                           (metaId BIGINT PRIMARY KEY NOT NULL)"
 
-        schema.Managed().execute sql
+        db.Managed().execute sql
         >>= fun f ->
                 match f <| eq 0 with
                 | 0 -> tagName.ToLower() |> Ok
@@ -44,7 +44,7 @@ let erase (tagName: string) =
 
     let sql = $"DROP TABLE tag_{tagName}"
 
-    schema.Managed().execute sql
+    db.Managed().execute sql
     >>= fun f ->
             match (fun _ -> true) |> f with
             | 0 -> Ok()
@@ -58,7 +58,7 @@ let tagTo (metaId: uint64) (tagName: string) =
 
     let para = [| MySqlParameter("metaId", metaId) |]
 
-    schema.Managed().execute (sql, para)
+    db.Managed().execute (sql, para)
     >>= fun f ->
             match f <| eq 1 with
             | 1 -> Ok()
@@ -67,7 +67,7 @@ let tagTo (metaId: uint64) (tagName: string) =
 /// 为文章元去除标签
 let detagFor (metaId: uint64) (tagName: string) =
 
-    schema.Managed().executeDelete $"tag_{tagName}" ("metaId", metaId)
+    db.Managed().executeDelete $"tag_{tagName}" ("metaId", metaId)
     >>= fun f ->
             match f <| eq 1 with
             | 1 -> Ok()
@@ -78,7 +78,7 @@ let getTag (tagName: string) =
 
     let sql = $"SELECT metaId FROM tag_{tagName}"
 
-    schema.Managed().getFstCol sql
+    db.Managed().getFstCol sql
     >>= fun r ->
             Ok
             <| match r with
