@@ -56,13 +56,13 @@ let private schemaPipeline =
 
     let fetch () : IDbManaged =
         let _managed =
-            PgSqlManaged(connMsg.unwarp (), database.unwarp (), poolSize.unwarp ())
+            PgSqlManaged(connMsg.unwrap (), database.unwrap (), poolSize.unwrap ())
 
         managed <- Some <| _managed
 
         _managed
 
-    let provide () = managed.unwarp ()
+    let provide () = managed.unwrap ()
 
     (GenericStatePipe(activate = initConfig, activated = id)
      |> GenericStatePipe(

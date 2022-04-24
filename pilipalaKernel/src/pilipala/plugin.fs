@@ -15,7 +15,7 @@ let rec getPluginFullNames (infos: FileSystemInfo list) =
     infos
     |> filter (fun x -> x.Extension = ".dll")
     |> foldMap (fun x -> List' [ x.FullName ])
-    |> unwarp
+    |> unwrap
 
 let rec getPluginNameAndAsms (fullNames: string list) =
     let getName fullName =
@@ -24,17 +24,17 @@ let rec getPluginNameAndAsms (fullNames: string list) =
 
     fullNames
     |> foldMap (fun fullName -> List' [ (getName fullName, Assembly.LoadFrom fullName) ])
-    |> unwarp
+    |> unwrap
 
 let rec getPluginTypes (nameAndAsms: (string * Assembly) list) =
     nameAndAsms
     |> foldMap (fun (name, asm: Assembly) -> List' [ asm.GetType($"pilipala.plugin.{name}") ])
-    |> unwarp
+    |> unwrap
 
 let rec getPluginInstances (types: Type list) =
     types
     |> foldMap (fun x -> List' [ Activator.CreateInstance x ])
-    |> unwarp
+    |> unwrap
 
 let rec invokePluginInstances (instances: obj list) =
     instances

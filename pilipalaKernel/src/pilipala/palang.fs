@@ -26,13 +26,13 @@ let private create_parse (argv: string array) =
 
     let name, (value: string) =
         match argv.[1] with
-        | "record" -> "id", coerce <%> PostRecord.create () |> unwarp
-        | "meta" -> "id", coerce <%> PostMeta.create () |> unwarp
-        | "comment" -> "id", coerce <%> Comment.create () |> unwarp
+        | "record" -> "id", coerce <%> PostRecord.create () |> unwrap
+        | "meta" -> "id", coerce <%> PostMeta.create () |> unwrap
+        | "comment" -> "id", coerce <%> Comment.create () |> unwrap
         | "tag" when argv.Length = 3 ->
             let tag_name = argv.[2]
-            "name", tag.create tag_name |> unwarp
-        | "token" -> "value", token.create () |> unwarp
+            "name", tag.create tag_name |> unwrap
+        | "token" -> "value", token.create () |> unwrap
         | _ -> raise UnknownSyntax //未知语法错误
 
     $"new {type_name} was created with {name} {value}"
@@ -48,7 +48,7 @@ let private recycle_parse (argv: string array) =
     | "meta" -> tag.tagTo type_id "invisible"
     | "comment" -> recycle<Comment, _, _> type_id
     | _ -> Err UnknownSyntax //未知语法错误
-    |> unwarp
+    |> unwrap
 
     $"{type_name} {type_id} was recycled"
 
@@ -66,7 +66,7 @@ let private erase_parse (argv: string array) =
     | "tag" -> type_id |> coerce |> tag.erase //type_id此处为标签名
     | "token" -> type_id |> coerce |> token.erase //type_id此处为凭据值
     | _ -> Err UnknownSyntax //未知语法错误
-    |> unwarp
+    |> unwrap
 
     $"{type_name} {type_id} was successfully erased"
 
@@ -77,7 +77,7 @@ let private tag_parse (argv: string array) =
     let tagName = argv.[1].ToLower()
     let metaId = coerce argv.[4]
 
-    tag.tagTo metaId tagName |> unwarp
+    tag.tagTo metaId tagName |> unwrap
     $"{tagName} was tagged to meta {metaId}"
 
 let private detag_parse (argv: string array) =
@@ -87,7 +87,7 @@ let private detag_parse (argv: string array) =
     let tagName = argv.[1]
     let metaId = coerce argv.[4]
 
-    tag.detagFor metaId tagName |> unwarp
+    tag.detagFor metaId tagName |> unwrap
     $"tag {tagName} now removed from meta {metaId}"
 
 
@@ -135,7 +135,7 @@ let private set_parse (argv: string array) =
         | "site" -> Ok <| (Comment type_id).site <- attribute_value
         | _ -> Err UnknownSyntax
     | _ -> Err UnknownSyntax
-    |> unwarp
+    |> unwrap
 
     $"the {attribute} of {type_name} {type_id} have been set"
 

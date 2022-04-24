@@ -40,13 +40,13 @@ let create () =
                    MySqlParameter("ctime", DateTime.Now)
                    MySqlParameter("atime", DateTime.Now) |]
 
-            db.Managed().execute (sql, para)
+            db.Managed().executeAny (sql, para)
             >>= fun f ->
                     match f <| eq 1 with
                     | 1 -> Ok uuid
                     | _ -> Err FailedToCreateToken
             |> Some
-    |> unwarp
+    |> unwrap
 
 /// 抹除凭据
 let erase (token: string) =
@@ -61,7 +61,7 @@ let erase (token: string) =
                     | 1 -> Ok()
                     | _ -> Err FailedToEraseToken
             |> Some
-    |> unwarp
+    |> unwrap
 
 /// 检查token是否合法
 let check (token: string) =
@@ -93,4 +93,4 @@ let check (token: string) =
                     | _ -> Err DuplicateToken
             |> Some
 
-    |> unwarp
+    |> unwrap

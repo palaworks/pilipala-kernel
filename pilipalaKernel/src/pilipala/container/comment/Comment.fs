@@ -19,7 +19,7 @@ type Comment(commentId: uint64) =
 
     /// 取字段值
     member inline private this.get key =
-        (fromCache key).unwarpOr
+        (fromCache key).unwrapOr
         <| fun _ ->
             db.tables
             >>= fun ts ->
@@ -33,15 +33,15 @@ type Comment(commentId: uint64) =
 
                     db.Managed().getFstVal (sql, para)
                     >>= fun r ->
-                            let value = r.unwarp ()
+                            let value = r.unwrap ()
 
                             intoCache key value //写入缓存并返回
                             value |> Ok
 
-                    |> unwarp
+                    |> unwrap
                     |> coerce
                     |> Some
-            |> unwarp
+            |> unwrap
 
 
 
@@ -60,38 +60,38 @@ type Comment(commentId: uint64) =
                         | 1 -> Ok <| intoCache key value
                         | _ -> Err FailedToWriteCache
                 |> Some
-        |> unwarp
+        |> unwrap
 
     /// 评论id
     member this.commentId = commentId
     /// 所属元id
     member this.ownerMetaId
         with get (): uint64 = this.get "ownerMetaId"
-        and set (v: uint64) = (this.set "ownerMetaId" v).unwarp ()
+        and set (v: uint64) = (this.set "ownerMetaId" v).unwrap ()
     /// 回复到
     member this.replyTo
         with get (): uint64 = this.get "replyTo"
-        and set (v: uint64) = (this.set "replyTo" v).unwarp ()
+        and set (v: uint64) = (this.set "replyTo" v).unwrap ()
     /// 昵称
     member this.nick
         with get (): string = this.get "nick"
-        and set (v: string) = (this.set "nick" v).unwarp ()
+        and set (v: string) = (this.set "nick" v).unwrap ()
     /// 内容
     member this.content
         with get (): string = this.get "content"
-        and set (v: string) = (this.set "content" v).unwarp ()
+        and set (v: string) = (this.set "content" v).unwrap ()
     /// 电子邮箱
     member this.email
         with get (): string = this.get "email"
-        and set (v: string) = (this.set "email" v).unwarp ()
+        and set (v: string) = (this.set "email" v).unwrap ()
     /// 站点
     member this.site
         with get (): string = this.get "site"
-        and set (v: string) = (this.set "site" v).unwarp ()
+        and set (v: string) = (this.set "site" v).unwrap ()
     /// 创建时间
     member this.ctime
         with get (): DateTime = this.get "ctime"
-        and set (v: DateTime) = (this.set "ctime" v).unwarp ()
+        and set (v: DateTime) = (this.set "ctime" v).unwrap ()
 
 type public Comment with
 
@@ -120,13 +120,13 @@ type public Comment with
                        MySqlParameter("site", "")
                        MySqlParameter("ctime", DateTime.Now) |]
 
-                db.Managed().execute (sql, para)
+                db.Managed().executeAny (sql, para)
                 >>= fun f ->
 
                         match f <| eq 1 with
                         | 1 -> Ok commentId
                         | _ -> Err FailedToCreateComment
-                |> unwarp
+                |> unwrap
                 |> Some
 
     /// 回收评论
@@ -142,7 +142,7 @@ type public Comment with
                 db.Managed().executeUpdate (table, set, where)
                 >>= fun f -> eq 1 |> f |> ignore |> Ok
                 |> Some
-        |> unwarp
+        |> unwrap
 
 
     /// 抹除评论
@@ -158,7 +158,7 @@ type public Comment with
                         | 1 -> Ok()
                         | _ -> Err FailedToEraseComment
                 |> Some
-        |> unwarp
+        |> unwrap
 
 module ext =
 
@@ -175,10 +175,9 @@ module ext =
                         $"SELECT commentId FROM {table} WHERE ownerMetaId = ?ownerMetaId \
                           ORDER BY ctime"
 
-                    let para =
-                        [| MySqlParameter("ownerMetaId", self.id) |]
+                    let paras = [ ("ownerMetaId", self.id) ]
 
-                    db.Managed().getFstCol (sql, para)
+                    db.Managed().getCol (sql, 0u, paras)
                     >>= fun rows ->
 
                             match rows with
@@ -186,5 +185,5 @@ module ext =
                             | Some rows' ->
                                 Ok
                                 <| map (fun (r: obj) -> Comment(downcast r)) rows'
-                    |> unwarp
+                    |> unwrap
                     |> Some

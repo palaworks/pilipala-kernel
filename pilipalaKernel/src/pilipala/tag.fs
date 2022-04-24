@@ -33,7 +33,7 @@ let create (tagName: string) =
             $"CREATE TABLE tag_{tagName} \
                           (metaId BIGINT PRIMARY KEY NOT NULL)"
 
-        db.Managed().execute sql
+        db.Managed().executeAny sql
         >>= fun f ->
                 match f <| eq 0 with
                 | 0 -> tagName.ToLower() |> Ok
@@ -44,7 +44,7 @@ let erase (tagName: string) =
 
     let sql = $"DROP TABLE tag_{tagName}"
 
-    db.Managed().execute sql
+    db.Managed().executeAny sql
     >>= fun f ->
             match (fun _ -> true) |> f with
             | 0 -> Ok()
@@ -58,7 +58,7 @@ let tagTo (metaId: uint64) (tagName: string) =
 
     let para = [| MySqlParameter("metaId", metaId) |]
 
-    db.Managed().execute (sql, para)
+    db.Managed().executeAny (sql, para)
     >>= fun f ->
             match f <| eq 1 with
             | 1 -> Ok()
@@ -78,7 +78,7 @@ let getTag (tagName: string) =
 
     let sql = $"SELECT metaId FROM tag_{tagName}"
 
-    db.Managed().getFstCol sql
+    db.Managed().getCol (sql, 0u)
     >>= fun r ->
             Ok
             <| match r with

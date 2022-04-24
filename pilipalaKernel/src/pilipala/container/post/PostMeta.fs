@@ -21,7 +21,7 @@ type internal PostMeta(metaId: uint64) =
 
     /// 取字段值
     member inline private this.get key =
-        (fromCache key).unwarpOr
+        (fromCache key).unwrapOr
         <| fun _ ->
             db.tables
             >>= fun ts ->
@@ -34,14 +34,14 @@ type internal PostMeta(metaId: uint64) =
 
                     db.Managed().getFstVal (sql, para)
                     >>= fun r ->
-                            let value = r.unwarp ()
+                            let value = r.unwrap ()
 
                             intoCache key value //写入缓存并返回
                             value |> Ok
-                    |> unwarp
+                    |> unwrap
                     |> coerce
                     |> Some
-            |> unwarp
+            |> unwrap
 
     /// 写字段值
     member inline private this.set key value =
@@ -58,7 +58,7 @@ type internal PostMeta(metaId: uint64) =
                         | 1 -> Ok <| intoCache key value
                         | _ -> Err FailedToWriteCache
                 |> Some
-        |> unwarp
+        |> unwrap
 
 
     /// 元id
@@ -66,27 +66,27 @@ type internal PostMeta(metaId: uint64) =
     /// 上级元id
     member this.superMetaId
         with get (): uint64 = this.get "superMetaId"
-        and set (v: uint64) = (this.set "superMetaId" v).unwarp ()
+        and set (v: uint64) = (this.set "superMetaId" v).unwrap ()
     /// 当前记录id
     member this.currRecordId
         with get (): uint64 = this.get "currRecordId"
-        and set (v: uint64) = (this.set "currRecordId" v).unwarp ()
+        and set (v: uint64) = (this.set "currRecordId" v).unwrap ()
     /// 创建时间
     member this.ctime
         with get (): DateTime = this.get "ctime"
-        and set (v: DateTime) = (this.set "ctime" v).unwarp ()
+        and set (v: DateTime) = (this.set "ctime" v).unwrap ()
     /// 访问时间
     member this.atime
         with get (): DateTime = this.get "atime"
-        and set (v: DateTime) = (this.set "atime" v).unwarp ()
+        and set (v: DateTime) = (this.set "atime" v).unwrap ()
     /// 访问数
     member this.view
         with get (): uint32 = this.get "view"
-        and set (v: uint32) = (this.set "view" v).unwarp ()
+        and set (v: uint32) = (this.set "view" v).unwrap ()
     /// 星星数
     member this.star
         with get (): uint32 = this.get "star"
-        and set (v: uint32) = (this.set "star" v).unwarp ()
+        and set (v: uint32) = (this.set "star" v).unwrap ()
 
 type PostMeta with
 
@@ -116,13 +116,13 @@ type PostMeta with
                        MySqlParameter("view", 0)
                        MySqlParameter("star", 0) |]
 
-                db.Managed().execute (sql, para)
+                db.Managed().executeAny (sql, para)
                 >>= fun f ->
 
                         match f <| eq 1 with
                         | 1 -> Ok metaId
                         | _ -> Err FailedToCreateMeta
-                |> unwarp
+                |> unwrap
                 |> Some
 
     /// 抹除文章元
@@ -138,4 +138,4 @@ type PostMeta with
                         | 1 -> Ok()
                         | _ -> Err FailedToEraseMeta
                 |> Some
-        |> unwarp
+        |> unwrap

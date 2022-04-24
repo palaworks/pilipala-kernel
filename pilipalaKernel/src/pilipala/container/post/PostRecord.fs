@@ -21,7 +21,7 @@ type internal PostRecord(recordId: uint64) =
 
     /// 取字段值
     member inline private this.get key =
-        (fromCache key).unwarpOr
+        (fromCache key).unwrapOr
         <| fun _ ->
             db.tables
             >>= fun ts ->
@@ -37,15 +37,15 @@ type internal PostRecord(recordId: uint64) =
 
                     db.Managed().getFstVal (sql, para)
                     >>= fun r ->
-                            let value = r.unwarp ()
+                            let value = r.unwrap ()
 
                             intoCache key value //写入缓存并返回
                             value |> Ok
 
-                    |> unwarp
+                    |> unwrap
                     |> coerce
                     |> Some
-            |> unwarp
+            |> unwrap
 
     /// 写字段值
     member inline private this.set key value =
@@ -62,7 +62,7 @@ type internal PostRecord(recordId: uint64) =
                         | 1 -> Ok <| intoCache key value
                         | _ -> Err FailedToWriteCache
                 |> Some
-        |> unwarp
+        |> unwrap
 
 
     /// 记录id
@@ -70,23 +70,23 @@ type internal PostRecord(recordId: uint64) =
     /// 封面
     member this.cover
         with get (): string = this.get "cover"
-        and set (v: string) = (this.set "cover" v).unwarp ()
+        and set (v: string) = (this.set "cover" v).unwrap ()
     /// 标题
     member this.title
         with get (): string = this.get "title"
-        and set (v: string) = (this.set "title" v).unwarp ()
+        and set (v: string) = (this.set "title" v).unwrap ()
     /// 概述
     member this.summary
         with get (): string = this.get "summary"
-        and set (v: string) = (this.set "summary" v).unwarp ()
+        and set (v: string) = (this.set "summary" v).unwrap ()
     /// 正文
     member this.body
         with get (): string = this.get "body"
-        and set (v: string) = (this.set "body" v).unwarp ()
+        and set (v: string) = (this.set "body" v).unwrap ()
     /// 修改时间
     member this.mtime
         with get (): DateTime = this.get "mtime"
-        and set (v: DateTime) = (this.set "mtime" v).unwarp ()
+        and set (v: DateTime) = (this.set "mtime" v).unwrap ()
 
 type PostRecord with
 
@@ -123,13 +123,13 @@ type PostRecord with
                        MySqlParameter("body", "")
                        MySqlParameter("mtime", DateTime.Now) |]
 
-                db.Managed().execute (sql, para)
+                db.Managed().executeAny (sql, para)
                 >>= fun f ->
 
                         match f <| eq 1 with
                         | 1 -> Ok recordId
                         | _ -> Err FailedToCreateRecord
-                |> unwarp
+                |> unwrap
                 |> Some
 
     /// 抹除文章记录
@@ -145,4 +145,4 @@ type PostRecord with
                         | 1 -> Ok()
                         | _ -> Err FailedToEraseRecord
                 |> Some
-        |> unwarp
+        |> unwrap

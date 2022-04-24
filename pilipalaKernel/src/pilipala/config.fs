@@ -18,14 +18,14 @@ let mutable private rootNode: Option'<JObject> = None
 let private configPipeline =
 
     let fetch () =
-        let config = configFilePath |> unwarp |> readFile
+        let config = configFilePath |> unwrap |> readFile
 
         let _rootNode = config.jsonParsed
         rootNode <- Some <| _rootNode
 
         _rootNode
 
-    let provide () = rootNode |> unwarp
+    let provide () = rootNode |> unwrap
 
     GenericStatePipe(activate = fetch, activated = provide)
         .build ()
