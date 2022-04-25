@@ -56,9 +56,9 @@ let tagTo (metaId: uint64) (tagName: string) =
     let sql =
         $"INSERT INTO tag_{tagName} (metaId) VALUES (?metaId)"
 
-    let para = [| MySqlParameter("metaId", metaId) |]
+    let paras: (string * obj) list = [ ("metaId", metaId) ]
 
-    db.Managed().executeAny (sql, para)
+    db.Managed().executeAny (sql, paras)
     >>= fun f ->
             match f <| eq 1 with
             | 1 -> Ok()

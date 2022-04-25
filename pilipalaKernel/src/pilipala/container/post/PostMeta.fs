@@ -30,9 +30,9 @@ type internal PostMeta(metaId: uint64) =
                     let sql =
                         $"SELECT {key} FROM {table} WHERE metaId = ?metaId"
 
-                    let para = [| MySqlParameter("metaId", metaId) |]
+                    let paras: (string * obj) list = [ ("metaId", metaId) ]
 
-                    db.Managed().getFstVal (sql, para)
+                    db.Managed().getFstVal (sql, paras)
                     >>= fun r ->
                             let value = r.unwrap ()
 
@@ -66,27 +66,27 @@ type internal PostMeta(metaId: uint64) =
     /// 上级元id
     member this.superMetaId
         with get (): uint64 = this.get "superMetaId"
-        and set (v: uint64) = (this.set "superMetaId" v).unwrap ()
+        and set (v: uint64) = this.set "superMetaId" v |> unwrap
     /// 当前记录id
     member this.currRecordId
         with get (): uint64 = this.get "currRecordId"
-        and set (v: uint64) = (this.set "currRecordId" v).unwrap ()
+        and set (v: uint64) = this.set "currRecordId" v |> unwrap
     /// 创建时间
     member this.ctime
         with get (): DateTime = this.get "ctime"
-        and set (v: DateTime) = (this.set "ctime" v).unwrap ()
+        and set (v: DateTime) = this.set "ctime" v |> unwrap
     /// 访问时间
     member this.atime
         with get (): DateTime = this.get "atime"
-        and set (v: DateTime) = (this.set "atime" v).unwrap ()
+        and set (v: DateTime) = this.set "atime" v |> unwrap
     /// 访问数
     member this.view
         with get (): uint32 = this.get "view"
-        and set (v: uint32) = (this.set "view" v).unwrap ()
+        and set (v: uint32) = this.set "view" v |> unwrap
     /// 星星数
     member this.star
         with get (): uint32 = this.get "star"
-        and set (v: uint32) = (this.set "star" v).unwrap ()
+        and set (v: uint32) = this.set "star" v |> unwrap
 
 type PostMeta with
 
@@ -107,16 +107,16 @@ type PostMeta with
 
                 let recordId = 0 //初始元空
 
-                let para =
-                    [| MySqlParameter("metaId", metaId)
-                       MySqlParameter("superMetaId", 0)
-                       MySqlParameter("currRecordId", recordId)
-                       MySqlParameter("ctime", DateTime.Now)
-                       MySqlParameter("atime", DateTime.Now)
-                       MySqlParameter("view", 0)
-                       MySqlParameter("star", 0) |]
+                let paras: (string * obj) list =
+                    [ ("metaId", metaId)
+                      ("superMetaId", 0)
+                      ("currRecordId", recordId)
+                      ("ctime", DateTime.Now)
+                      ("atime", DateTime.Now)
+                      ("view", 0)
+                      ("star", 0) ]
 
-                db.Managed().executeAny (sql, para)
+                db.Managed().executeAny (sql, paras)
                 >>= fun f ->
 
                         match f <| eq 1 with

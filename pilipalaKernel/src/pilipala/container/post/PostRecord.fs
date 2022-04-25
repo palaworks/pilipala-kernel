@@ -31,11 +31,10 @@ type internal PostRecord(recordId: uint64) =
                     let sql =
                         $"SELECT {key} FROM {table} WHERE recordId = ?recordId"
 
-                    let para =
-                        [| MySqlParameter("recordId", recordId) |]
+                    let paras: (string * obj) list = [ ("recordId", recordId) ]
 
 
-                    db.Managed().getFstVal (sql, para)
+                    db.Managed().getFstVal (sql, paras)
                     >>= fun r ->
                             let value = r.unwrap ()
 
@@ -70,23 +69,23 @@ type internal PostRecord(recordId: uint64) =
     /// 封面
     member this.cover
         with get (): string = this.get "cover"
-        and set (v: string) = (this.set "cover" v).unwrap ()
+        and set (v: string) = this.set "cover" v |> unwrap
     /// 标题
     member this.title
         with get (): string = this.get "title"
-        and set (v: string) = (this.set "title" v).unwrap ()
+        and set (v: string) = this.set "title" v |> unwrap
     /// 概述
     member this.summary
         with get (): string = this.get "summary"
-        and set (v: string) = (this.set "summary" v).unwrap ()
+        and set (v: string) = this.set "summary" v |> unwrap
     /// 正文
     member this.body
         with get (): string = this.get "body"
-        and set (v: string) = (this.set "body" v).unwrap ()
+        and set (v: string) = this.set "body" v |> unwrap
     /// 修改时间
     member this.mtime
         with get (): DateTime = this.get "mtime"
-        and set (v: DateTime) = (this.set "mtime" v).unwrap ()
+        and set (v: DateTime) = this.set "mtime" v |> unwrap
 
 type PostRecord with
 
@@ -115,15 +114,15 @@ type PostRecord with
 
                 let recordId = palaflake.gen ()
 
-                let para =
-                    [| MySqlParameter("recordId", recordId)
-                       MySqlParameter("cover", "")
-                       MySqlParameter("title", "")
-                       MySqlParameter("summary", "")
-                       MySqlParameter("body", "")
-                       MySqlParameter("mtime", DateTime.Now) |]
+                let paras: (string * obj) list =
+                    [ ("recordId", recordId)
+                      ("cover", "")
+                      ("title", "")
+                      ("summary", "")
+                      ("body", "")
+                      ("mtime", DateTime.Now) ]
 
-                db.Managed().executeAny (sql, para)
+                db.Managed().executeAny (sql, paras)
                 >>= fun f ->
 
                         match f <| eq 1 with

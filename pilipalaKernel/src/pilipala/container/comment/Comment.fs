@@ -28,10 +28,9 @@ type Comment(commentId: uint64) =
                     let sql =
                         $"SELECT {key} FROM {table} WHERE commentId = ?commentId"
 
-                    let para =
-                        [| MySqlParameter("commentId", commentId) |]
+                    let paras: (string * obj) list = [ ("commentId", commentId) ]
 
-                    db.Managed().getFstVal (sql, para)
+                    db.Managed().getFstVal (sql, paras)
                     >>= fun r ->
                             let value = r.unwrap ()
 
@@ -67,31 +66,31 @@ type Comment(commentId: uint64) =
     /// 所属元id
     member this.ownerMetaId
         with get (): uint64 = this.get "ownerMetaId"
-        and set (v: uint64) = (this.set "ownerMetaId" v).unwrap ()
+        and set (v: uint64) = this.set "ownerMetaId" v|> unwrap
     /// 回复到
     member this.replyTo
         with get (): uint64 = this.get "replyTo"
-        and set (v: uint64) = (this.set "replyTo" v).unwrap ()
+        and set (v: uint64) = this.set "replyTo" v|> unwrap
     /// 昵称
     member this.nick
         with get (): string = this.get "nick"
-        and set (v: string) = (this.set "nick" v).unwrap ()
+        and set (v: string) = this.set "nick" v|> unwrap
     /// 内容
     member this.content
         with get (): string = this.get "content"
-        and set (v: string) = (this.set "content" v).unwrap ()
+        and set (v: string) = this.set "content" v|> unwrap
     /// 电子邮箱
     member this.email
         with get (): string = this.get "email"
-        and set (v: string) = (this.set "email" v).unwrap ()
+        and set (v: string) = this.set "email" v|> unwrap
     /// 站点
     member this.site
         with get (): string = this.get "site"
-        and set (v: string) = (this.set "site" v).unwrap ()
+        and set (v: string) = this.set "site" v|> unwrap
     /// 创建时间
     member this.ctime
         with get (): DateTime = this.get "ctime"
-        and set (v: DateTime) = (this.set "ctime" v).unwrap ()
+        and set (v: DateTime) = this.set "ctime" v|> unwrap
 
 type public Comment with
 
@@ -110,17 +109,17 @@ type public Comment with
 
                 let commentId = palaflake.gen ()
 
-                let para =
-                    [| MySqlParameter("commentId", commentId)
-                       MySqlParameter("ownerMetaId", 0)
-                       MySqlParameter("replyTo", 0)
-                       MySqlParameter("nick", "")
-                       MySqlParameter("content", "")
-                       MySqlParameter("email", "")
-                       MySqlParameter("site", "")
-                       MySqlParameter("ctime", DateTime.Now) |]
+                let paras: (string * obj) list =
+                    [ ("commentId", commentId)
+                      ("ownerMetaId", 0)
+                      ("replyTo", 0)
+                      ("nick", "")
+                      ("content", "")
+                      ("email", "")
+                      ("site", "")
+                      ("ctime", DateTime.Now) ]
 
-                db.Managed().executeAny (sql, para)
+                db.Managed().executeAny (sql, paras)
                 >>= fun f ->
 
                         match f <| eq 1 with
@@ -175,7 +174,7 @@ module ext =
                         $"SELECT commentId FROM {table} WHERE ownerMetaId = ?ownerMetaId \
                           ORDER BY ctime"
 
-                    let paras = [ ("ownerMetaId", self.id) ]
+                    let paras: (string * obj) list = [ ("ownerMetaId", self.id) ]
 
                     db.Managed().getCol (sql, 0u, paras)
                     >>= fun rows ->

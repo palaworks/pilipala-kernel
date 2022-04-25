@@ -35,12 +35,12 @@ let create () =
 
             let uuid = gen N
 
-            let para =
-                [| MySqlParameter("tokenHash", uuid.sha1)
-                   MySqlParameter("ctime", DateTime.Now)
-                   MySqlParameter("atime", DateTime.Now) |]
+            let paras: (string * obj) list =
+                [ ("tokenHash", uuid.sha1)
+                  ("ctime", DateTime.Now)
+                  ("atime", DateTime.Now) ]
 
-            db.Managed().executeAny (sql, para)
+            db.Managed().executeAny (sql, paras)
             >>= fun f ->
                     match f <| eq 1 with
                     | 1 -> Ok uuid
@@ -74,10 +74,9 @@ let check (token: string) =
 
             let tokenHash = token.sha1
 
-            let para =
-                [| MySqlParameter("tokenHash", tokenHash) |]
+            let paras: (string * obj) list = [ ("tokenHash", tokenHash) ]
 
-            db.Managed().getFstVal (sql, para)
+            db.Managed().getFstVal (sql, paras)
             >>= fun n ->
                     //如果查询到的凭据记录唯一
                     match n with
