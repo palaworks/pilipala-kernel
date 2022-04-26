@@ -45,8 +45,25 @@
         
         <Compile Include="src\pilipala\auth\channel.fs" />
         <Compile Include="src\pilipala\auth\serv.fs" />
+        <Compile Include="src\pilipala\palang\parser.fs" />
         
-        <Compile Include="src\pilipala\palang.fs" />
+        <Compile Include="src\pilipala\palang\palang.fs" />
+        
+        <Compile Include="src\pilipala\palang\parser\erase.fs" />
+        
+        <Compile Include="src\pilipala\palang\parser\detag.fs" />
+        
+        <Compile Include="src\pilipala\palang\parser\tag.fs" />
+        
+        <Compile Include="src\pilipala\palang\parser\create.fs" />
+        
+        <Compile Include="src\pilipala\palang\parser\recycle.fs" />
+        
+        <Compile Include="src\pilipala\palang\parser\set.fs" />
+        
+        <Compile Include="src\pilipala\palang\parser\rebase.fs" />
+        
+        <Compile Include="src\pilipala\palang\parser\bind.fs" />
         
         <Compile Include="src\pilipala\plugin.fs" />
         
