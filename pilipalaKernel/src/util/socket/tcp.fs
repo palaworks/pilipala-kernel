@@ -1,9 +1,10 @@
 ﻿module pilipala.util.socket.tcp
 
-open System.Text
+open System
 open System.Net
 open System.Net.Sockets
-
+open fsharper.types.Array
+open pilipala.util.encoding
 
 /// 与指定ip端口建立tcp连接
 let connect (ip: string) (port: uint16) =
@@ -44,44 +45,42 @@ let listen (port: uint16) f =
 
 type Socket with
 
-    /// 发送文本消息
-    member self.sendText: string -> unit =
-        Encoding.UTF8.GetBytes >> self.Send >> ignore
-    /// 发送字节消息
-    member self.sendBytes: byte [] -> unit = self.Send >> ignore
+    /// 发送字节数据
+    member self.sendBytes(bytes: byte array) =
+        match self.Send bytes with
+        | sentLen when sentLen = bytes.Length -> () //全部发送完成
+        | sentLen -> self.sendBytes bytes.[sentLen..^0] //继续发送剩余部分
 
-    /// 接收文本消息
-    member self.recvText() =
+    /// 接收指定长度字节数据
+    member self.recvBytes(n: uint32) =
+
+        let rec fetch buf start remain =
+            match self.Receive(buf, start, remain, SocketFlags.None) with
+            | readLen when readLen = remain -> //读完
+                buf
+            | readLen -> fetch buf readLen (remain - readLen)
+
+        let n' = min (uint32 Int32.MaxValue) n |> int //防止溢出
+
+        fetch (Array.zeroCreate<byte> n') 0 n'
+
+    /// 接收所有字节数据
+    member self.recvAllBytes() =
         let buf = Array.zeroCreate<byte> 4096
 
-        let rec fetch (sb: StringBuilder) =
-            match self.Receive buf with
-            | n when n = buf.Length ->
-                Encoding.UTF8.GetString(buf, 0, n)
-                |> sb.Append
-                |> fetch
-            | n -> //缓冲区未满，说明全部接收完毕
-                Encoding.UTF8.GetString(buf, 0, n) |> sb.Append
-
-        (StringBuilder() |> fetch).ToString()
-    /// 接收全部字节消息
-    member self.recvBytes() =
-        let buf = Array.zeroCreate<byte> 4096
-
-        let rec fetch bl =
+        let rec fetch acc =
             match self.Receive buf with
             | readLen when readLen = buf.Length -> //尚未读完
-                bl @ (buf |> Array.toList) |> fetch
+                acc @ buf.toList () |> fetch
             | readLen -> //缓冲区未满，说明全部接收完毕
-                bl @ (buf.[0..readLen - 1] |> Array.toList)
+                acc @ buf.[0..readLen - 1].toList ()
 
         [] |> fetch |> List.toArray
-    /// 接收指定长度字节消息
-    member self.recvBytes(n) =
-        let rec fetch buf start length =
-            match self.Receive(buf, start, length, SocketFlags.None) with
-            | readLen when readLen = length -> //读完
-                buf
-            | readLen -> fetch buf readLen (length - readLen)
 
-        fetch (Array.zeroCreate<byte> n) 0 n
+type Socket with
+
+    /// 发送UTF8数据
+    member self.sendUtf8(s: string) = s |> utf8ToBytes |> self.sendBytes
+
+    /// 以UTF8编码接收所有数据
+    member self.recvAllUtf8() = self.recvAllBytes () |> bytesToUtf8

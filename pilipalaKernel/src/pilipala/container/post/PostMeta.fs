@@ -1,13 +1,13 @@
 ﻿namespace pilipala.container.post
 
 open System
-open MySql.Data.MySqlClient
 open fsharper.op
 open fsharper.types
 open fsharper.types.Ord
 open pilipala
 open pilipala.util
 open pilipala.container
+open DbManaged.PgSql.ext.String
 
 
 //映射容器
@@ -28,7 +28,8 @@ type internal PostMeta(metaId: uint64) =
                     let table = ts.meta
 
                     let sql =
-                        $"SELECT {key} FROM {table} WHERE metaId = ?metaId"
+                        $"SELECT {key} FROM {table} WHERE metaId = <metaId>"
+                        |> normalizeSql
 
                     let paras: (string * obj) list = [ ("metaId", metaId) ]
 
@@ -65,12 +66,12 @@ type internal PostMeta(metaId: uint64) =
     member this.metaId = metaId
     /// 上级元id
     member this.superMetaId
-        with get (): uint64 = this.get "superMetaId"
-        and set (v: uint64) = this.set "superMetaId" v |> unwrap
+        with get (): uint64 = this.get "baseMetaId"
+        and set (v: uint64) = this.set "baseMetaId" v |> unwrap
     /// 当前记录id
     member this.currRecordId
-        with get (): uint64 = this.get "currRecordId"
-        and set (v: uint64) = this.set "currRecordId" v |> unwrap
+        with get (): uint64 = this.get "bindRecordId"
+        and set (v: uint64) = this.set "bindRecordId" v |> unwrap
     /// 创建时间
     member this.ctime
         with get (): DateTime = this.get "ctime"
@@ -99,9 +100,10 @@ type PostMeta with
 
                 let sql =
                     $"INSERT INTO {table} \
-                    ( metaId, superMetaId, currRecordId, ctime, atime, view, star) \
+                    ( metaId,  baseMetaId,  bindRecordId,  ctime,  atime,  view,  star) \
                     VALUES \
-                    (?metaId,?superMetaId,?currRecordId,?ctime,?atime,?view,?star)"
+                    (<metaId>,<baseMetaId>,<bindRecordId>,<ctime>,<atime>,<view>,<star>)"
+                    |> normalizeSql
 
                 let metaId = palaflake.gen ()
 
@@ -109,8 +111,8 @@ type PostMeta with
 
                 let paras: (string * obj) list =
                     [ ("metaId", metaId)
-                      ("superMetaId", 0)
-                      ("currRecordId", recordId)
+                      ("baseMetaId", 0)
+                      ("bindRecordId", recordId)
                       ("ctime", DateTime.Now)
                       ("atime", DateTime.Now)
                       ("view", 0)
@@ -122,8 +124,8 @@ type PostMeta with
                         match f <| eq 1 with
                         | 1 -> Ok metaId
                         | _ -> Err FailedToCreateMeta
-                |> unwrap
                 |> Some
+        |> unwrap
 
     /// 抹除文章元
     static member erase(metaId: uint64) =

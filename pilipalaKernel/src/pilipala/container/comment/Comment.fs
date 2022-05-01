@@ -1,7 +1,6 @@
 ﻿namespace pilipala.container.comment
 
 open System
-open MySql.Data.MySqlClient
 open fsharper.op
 open fsharper.types
 open fsharper.types.Ord
@@ -9,6 +8,7 @@ open pilipala
 open pilipala.util
 open pilipala.container
 open pilipala.container.post
+open DbManaged.PgSql.ext.String
 
 
 type Comment(commentId: uint64) =
@@ -26,7 +26,8 @@ type Comment(commentId: uint64) =
                     let table = ts.comment
 
                     let sql =
-                        $"SELECT {key} FROM {table} WHERE commentId = ?commentId"
+                        $"SELECT {key} FROM {table} WHERE commentId = <commentId>"
+                        |> normalizeSql
 
                     let paras: (string * obj) list = [ ("commentId", commentId) ]
 
@@ -66,31 +67,31 @@ type Comment(commentId: uint64) =
     /// 所属元id
     member this.ownerMetaId
         with get (): uint64 = this.get "ownerMetaId"
-        and set (v: uint64) = this.set "ownerMetaId" v|> unwrap
+        and set (v: uint64) = this.set "ownerMetaId" v |> unwrap
     /// 回复到
     member this.replyTo
         with get (): uint64 = this.get "replyTo"
-        and set (v: uint64) = this.set "replyTo" v|> unwrap
+        and set (v: uint64) = this.set "replyTo" v |> unwrap
     /// 昵称
     member this.nick
         with get (): string = this.get "nick"
-        and set (v: string) = this.set "nick" v|> unwrap
+        and set (v: string) = this.set "nick" v |> unwrap
     /// 内容
     member this.content
         with get (): string = this.get "content"
-        and set (v: string) = this.set "content" v|> unwrap
+        and set (v: string) = this.set "content" v |> unwrap
     /// 电子邮箱
     member this.email
         with get (): string = this.get "email"
-        and set (v: string) = this.set "email" v|> unwrap
+        and set (v: string) = this.set "email" v |> unwrap
     /// 站点
     member this.site
         with get (): string = this.get "site"
-        and set (v: string) = this.set "site" v|> unwrap
+        and set (v: string) = this.set "site" v |> unwrap
     /// 创建时间
     member this.ctime
         with get (): DateTime = this.get "ctime"
-        and set (v: DateTime) = this.set "ctime" v|> unwrap
+        and set (v: DateTime) = this.set "ctime" v |> unwrap
 
 type public Comment with
 
@@ -103,9 +104,10 @@ type public Comment with
 
                 let sql =
                     $"INSERT INTO {table} \
-                    ( commentId, ownerMetaId, replyTo, nick, content, email, site, ctime) \
+                    ( commentId,  ownerMetaId,  replyTo,  nick,  content,  email,  site,  ctime) \
                     VALUES \
-                    (?commentId,?ownerMetaId,?replyTo,?nick,?content,?email,?site,?ctime)"
+                    (<commentId>,<ownerMetaId>,<replyTo>,<nick>,<content>,<email>,<site>,<ctime>)"
+                    |> normalizeSql
 
                 let commentId = palaflake.gen ()
 
@@ -125,8 +127,8 @@ type public Comment with
                         match f <| eq 1 with
                         | 1 -> Ok commentId
                         | _ -> Err FailedToCreateComment
-                |> unwrap
                 |> Some
+        |> unwrap
 
     /// 回收评论
     static member recycle(commentId: uint64) =
@@ -171,8 +173,9 @@ module ext =
 
                     //按时间排序
                     let sql =
-                        $"SELECT commentId FROM {table} WHERE ownerMetaId = ?ownerMetaId \
+                        $"SELECT commentId FROM {table} WHERE ownerMetaId = <ownerMetaId> \
                           ORDER BY ctime"
+                        |> normalizeSql
 
                     let paras: (string * obj) list = [ ("ownerMetaId", self.id) ]
 

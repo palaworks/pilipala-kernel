@@ -1,13 +1,13 @@
 ﻿module pilipala.auth.token
 
 open System
-open MySql.Data.MySqlClient
 open fsharper.op
 open fsharper.types
 open fsharper.types.Ord
 open pilipala
 open pilipala.util.hash
 open pilipala.util.uuid
+open DbManaged.PgSql.ext.String
 
 /// 无法创建凭据错误
 exception FailedToCreateToken
@@ -29,9 +29,10 @@ let create () =
 
             let sql =
                 $"INSERT INTO {table} \
-                    ( tokenHash, ctime, atime) \
+                    ( tokenHash,  ctime,  atime) \
                     VALUES \
-                    (?tokenHash,?ctime,?atime)"
+                    (<tokenHash>,<ctime>,<atime>)"
+                |> normalizeSql
 
             let uuid = gen N
 
@@ -70,7 +71,8 @@ let check (token: string) =
             let table = ts.token
 
             let sql =
-                $"SELECT COUNT(*) FROM {table} WHERE tokenHash=?tokenHash"
+                $"SELECT COUNT(*) FROM {table} WHERE tokenHash = <tokenHash>"
+                |> normalizeSql
 
             let tokenHash = token.sha1
 

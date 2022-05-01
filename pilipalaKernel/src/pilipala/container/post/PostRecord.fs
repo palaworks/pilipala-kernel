@@ -1,7 +1,6 @@
 ﻿namespace pilipala.container.post
 
 open System
-open MySql.Data.MySqlClient
 open fsharper.op
 open fsharper.types
 open fsharper.types.Ord
@@ -9,6 +8,7 @@ open pilipala
 open pilipala.util
 open pilipala.util.hash
 open pilipala.container
+open DbManaged.PgSql.ext.String
 
 
 //映射型容器
@@ -29,7 +29,8 @@ type internal PostRecord(recordId: uint64) =
                     let table = ts.record
 
                     let sql =
-                        $"SELECT {key} FROM {table} WHERE recordId = ?recordId"
+                        $"SELECT {key} FROM {table} WHERE recordId = <recordId>"
+                        |> normalizeSql
 
                     let paras: (string * obj) list = [ ("recordId", recordId) ]
 
@@ -108,9 +109,10 @@ type PostRecord with
 
                 let sql =
                     $"INSERT INTO {table} \
-                        ( recordId, cover, title, summary, body, mtime) \
+                        ( recordId,  cover,  title,  summary,  body,  mtime) \
                         VALUES \
-                        (?recordId,?cover,?title,?summary,?body,?mtime)"
+                        (<recordId>,<cover>,<title>,<summary>,<body>,<mtime>)"
+                    |> normalizeSql
 
                 let recordId = palaflake.gen ()
 
@@ -128,8 +130,8 @@ type PostRecord with
                         match f <| eq 1 with
                         | 1 -> Ok recordId
                         | _ -> Err FailedToCreateRecord
-                |> unwrap
                 |> Some
+        |> unwrap
 
     /// 抹除文章记录
     static member erase(recordId: uint64) =

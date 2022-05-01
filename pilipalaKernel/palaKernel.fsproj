@@ -45,25 +45,12 @@
         
         <Compile Include="src\pilipala\auth\channel.fs" />
         <Compile Include="src\pilipala\auth\serv.fs" />
-        <Compile Include="src\pilipala\palang\parser.fs" />
+        <Compile Include="src\pilipala\palang\util.fs" />
+        <Compile Include="src\pilipala\palang\eval.fs" />
         
-        <Compile Include="src\pilipala\palang\palang.fs" />
+        <Compile Include="src\pilipala\palang\analyse.fs" />
         
-        <Compile Include="src\pilipala\palang\parser\erase.fs" />
-        
-        <Compile Include="src\pilipala\palang\parser\detag.fs" />
-        
-        <Compile Include="src\pilipala\palang\parser\tag.fs" />
-        
-        <Compile Include="src\pilipala\palang\parser\create.fs" />
-        
-        <Compile Include="src\pilipala\palang\parser\recycle.fs" />
-        
-        <Compile Include="src\pilipala\palang\parser\set.fs" />
-        
-        <Compile Include="src\pilipala\palang\parser\rebase.fs" />
-        
-        <Compile Include="src\pilipala\palang\parser\bind.fs" />
+        <Compile Include="src\pilipala\palang\service.fs" />
         
         <Compile Include="src\pilipala\plugin.fs" />
         
@@ -88,6 +75,9 @@
       </Reference>
       <Reference Include="fsharper, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null">
         <HintPath>..\..\fsharper\bin\Debug\net6.0\fsharper.dll</HintPath>
+      </Reference>
+      <Reference Include="WebSocketer, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null">
+        <HintPath>..\..\WebsSocketer\bin\Debug\net6.0\WebSocketer.dll</HintPath>
       </Reference>
     </ItemGroup>
 

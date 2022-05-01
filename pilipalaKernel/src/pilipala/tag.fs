@@ -1,11 +1,11 @@
 ﻿module pilipala.container.tag
 
-open MySql.Data.MySqlClient
 open fsharper.op
 open fsharper.types
 open fsharper.types.Ord
 open pilipala
 open pilipala.container.post
+open DbManaged.PgSql.ext.String
 
 /// 无法创建标签错误
 exception FailedToCreateTag
@@ -54,7 +54,8 @@ let erase (tagName: string) =
 let tagTo (metaId: uint64) (tagName: string) =
 
     let sql =
-        $"INSERT INTO tag_{tagName} (metaId) VALUES (?metaId)"
+        $"INSERT INTO tag_{tagName} (metaId) VALUES (<metaId>)"
+        |> normalizeSql
 
     let paras: (string * obj) list = [ ("metaId", metaId) ]
 
