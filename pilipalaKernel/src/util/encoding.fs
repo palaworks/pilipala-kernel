@@ -1,35 +1,45 @@
-﻿module pilipala.util.encoding
+﻿namespace pilipala.util.encoding
 
 open System
 open System.Text
 open Microsoft.IdentityModel.Tokens
 
+[<AutoOpen>]
+module byte =
+    /// utf8字符串 <-> 字节数组
+    let inline bytesToUtf8 bytes =
+        Encoding.UTF8.GetString(bytes, 0, bytes.Length)
 
-/// 字节数组转utf8字符串
-let bytesToUtf8 bytes =
-    Encoding.UTF8.GetString(bytes, 0, bytes.Length)
-/// utf8字符串转字节数组
-let utf8ToBytes (utf8: string) = Encoding.UTF8.GetBytes utf8
+    let inline utf8ToBytes (s: string) = Encoding.UTF8.GetBytes s
 
-/// 解码16进制字符串
-let decodeHex (hex: string) =
-    hex |> Convert.FromHexString |> bytesToUtf8
+    /// base64Url字符串 <-> utf8字符串
+    let base64UrlToUtf8 (s: string) = Base64UrlEncoder.Decode s
 
-/// 解码base64
-let decodeBase64 (base64: string) =
-    base64 |> Convert.FromBase64String |> bytesToUtf8
+    type String with
+        member self.base64Url = self |> Base64UrlEncoder.Encode
 
-/// 解码base64url
-let decodeBase64url (base64url: string) = base64url |> Base64UrlEncoder.Decode
+[<AutoOpen>]
+module base64 =
+    // base64字符串 <-> 字节数组
+    let inline base64ToBytes (s: string) = Convert.FromBase64String s
+    let inline bytesToBase64 bytes = Convert.ToBase64String bytes
 
-type String with
+    // base64字符串 <-> utf8字符串
+    let base64ToUtf8 (s: string) = s |> base64ToBytes |> bytesToUtf8
 
-    /// 转换到16进制字符串
-    member self.hex = self |> utf8ToBytes |> Convert.ToHexString
+    type String with
+        member self.base64 =
+            self |> utf8ToBytes |> Convert.ToBase64String
 
-    /// 转换到base64字符串
-    member self.base64 =
-        self |> utf8ToBytes |> Convert.ToBase64String
+[<AutoOpen>]
+module hex =
+    // hex字符串 <-> 字节数组
+    let inline hexToBytes (s: string) = Convert.FromHexString s
+    let inline bytesToHex (bytes: byte []) = bytes |> Convert.ToHexString
 
-    /// 转换到适用于url的base64字符串
-    member self.base64url = self |> Base64UrlEncoder.Encode
+    // hex字符串 <-> utf8字符串
+    let hexToUtf8 (s: string) = s |> hexToBytes |> bytesToUtf8
+
+    type String with
+        member self.hex =
+            self |> utf8ToBytes |> Convert.ToHexString

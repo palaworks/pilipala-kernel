@@ -20,7 +20,7 @@ type ServType =
 /// 服务集
 let private services =
     Dictionary<string, ServType * (ServChannel -> unit)>()
-
+ 
 let regService servName servType (servHandler: ServLog -> ServChannel -> unit) =
     let handler =
         let sl = ServLog servName

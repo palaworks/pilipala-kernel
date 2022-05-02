@@ -73,7 +73,7 @@ let eval_recycle type_name type_id =
 
 let eval_set attribute type_name type_id base64url_attribute_value =
     let attribute_value =
-        decodeBase64url base64url_attribute_value
+        base64UrlToUtf8 base64url_attribute_value
 
     match type_name with
     | "record" ->

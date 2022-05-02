@@ -19,7 +19,6 @@ let patternMatch (pattern: string) (command: string) =
     let command_list = command.Split(' ').toList ()
 
     let z = zip pattern_list command_list //组合模式对
-    let z2 = zipAll pattern_list command_list
 
     let non_paras = filter (fun (p, _) -> not <| isPara p) z //过滤出所有非参数对
 

@@ -4,6 +4,7 @@ open System
 open System.Security.Cryptography
 open WebSocketer.Type
 open pilipala.util.crypto
+open pilipala.util.encoding
 
 /// 信道接口
 type ServChannel =
@@ -16,7 +17,7 @@ type ServChannel =
 /// 私有信道
 /// 该信道用于私有服务
 type PriChannel(s: WebSocket, sessionKey: string) =
-    let sessionKeyBytes = sessionKey |> Convert.FromHexString
+    let sessionKeyBytes = sessionKey |> hexToBytes
 
     //TODO 应使用随机化IV+CBC以代替ECB模式以获得最佳安全性
 

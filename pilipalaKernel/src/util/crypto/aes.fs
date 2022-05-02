@@ -3,6 +3,7 @@
 open System
 open System.IO
 open System.Security.Cryptography
+open pilipala.util.encoding
 
 
 /// 加密明文
@@ -40,7 +41,7 @@ let decrypt (key: byte []) (iv: byte []) mode paddingMode (cipherText: string) =
             .Create(Key = key, IV = iv, Padding = paddingMode, Mode = mode)
             .CreateDecryptor()
 
-    let cipherBytes = cipherText |> Convert.FromHexString
+    let cipherBytes = cipherText |> hexToBytes
 
     use ms = new MemoryStream(cipherBytes)
 

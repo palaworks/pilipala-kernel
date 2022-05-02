@@ -3,7 +3,7 @@
 open System
 open System.Text
 open System.Security.Cryptography
-
+open pilipala.util.encoding
 
 /// 加密明文
 let encrypt (pubKey: string) (paddingMode: RSAEncryptionPadding) (plainText: string) =
@@ -20,7 +20,7 @@ let decrypt (priKey: string) (paddingMode: RSAEncryptionPadding) (cipherText: st
     let csp = new RSACryptoServiceProvider()
     csp.ImportFromPem priKey
 
-    let cipherBytes = cipherText |> Convert.FromBase64String
+    let cipherBytes = cipherText |> base64ToBytes
     let plainBytes = csp.Decrypt(cipherBytes, paddingMode)
 
     plainBytes |> Encoding.UTF8.GetString
