@@ -2,9 +2,8 @@
 
 open System
 open System.Security.Cryptography
-open pilipala.util.crypto
-open pilipala.util.encoding
 open WebSocketer.Type
+open pilipala.util.crypto
 
 /// 信道接口
 type ServChannel =

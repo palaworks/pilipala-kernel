@@ -20,6 +20,7 @@
 `useserv <serv_name>`
   * 若`serv_name`是公共服务，则服务器会送回服务内容，并关闭连接。
   * 若`serv_name`是私有服务，则服务器将按照下述流程继续。
+  * 若`serv_name`非法，则服务器返回`bad serv`，并关闭连接。
 
 ## 认证
 

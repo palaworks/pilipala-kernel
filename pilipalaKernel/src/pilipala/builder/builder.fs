@@ -1,9 +1,15 @@
 ﻿[<AutoOpen>]
 module pilipala.builder
 
-open fsharper.types
+open System 
+open fsharper.types 
 open fsharper.types.Pipe.Pipable
-open pilipala
+open pilipala.service
+open pilipala 
+
+/// 在指定端口启动认证服务
+/// 认证通过后，会以 SecureChannel 为参数执行闭包 f
+
 
 /// 构建器
 type palaBuilder() =
@@ -22,7 +28,7 @@ type palaBuilder() =
 
     /// 使用配置文件
     member self.useConfig configFilePath =
-        let func () =
+        let func _ =
             config.configFilePath <- Some <| configFilePath
 
         buildPipeline <- Pipe(func = func) |> buildPipeline.import
@@ -30,18 +36,25 @@ type palaBuilder() =
 
     /// 使用插件集
     member self.usePlugins pluginDir =
-        let func () = plugin.invokePlugins pluginDir
+        let func _ = plugin.invokePlugins pluginDir
         buildPipeline <- Pipe(func = func) |> buildPipeline.import
         self
 
     /// 使用认证
     member self.useAuth port = ()
 
-    /// 使用服务
-    member self.useService service = ()
-
     /// 使用服务日志
     member self.useServiceLog logDir = ()
+
+    /// 使用服务
+    member self.useService serviceName serviceType serviceHandler =
+        let func _ =
+            regService serviceName serviceType serviceHandler
+
+        buildPipeline <- Pipe(func = func) |> buildPipeline.import
+        self
+
+
 
     /// 使用日志
     member self.useLog logDir = ()
