@@ -3,37 +3,35 @@
 open System
 open System.Net.Sockets
 open System.Security.Cryptography
+open System.Threading.Tasks
 open WebSocketer.Type.WebSocket
 open fsharper.types
+open fsharper.op.Fmt
 open pilipala.util.crypto
 open pilipala.util.socket.tcp
 open pilipala.util.uuid
 open pilipala.auth.token
 open pilipala.auth.channel
 
-
-//TODO此模块存在问题，需要重构逻辑
+let private cli (msg: string) =
+    Console.WriteLine $"pilipala auth service : {msg}"
 
 /// 在指定端口启动认证服务
 /// 认证通过后，会以 SecureChannel 为参数执行闭包 f
 let serveOn port f =
-    let cli (msg: string) =
-        Console.WriteLine $"pilipala auth service : {msg}"
 
-    Async.Start
-    <| async {
+    async {
         cli "service online"
 
         let ws = new WebSocket(port) //阻塞
 
-
-        Console.WriteLine()
+        println ""
         cli "new client connected"
 
         try
             match ws.recv () with
             | "hello" -> //客户端问候
-                ws.send "hi" //服务端问候
+                ws.send "need auth" //服务端问候
                 cli "start authing"
 
                 let pubKey = ws.recv () //接收客户公钥
@@ -62,7 +60,7 @@ let serveOn port f =
                     ws.send "pass" //受信通告
                     cli "client certified"
 
-                    SecureChannel(ws, sessionKey) |> f
+                    PriChannel(ws, sessionKey) |> f
 
                 | _ -> cli "token invalid" //凭据无效
             | _ -> cli "client rejected" //非login请求
@@ -70,4 +68,5 @@ let serveOn port f =
         | :? SocketException -> cli "connection lost"
         | _ -> cli "auth failed"
         |> ignore
-       }
+    }
+    |> Async.Start

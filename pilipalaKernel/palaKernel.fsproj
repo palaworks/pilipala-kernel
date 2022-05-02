@@ -44,17 +44,22 @@
         <Compile Include="src\pilipala\auth\token.fs" />
         
         <Compile Include="src\pilipala\auth\channel.fs" />
-        <Compile Include="src\pilipala\auth\serv.fs" />
+        
+        <Compile Include="src\pilipala\auth\authService.fs" />
         <Compile Include="src\pilipala\palang\util.fs" />
         <Compile Include="src\pilipala\palang\eval.fs" />
         
         <Compile Include="src\pilipala\palang\analyse.fs" />
         
-        <Compile Include="src\pilipala\palang\service.fs" />
-        
         <Compile Include="src\pilipala\plugin.fs" />
         
         <Compile Include="src\pilipala\builder.fs" />
+        
+        <Compile Include="src\pilipala\service\palangServ.fs" />
+        
+        <Compile Include="src\pilipala\service\versionServ.fs" />
+        
+        <Compile Include="src\pilipala\service\service.fs" />
         
         
        

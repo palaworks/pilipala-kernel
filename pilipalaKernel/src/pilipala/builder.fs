@@ -18,8 +18,6 @@ type palaBuilder() =
     member self.useMemoryTable() = ()
     /// 使用调试信息
     member self.useDebugMessage() = ()
-    /// 使用日志记录
-    member self.useLog logPath = ()
     *)
 
     /// 使用配置文件
@@ -29,14 +27,24 @@ type palaBuilder() =
 
         buildPipeline <- Pipe(func = func) |> buildPipeline.import
         self
-    ///使用插件
+
+    /// 使用插件集
     member self.usePlugins pluginDir =
         let func () = plugin.invokePlugins pluginDir
         buildPipeline <- Pipe(func = func) |> buildPipeline.import
         self
 
-    /// 使用认证系统
-    member self.useAuth listenPort = ()
+    /// 使用认证
+    member self.useAuth port = ()
+
+    /// 使用服务
+    member self.useService service = ()
+
+    /// 使用服务日志
+    member self.useServiceLog logDir = ()
+
+    /// 使用日志
+    member self.useLog logDir = ()
 
     /// 构建
     member self.build = buildPipeline.build().invoke
