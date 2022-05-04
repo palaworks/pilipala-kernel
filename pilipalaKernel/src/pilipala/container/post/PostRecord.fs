@@ -60,7 +60,7 @@ type internal PostRecord(recordId: uint64) =
                         //当更改记录数为 1 时才会提交事务并追加到缓存头
                         match f <| eq 1 with
                         | 1 -> Ok <| intoCache key value
-                        | _ -> Err FailedToWriteCache
+                        | _ -> Err FailedToWriteCacheException
                 |> Some
         |> unwrap
 
@@ -129,7 +129,7 @@ type PostRecord with
 
                         match f <| eq 1 with
                         | 1 -> Ok recordId
-                        | _ -> Err FailedToCreateRecord
+                        | _ -> Err FailedToCreateRecordException
                 |> Some
         |> unwrap
 
@@ -144,6 +144,6 @@ type PostRecord with
 
                         match f <| eq 1 with
                         | 1 -> Ok()
-                        | _ -> Err FailedToEraseRecord
+                        | _ -> Err FailedToEraseRecordException
                 |> Some
         |> unwrap

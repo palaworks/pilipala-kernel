@@ -58,7 +58,7 @@ type Comment(commentId: uint64) =
                         //当更改记录数为 1 时才会提交事务并追加到缓存头
                         match f <| eq 1 with
                         | 1 -> Ok <| intoCache key value
-                        | _ -> Err FailedToWriteCache
+                        | _ -> Err FailedToWriteCacheException
                 |> Some
         |> unwrap
 
@@ -126,7 +126,7 @@ type public Comment with
 
                         match f <| eq 1 with
                         | 1 -> Ok commentId
-                        | _ -> Err FailedToCreateComment
+                        | _ -> Err FailedToCreateCommentException
                 |> Some
         |> unwrap
 
@@ -157,7 +157,7 @@ type public Comment with
 
                         match f <| eq 1 with
                         | 1 -> Ok()
-                        | _ -> Err FailedToEraseComment
+                        | _ -> Err FailedToEraseCommentException
                 |> Some
         |> unwrap
 

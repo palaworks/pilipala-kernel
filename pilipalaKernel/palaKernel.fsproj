@@ -45,9 +45,9 @@
         <Compile Include="src\pilipala\palang\eval.fs" />
         <Compile Include="src\pilipala\palang\analyse.fs" />
 
-        <Compile Include="src\pilipala\service\fn.fs" />
-        <Compile Include="src\pilipala\service\palangServ.fs" />
-        <Compile Include="src\pilipala\service\versionServ.fs" />
+        <Compile Include="src\pilipala\service\prelude.fs" />
+        <Compile Include="src\pilipala\service\PalangServ.fs" />
+        <Compile Include="src\pilipala\service\VersionServ.fs" />
         
         <Compile Include="src\pilipala\plugin.fs" />
         

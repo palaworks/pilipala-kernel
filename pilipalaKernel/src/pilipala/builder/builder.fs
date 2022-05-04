@@ -1,7 +1,10 @@
 ﻿namespace pilipala.builder
 
 open System
+open System.IO
+open System.Reflection
 open System.Threading.Tasks
+open Google.Protobuf.WellKnownTypes
 open fsharper.types
 open fsharper.types.Pipe.Pipable
 open pilipala.service
@@ -14,6 +17,9 @@ open pilipala
 /// 构建器
 type palaBuilder() =
     let mutable buildPipeline = Pipe<unit>()
+    let mutable logStream = new MemoryStream()
+
+    let mutable servLogStream = new MemoryStream()
 
     (*
     /// 使用全局缓存
@@ -22,8 +28,6 @@ type palaBuilder() =
     member self.usePageCache() = ()
     /// 使用内存表
     member self.useMemoryTable() = ()
-    /// 使用调试信息
-    member self.useDebugMessage() = ()
     *)
 
     /// 使用配置文件
@@ -53,21 +57,18 @@ type palaBuilder() =
         buildPipeline <- Pipe(func = func) |> buildPipeline.import
         self
 
+    /// 使用日志
+    member self.useLog logStream = ()
     /// 使用服务日志
-    member self.useServiceLog logDir = ()
+    member self.useServiceLog logStream = ()
 
-    /// 使用服务
-    member self.useService serviceName serviceType serviceHandler =
-        let func _ =
-            regService serviceName serviceType serviceHandler
+    /// 使用公共服务
+    member self.useService<'s>() =
+        let func _ = regService<'s> servLogStream
 
         buildPipeline <- Pipe(func = func) |> buildPipeline.import
         self
 
-
-
-    /// 使用日志
-    member self.useLog logDir = ()
 
     /// 构建
     member self.build = buildPipeline.build().invoke
