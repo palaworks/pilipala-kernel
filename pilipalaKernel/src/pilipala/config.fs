@@ -1,9 +1,9 @@
 module internal pilipala.config
 
 open System.IO
-open fsharper.types
+open fsharper.typ
 open fsharper.op.Boxing
-open fsharper.types.Pipe.GenericPipable
+open fsharper.typ.Pipe.GenericPipable
 open pilipala.util.yaml
 open pilipala.util.json
 open pilipala.util.io

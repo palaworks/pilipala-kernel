@@ -1,7 +1,7 @@
 ﻿module pilipala.util.markdown
 
 open System
-open fsharper.types
+open fsharper.typ
 open Markdig
 open Markdig.Extensions
 

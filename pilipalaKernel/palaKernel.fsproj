@@ -16,9 +16,12 @@
         <Compile Include="src\util\markdown.fs" />
         <Compile Include="src\util\palaflake.fs" />
         <Compile Include="src\util\uuid.fs" />
+        <Compile Include="src\util\stream.fs" />
         <Compile Include="src\util\yaml.fs" />
         <Compile Include="src\util\json.fs" />
-        <Compile Include="src\util\encoding.fs" />
+        <Compile Include="src\util\encoding\byte.fs" />
+        <Compile Include="src\util\encoding\base64.fs" />
+        <Compile Include="src\util\encoding\hex.fs" />
         <Compile Include="src\util\socket\tcp.fs" />
         <Compile Include="src\util\crypto\rsa.fs" />
         <Compile Include="src\util\crypto\aes.fs" />
@@ -48,12 +51,15 @@
         <Compile Include="src\pilipala\service\prelude.fs" />
         <Compile Include="src\pilipala\service\PalangServ.fs" />
         <Compile Include="src\pilipala\service\VersionServ.fs" />
+        <Compile Include="src\pilipala\service\ShutdownServ.fs" />
         
         <Compile Include="src\pilipala\plugin.fs" />
-        
-        
-        <Compile Include="src\pilipala\builder\fn.fs" />
         <Compile Include="src\pilipala\builder\builder.fs" />
+        <Compile Include="src\pilipala\builder\useConfig.fs" />
+        <Compile Include="src\pilipala\builder\usePluginSet.fs" />
+        <Compile Include="src\pilipala\builder\useAuth.fs" />
+        <Compile Include="src\pilipala\builder\useLog.fs" />
+        <Compile Include="src\pilipala\builder\useService.fs" />
        
         <Compile Include="src\assembly.fs" />
     </ItemGroup>
@@ -72,6 +78,9 @@
       </Reference>
       <Reference Include="fsharper, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null">
         <HintPath>..\..\fsharper\bin\Debug\net6.0\fsharper.dll</HintPath>
+      </Reference>
+      <Reference Include="palaflake, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null">
+        <HintPath>..\..\palaflake\impl\fs\palaflake\bin\Debug\net6.0\palaflake.dll</HintPath>
       </Reference>
       <Reference Include="WebSocketer, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null">
         <HintPath>..\..\WebsSocketer\bin\Debug\net6.0\WebSocketer.dll</HintPath>

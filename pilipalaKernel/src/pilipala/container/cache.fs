@@ -2,7 +2,7 @@ module internal pilipala.container.cache
 
 open System.Collections.Generic
 open fsharper.op
-open fsharper.types
+open fsharper.typ
 open pilipala.util
 
 

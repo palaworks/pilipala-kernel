@@ -6,7 +6,7 @@ open System.Reflection
 open System.Text.RegularExpressions
 
 open fsharper.op
-open fsharper.types
+open fsharper.typ
 
 let getPluginInfos dir =
     DirectoryInfo(dir).GetFileSystemInfos().toList ()

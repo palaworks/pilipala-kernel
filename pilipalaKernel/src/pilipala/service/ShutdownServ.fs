@@ -6,11 +6,10 @@ open pilipala.auth.channel
 open pilipala.palang.analyse
 open pilipala.service
 
-/// 版本信息服务
-[<PubServ>]
-[<Serv("version")>]
-type VersionServ(chan: ServChannel, sl: ServLog) =
+/// 关闭噼里啪啦服务
+[<PriServ>]
+[<Serv("shutdown")>]
+type ShutdownServ() =
     member self.start() =
-
-        sl.log "v1.0.0"
-        chan.sendMsg "v1.0.0"
+        //TODO 等待实现
+        ()

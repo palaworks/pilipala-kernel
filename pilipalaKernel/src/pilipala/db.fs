@@ -2,8 +2,8 @@ module internal pilipala.db
 
 open DbManaged
 open DbManaged.PgSql
-open fsharper.types
-open fsharper.types.Pipe.GenericPipable
+open fsharper.typ
+open fsharper.typ.Pipe.GenericPipable
 
 
 /// 数据库连接信息

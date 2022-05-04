@@ -5,7 +5,7 @@ open System.Collections.Generic
 open pilipala.auth
 open System.Text.RegularExpressions
 open fsharper.op
-open fsharper.types
+open fsharper.typ
 open pilipala.container
 open pilipala.container.post
 open pilipala.container.comment

@@ -1,8 +1,8 @@
 ﻿module pilipala.container.tag
 
 open fsharper.op
-open fsharper.types
-open fsharper.types.Ord
+open fsharper.typ
+open fsharper.typ.Ord
 open pilipala
 open pilipala.container.post
 open DbManaged.PgSql.ext.String

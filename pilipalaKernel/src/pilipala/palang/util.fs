@@ -1,7 +1,7 @@
 module pilipala.palang.util
 
 open System.Collections.Generic 
-open fsharper.types 
+open fsharper.typ 
 
 let isAlt (pattern: string) =
     pattern.StartsWith('<') && pattern.EndsWith('>')

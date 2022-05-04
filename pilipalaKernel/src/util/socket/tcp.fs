@@ -3,7 +3,7 @@
 open System
 open System.Net
 open System.Net.Sockets
-open fsharper.types.Array
+open fsharper.typ.Array
 open pilipala.util.encoding
 
 /// 与指定ip端口建立tcp连接

@@ -7,11 +7,11 @@ open pilipala.palang.analyse
 open pilipala.service
 
 /// palang语言服务
-[<PriServ>]//TODO 能否强制多特性组合？
+[<PriServ>] //TODO 能否强制多特性组合？
 [<Serv("palang")>]
-type PalangServ(sl: ServLog, chan: ServChannel) =
+type PalangServ(chan: ServChannel, sl: ServLog) =
     member self.start() =
-        
+
         while true do //持续执行命令
             let cmd = chan.recvMsg ()
             sl.log $"command received < {cmd}"

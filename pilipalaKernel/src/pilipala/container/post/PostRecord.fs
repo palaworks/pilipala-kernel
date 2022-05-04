@@ -2,8 +2,8 @@
 
 open System
 open fsharper.op
-open fsharper.types
-open fsharper.types.Ord
+open fsharper.typ
+open fsharper.typ.Ord
 open pilipala
 open pilipala.util
 open pilipala.util.hash
