@@ -46,8 +46,6 @@ let create () =
                     match f <| eq 1 with
                     | 1 -> Ok uuid
                     | _ -> Err FailedToCreateToken
-            |> Some
-    |> unwrap
 
 /// 抹除凭据
 let erase (token: string) =
@@ -61,8 +59,6 @@ let erase (token: string) =
                     match f <| eq 1 with
                     | 1 -> Ok()
                     | _ -> Err FailedToEraseToken
-            |> Some
-    |> unwrap
 
 /// 检查token是否合法
 let check (token: string) =
@@ -92,6 +88,3 @@ let check (token: string) =
                                 | 1 -> Ok true
                                 | __ -> Err FailedToUpdateTokenAtime
                     | _ -> Err DuplicateToken
-            |> Some
-
-    |> unwrap

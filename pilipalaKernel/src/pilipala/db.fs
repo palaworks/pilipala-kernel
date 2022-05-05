@@ -5,23 +5,24 @@ open DbManaged.PgSql
 open fsharper.typ
 open fsharper.typ.Pipe.GenericPipable
 
+/// 数据库未初始化异常
+exception DbNotInitException
 
 /// 数据库连接信息
-let mutable connMsg: Option'<DbConnMsg> = None
+let mutable connMsg: Result'<DbConnMsg, exn> = Err DbNotInitException
 
 /// 连接池大小
-let mutable private poolSize: Option'<uint> = None
-
+let mutable private poolSize: Result'<uint, exn> = Err DbNotInitException
 
 /// 库名
-let mutable private database: Option'<string> = None
+let mutable private database: Result'<string, exn> = Err DbNotInitException
 
 /// 表集合
-let mutable tables: Option'<{| record: string
+let mutable tables: Result'<{| record: string
                                meta: string
                                comment: string
-                               token: string |}> =
-    None
+                               token: string |}, exn> =
+    Err DbNotInitException
 
 /// 管理器
 let mutable private managed: Option'<IDbManaged> = None
@@ -32,20 +33,20 @@ let private initConfig () =
     let tableNode = databaseNode.["table"] //database.table节点
 
     connMsg <-
-        Some
+        Ok
         <| { Host = databaseNode.Value "host"
              Port = databaseNode.Value "port"
              User = databaseNode.Value "user"
              Password = databaseNode.Value "password" }
 
-    poolSize <- Some <| databaseNode.Value "poolSize"
+    poolSize <- Ok <| databaseNode.Value "poolSize"
 
     //TODO：配置文件应从database节点独立出schema节点
 
-    database <- Some <| databaseNode.Value "database"
+    database <- Ok <| databaseNode.Value "database"
 
     tables <-
-        Some
+        Ok
         <| {| record = tableNode.Value "record"
               meta = tableNode.Value "meta"
               comment = tableNode.Value "comment"

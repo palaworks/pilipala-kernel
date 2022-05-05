@@ -9,6 +9,7 @@ open pilipala.service
 open System.Net.Sockets
 open System.Security.Cryptography
 open WebSocketer.Type
+open pilipala.log
 open pilipala.util.uuid
 open pilipala.auth.token
 open pilipala.util.crypto
@@ -19,7 +20,7 @@ type palaBuilder with
 
     /// 使用认证
     member self.useAuth port =
-        use sw = new StreamWriter(self.genLogStream ())
+        use sw = new StreamWriter(genLogStream ())
 
         let log (text: string) =
             sw.WriteLine $"pilipala auth service : {text}"

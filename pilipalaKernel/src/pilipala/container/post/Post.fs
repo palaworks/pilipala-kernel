@@ -41,7 +41,7 @@ type Post private (meta: PostMeta, record: PostRecord) =
         meta.atime |> atimeRenderPipeline.build().invoke
 
     /// 访问计数
-    member self.siew =
+    member self.view =
         meta.view |> viewRenderPipeline.build().invoke
     /// 星星计数
     member self.star =

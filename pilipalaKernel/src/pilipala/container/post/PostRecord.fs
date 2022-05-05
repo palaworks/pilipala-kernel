@@ -10,14 +10,12 @@ open pilipala.util.hash
 open pilipala.container
 open DbManaged.PgSql.ext.String
 
-
 //映射型容器
 //对该容器的更改会立即反映到持久化层次
-type internal PostRecord(recordId: uint64) =
+type PostRecord internal (recordId: uint64) =
 
     let fromCache key = cache.get "record" recordId key
     let intoCache key value = cache.set "record" recordId key value
-
 
     /// 取字段值
     member inline private this.get key =
@@ -40,12 +38,9 @@ type internal PostRecord(recordId: uint64) =
                             let value = r.unwrap ()
 
                             intoCache key value //写入缓存并返回
-                            value |> Ok
+                            value |> coerce |> Ok
 
-                    |> unwrap
-                    |> coerce
-                    |> Some
-            |> unwrap
+        |> unwrap
 
     /// 写字段值
     member inline private this.set key value =
@@ -61,7 +56,6 @@ type internal PostRecord(recordId: uint64) =
                         match f <| eq 1 with
                         | 1 -> Ok <| intoCache key value
                         | _ -> Err FailedToWriteCacheException
-                |> Some
         |> unwrap
 
 
@@ -70,23 +64,23 @@ type internal PostRecord(recordId: uint64) =
     /// 封面
     member this.cover
         with get (): string = this.get "cover"
-        and set (v: string) = this.set "cover" v |> unwrap
+        and set (v: string) = this.set "cover" v
     /// 标题
     member this.title
         with get (): string = this.get "title"
-        and set (v: string) = this.set "title" v |> unwrap
+        and set (v: string) = this.set "title" v
     /// 概述
     member this.summary
         with get (): string = this.get "summary"
-        and set (v: string) = this.set "summary" v |> unwrap
+        and set (v: string) = this.set "summary" v
     /// 正文
     member this.body
         with get (): string = this.get "body"
-        and set (v: string) = this.set "body" v |> unwrap
+        and set (v: string) = this.set "body" v
     /// 修改时间
     member this.mtime
         with get (): DateTime = this.get "mtime"
-        and set (v: DateTime) = this.set "mtime" v |> unwrap
+        and set (v: DateTime) = this.set "mtime" v
 
 type PostRecord with
 
@@ -130,8 +124,6 @@ type PostRecord with
                         match f <| eq 1 with
                         | 1 -> Ok recordId
                         | _ -> Err FailedToCreateRecordException
-                |> Some
-        |> unwrap
 
     /// 抹除文章记录
     static member erase(recordId: uint64) =
@@ -145,5 +137,3 @@ type PostRecord with
                         match f <| eq 1 with
                         | 1 -> Ok()
                         | _ -> Err FailedToEraseRecordException
-                |> Some
-        |> unwrap

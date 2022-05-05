@@ -9,15 +9,12 @@ open pilipala.util
 open pilipala.container
 open DbManaged.PgSql.ext.String
 
-
 //映射容器
 //对该容器的更改会立即反映到持久化层次
-type internal PostMeta(metaId: uint64) =
-    //该数据结构用于存放文章元数据
+type PostMeta internal (metaId: uint64) =
 
     let fromCache key = cache.get "meta" metaId key
     let intoCache key value = cache.set "meta" metaId key value
-
 
     /// 取字段值
     member inline private this.get key =
@@ -38,11 +35,9 @@ type internal PostMeta(metaId: uint64) =
                             let value = r.unwrap ()
 
                             intoCache key value //写入缓存并返回
-                            value |> Ok
-                    |> unwrap
-                    |> coerce
-                    |> Some
-            |> unwrap
+                            value |> coerce |> Ok
+        |> unwrap
+
 
     /// 写字段值
     member inline private this.set key value =
@@ -58,41 +53,37 @@ type internal PostMeta(metaId: uint64) =
                         match f <| eq 1 with
                         | 1 -> Ok <| intoCache key value
                         | _ -> Err FailedToWriteCacheException
-                |> Some
         |> unwrap
-
 
     /// 元id
     member this.metaId = metaId
     /// 上级元id
     member this.superMetaId
         with get (): uint64 = this.get "baseMetaId"
-        and set (v: uint64) = this.set "baseMetaId" v |> unwrap
+        and set (v: uint64) = this.set "baseMetaId" v
     /// 当前记录id
     member this.currRecordId
         with get (): uint64 = this.get "bindRecordId"
-        and set (v: uint64) = this.set "bindRecordId" v |> unwrap
+        and set (v: uint64) = this.set "bindRecordId" v
     /// 创建时间
     member this.ctime
         with get (): DateTime = this.get "ctime"
-        and set (v: DateTime) = this.set "ctime" v |> unwrap
+        and set (v: DateTime) = this.set "ctime" v
     /// 访问时间
     member this.atime
         with get (): DateTime = this.get "atime"
-        and set (v: DateTime) = this.set "atime" v |> unwrap
+        and set (v: DateTime) = this.set "atime" v
     /// 访问数
     member this.view
         with get (): uint32 = this.get "view"
-        and set (v: uint32) = this.set "view" v |> unwrap
+        and set (v: uint32) = this.set "view" v
     /// 星星数
     member this.star
         with get (): uint32 = this.get "star"
-        and set (v: uint32) = this.set "star" v |> unwrap
+        and set (v: uint32) = this.set "star" v
 
 type PostMeta with
 
-    /// 创建文章元
-    /// 返回文章元id
     static member create() =
         db.tables
         >>= fun ts ->
@@ -120,15 +111,13 @@ type PostMeta with
 
                 db.Managed().executeAny (sql, paras)
                 >>= fun f ->
-
                         match f <| eq 1 with
                         | 1 -> Ok metaId
                         | _ -> Err FailedToCreateMetaException
-                |> Some
-        |> unwrap
+
 
     /// 抹除文章元
-    static member erase(metaId: uint64) =
+    static member erase(metaId: uint64) : Result'<unit, exn> =
         db.tables
         >>= fun ts ->
                 let table = ts.meta
@@ -139,5 +128,3 @@ type PostMeta with
                         match f <| eq 1 with
                         | 1 -> Ok()
                         | _ -> Err FailedToEraseMetaException
-                |> Some
-        |> unwrap

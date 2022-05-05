@@ -11,10 +11,9 @@ open pilipala.container.post
 open DbManaged.PgSql.ext.String
 
 
-type Comment(commentId: uint64) =
+type Comment internal (commentId: uint64) =
 
     let fromCache key = cache.get "comment" commentId key
-
     let intoCache key value = cache.set "comment" commentId key value
 
     /// 取字段值
@@ -36,14 +35,10 @@ type Comment(commentId: uint64) =
                             let value = r.unwrap ()
 
                             intoCache key value //写入缓存并返回
-                            value |> Ok
-
-                    |> unwrap
-                    |> coerce
-                    |> Some
-            |> unwrap
+                            value |> coerce |> Ok
 
 
+        |> unwrap
 
     /// 写字段值
     member inline private this.set key value =
@@ -59,7 +54,7 @@ type Comment(commentId: uint64) =
                         match f <| eq 1 with
                         | 1 -> Ok <| intoCache key value
                         | _ -> Err FailedToWriteCacheException
-                |> Some
+
         |> unwrap
 
     /// 评论id
@@ -67,31 +62,31 @@ type Comment(commentId: uint64) =
     /// 所属元id
     member this.ownerMetaId
         with get (): uint64 = this.get "ownerMetaId"
-        and set (v: uint64) = this.set "ownerMetaId" v |> unwrap
+        and set (v: uint64) = this.set "ownerMetaId" v
     /// 回复到
     member this.replyTo
         with get (): uint64 = this.get "replyTo"
-        and set (v: uint64) = this.set "replyTo" v |> unwrap
+        and set (v: uint64) = this.set "replyTo" v
     /// 昵称
     member this.nick
         with get (): string = this.get "nick"
-        and set (v: string) = this.set "nick" v |> unwrap
+        and set (v: string) = this.set "nick" v
     /// 内容
     member this.content
         with get (): string = this.get "content"
-        and set (v: string) = this.set "content" v |> unwrap
+        and set (v: string) = this.set "content" v
     /// 电子邮箱
     member this.email
         with get (): string = this.get "email"
-        and set (v: string) = this.set "email" v |> unwrap
+        and set (v: string) = this.set "email" v
     /// 站点
     member this.site
         with get (): string = this.get "site"
-        and set (v: string) = this.set "site" v |> unwrap
+        and set (v: string) = this.set "site" v
     /// 创建时间
     member this.ctime
         with get (): DateTime = this.get "ctime"
-        and set (v: DateTime) = this.set "ctime" v |> unwrap
+        and set (v: DateTime) = this.set "ctime" v
 
 type public Comment with
 
@@ -127,8 +122,7 @@ type public Comment with
                         match f <| eq 1 with
                         | 1 -> Ok commentId
                         | _ -> Err FailedToCreateCommentException
-                |> Some
-        |> unwrap
+
 
     /// 回收评论
     static member recycle(commentId: uint64) =
@@ -142,8 +136,7 @@ type public Comment with
 
                 db.Managed().executeUpdate (table, set, where)
                 >>= fun f -> eq 1 |> f |> ignore |> Ok
-                |> Some
-        |> unwrap
+
 
 
     /// 抹除评论
@@ -158,8 +151,7 @@ type public Comment with
                         match f <| eq 1 with
                         | 1 -> Ok()
                         | _ -> Err FailedToEraseCommentException
-                |> Some
-        |> unwrap
+
 
 module ext =
 
@@ -180,12 +172,9 @@ module ext =
                     let paras: (string * obj) list = [ ("ownerMetaId", self.id) ]
 
                     db.Managed().getCol (sql, 0u, paras)
-                    >>= fun rows ->
+                    >>= fun x ->
 
-                            match rows with
-                            | None -> Ok []
-                            | Some rows' ->
-                                Ok
-                                <| map (fun (r: obj) -> Comment(downcast r)) rows'
-                    |> unwrap
-                    |> Some
+                            match x with
+                            | None -> []
+                            | Some rows -> map (fun (r: obj) -> Comment(downcast r)) rows
+                            |> Ok

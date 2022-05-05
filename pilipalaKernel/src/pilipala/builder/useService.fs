@@ -3,13 +3,14 @@ module pilipala.builder.useService
 
 open fsharper.typ
 open fsharper.typ.Pipe.Pipable
+open pilipala.log
 open pilipala.service
 
 type palaBuilder with
 
     /// 使用服务，采用默认日志流
     member self.useService<'s>() =
-        let func _ = regService<'s> self.genLogStream
+        let func _ = regService<'s> genLogStream
 
         self.buildPipeline <- Pipe(func = func) |> self.buildPipeline.import
         self
