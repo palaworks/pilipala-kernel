@@ -3,6 +3,7 @@
 open fsharper.op
 open fsharper.typ
 open fsharper.typ.Ord
+open fsharper.op.Alias
 open pilipala
 open pilipala.container.post
 open DbManaged.PgSql.ext.String
@@ -21,7 +22,7 @@ exception FailedToDetag
 /// 可以根据该列表过滤出不同的文章
 
 /// 标签别名
-type Tag = uint64 list
+type Tag = u64 list
 
 /// 创建标签
 /// 返回被创建标签名
@@ -51,7 +52,7 @@ let erase (tagName: string) =
             | _ -> Err FailedToEraseTag
 
 /// 为文章元加标签
-let tagTo (metaId: uint64) (tagName: string) =
+let tagTo (metaId: u64) (tagName: string) =
 
     let sql =
         $"INSERT INTO tag_{tagName} (metaId) VALUES (<metaId>)"
@@ -66,7 +67,7 @@ let tagTo (metaId: uint64) (tagName: string) =
             | _ -> Err FailedToTag
 
 /// 为文章元去除标签
-let detagFor (metaId: uint64) (tagName: string) =
+let detagFor (metaId: u64) (tagName: string) =
 
     db.Managed().executeDelete $"tag_{tagName}" ("metaId", metaId)
     >>= fun f ->
@@ -83,7 +84,7 @@ let getTag (tagName: string) =
     >>= fun r ->
             Ok
             <| match r with
-               | Some list -> [ for x in list -> x :?> uint64 ]
+               | Some list -> [ for x in list -> x :?> u64 ]
                | None -> []
 
 /// 过滤出是 tag 的文章

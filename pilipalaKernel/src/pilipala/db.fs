@@ -25,7 +25,7 @@ let mutable tables: Result'<{| record: string
     Err DbNotInitException
 
 /// 管理器
-let mutable private managed: Option'<IDbManaged> = None
+let mutable private managed: Result'<IDbManaged, exn> = Err DbNotInitException
 
 let private initConfig () =
     let config = config.JsonConfig()
@@ -53,13 +53,13 @@ let private initConfig () =
               token = tableNode.Value "token" |}
 
 
-let private schemaPipeline =
+let private pipeline =
 
     let fetch () : IDbManaged =
         let _managed =
             PgSqlManaged(connMsg.unwrap (), database.unwrap (), poolSize.unwrap ())
 
-        managed <- Some <| _managed
+        managed <- Ok <| _managed
 
         _managed
 
@@ -74,4 +74,4 @@ let private schemaPipeline =
         .build ()
 
 
-let Managed = schemaPipeline.invoke
+let Managed = pipeline.invoke

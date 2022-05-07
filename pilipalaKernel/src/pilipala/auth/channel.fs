@@ -23,13 +23,13 @@ type PriChannel(s: WebSocket, sessionKey: string) =
 
     interface ServChannel with
 
-        member this.sendMsg message =
+        member self.sendMsg message =
             message
             |> aes.encrypt sessionKeyBytes [||] CipherMode.ECB PaddingMode.Zeros
             |> s.send
 
         /// 此方法阻塞当前线程
-        member this.recvMsg() =
+        member self.recvMsg() =
             s.recv ()
             |> aes.decrypt sessionKeyBytes [||] CipherMode.ECB PaddingMode.Zeros
 
@@ -38,6 +38,6 @@ type PriChannel(s: WebSocket, sessionKey: string) =
 type PubChannel(s: WebSocket) =
 
     interface ServChannel with
-        member this.sendMsg message = message |> s.send
+        member self.sendMsg message = message |> s.send
 
-        member this.recvMsg() = s.recv ()
+        member self.recvMsg() = s.recv ()

@@ -3,11 +3,12 @@
 open System
 open System.Net
 open System.Net.Sockets
+open fsharper.op.Alias
 open fsharper.typ.Array
 open pilipala.util.encoding
 
 /// 与指定ip端口建立tcp连接
-let connect (ip: string) (port: uint16) =
+let connect (ip: string) (port: u16) =
     let socket =
         new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp)
 
@@ -22,7 +23,7 @@ let connect (ip: string) (port: uint16) =
 /// 持续监听本机指定端口的tcp连接
 /// 闭包 f 生命期结束后其连接会被自动销毁
 /// 此函数会永久性阻塞当前线程
-let listen (port: uint16) f =
+let listen (port: u16) f =
     let listenSocket =
         new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp)
 
@@ -52,7 +53,7 @@ type Socket with
         | sentLen -> self.sendBytes bytes.[sentLen..^0] //继续发送剩余部分
 
     /// 接收指定长度字节数据
-    member self.recvBytes(n: uint32) =
+    member self.recvBytes(n: u32) =
 
         let rec fetch buf start remain =
             match self.Receive(buf, start, remain, SocketFlags.None) with
@@ -60,7 +61,7 @@ type Socket with
                 buf
             | readLen -> fetch buf readLen (remain - readLen)
 
-        let n' = min (uint32 Int32.MaxValue) n |> int //防止溢出
+        let n' = min (u32 Int32.MaxValue) n |> int //防止溢出
 
         fetch (Array.zeroCreate<byte> n') 0 n'
 

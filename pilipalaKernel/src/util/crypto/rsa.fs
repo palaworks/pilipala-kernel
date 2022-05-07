@@ -3,6 +3,7 @@
 open System
 open System.Text
 open System.Security.Cryptography
+open fsharper.op.Alias
 open pilipala.util.encoding
 
 /// 加密明文
@@ -26,7 +27,7 @@ let decrypt (priKey: string) (paddingMode: RSAEncryptionPadding) (cipherText: st
     plainBytes |> Encoding.UTF8.GetString
 
 /// 生成RSA密钥对
-let genRsaKeyPair (keySize: uint16) =
+let genRsaKeyPair (keySize: u16) =
     let csp =
         new RSACryptoServiceProvider(int keySize)
 

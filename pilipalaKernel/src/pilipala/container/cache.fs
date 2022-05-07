@@ -2,6 +2,7 @@ module internal pilipala.container.cache
 
 open System.Collections.Generic
 open fsharper.op
+open fsharper.op.Alias
 open fsharper.typ
 open pilipala.util
 
@@ -14,7 +15,7 @@ open pilipala.util
 //老旧的缓存在超出容量限制后将被清除
 
 let private cache =
-    Dictionary<string * uint64 * string, uint64 * obj>()
+    Dictionary<string * u64 * string, u64 * obj>()
 
 /// 取字段值
 let inline get pool id key =
