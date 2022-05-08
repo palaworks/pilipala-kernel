@@ -6,14 +6,15 @@ open fsharper.typ
 open fsharper.typ.Ord
 open fsharper.op.Alias
 open pilipala
-open pilipala.util
+open pilipala.taskQueue
 open pilipala.container
 open DbManaged.PgSql.ext.String
 
 type comment_entry internal (commentId: u64) =
 
-    let fromCache key = cache.get "comment" commentId key
-    let intoCache key value = cache.set "comment" commentId key value
+    let fromCache key = cache.get commentId key
+    let intoCache key value = cache.set commentId key value
+    let rmCache key = cache.rm commentId key
 
     /// 取字段值
     member inline private self.get key =
@@ -33,26 +34,32 @@ type comment_entry internal (commentId: u64) =
                     >>= fun r ->
                             let value = r.unwrap ()
 
-                            intoCache key value //写入缓存并返回
+                            //写入缓存并返回
+                            intoCache key value
                             value |> coerce |> Ok
         |> unwrap
 
     /// 写字段值
     member inline private self.set key value =
-        db.tables
-        >>= fun ts ->
-                let table = ts.comment
+        intoCache key value
 
-                (table, (key, value), ("commentId", commentId))
-                |> db.Managed().executeUpdate
-                >>= fun f ->
+        fun _ ->
+            db.tables
+            >>= fun ts ->
+                    let table = ts.comment
 
-                        //当更改记录数为 1 时才会提交事务并追加到缓存头
-                        match f <| eq 1 with
-                        | 1 -> Ok <| intoCache key value
-                        | _ -> Err FailedToWriteCacheException
+                    (table, (key, value), ("commentId", commentId))
+                    |> db.Managed().executeUpdate
+                    >>= fun f ->
 
-        |> unwrap
+                            //当更改记录数为 1 时才会提交事务并追加到缓存头
+                            match f <| eq 1 with
+                            | 1 -> Ok()
+                            | _ ->
+                                rmCache key
+                                Err FailedToWriteCacheException
+        |> queueTask
+
 
     /// 评论id
     member self.commentId = commentId

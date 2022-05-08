@@ -7,4 +7,7 @@
 	<s:String x:Key="/Default/Environment/AssemblyExplorer/XmlDocument/@EntryValue">&lt;AssemblyExplorer&gt;
   &lt;Assembly Path="/home/thaumy/repo/WebsSocketer/bin/Debug/net6.0/WebSocketer.dll" /&gt;
   &lt;Assembly Path="/home/thaumy/.nuget/packages/google.protobuf/3.14.0/lib/netstandard2.0/Google.Protobuf.dll" /&gt;
-&lt;/AssemblyExplorer&gt;</s:String></wpf:ResourceDictionary>
+&lt;/AssemblyExplorer&gt;</s:String>
+	<s:String x:Key="/Default/Environment/UnitTesting/UnitTestSessionStore/Sessions/=94bbac5b_002D3e69_002D4e57_002Dbe14_002Dc02de19bc14a/@EntryIndexedValue">&lt;SessionState ContinuousTestingMode="0" Name="All tests from Solution" xmlns="urn:schemas-jetbrains-com:jetbrains-ut-session"&gt;
+  &lt;Solution /&gt;
+&lt;/SessionState&gt;</s:String></wpf:ResourceDictionary>

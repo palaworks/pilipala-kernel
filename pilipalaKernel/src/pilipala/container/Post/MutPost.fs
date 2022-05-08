@@ -29,28 +29,34 @@ type MutPost internal (postId: u64) =
     let record_entry =
         post_record_entry (meta_entry.bindRecordId)
 
+    /// 文章id
+    /// 此项目不可自定义，由pilipala托管
     member self.postId = postId
 
     /// 创建时间
+    /// 此时间不可自定义，由pilipala托管
     member self.ctime
         with get (): DateTime = meta_entry.ctime
         and set (v: DateTime) = meta_entry.ctime <- v
-    /// 访问时间
+        
+    /// 访问时间 
     member self.atime
         with get (): DateTime = meta_entry.atime
         and set (v: DateTime) = meta_entry.atime <- v
+
     /// 修改时间
-    member self.mtime
-        with get (): DateTime = record_entry.mtime
-        and set (v: DateTime) = record_entry.mtime <- v
-    /// 访问数
+    /// 此时间不可自定义，由pilipala托管
+    member self.mtime = record_entry.mtime
+
+    /// 访问数 
     member self.view
         with get (): u32 = meta_entry.view
         and set (v: u32) = meta_entry.view <- v
-    /// 星星数
+    /// 星星数 
     member self.star
         with get (): u32 = meta_entry.star
         and set (v: u32) = meta_entry.star <- v
+        
     /// 封面
     member self.cover
         with get (): string = record_entry.cover

@@ -28,6 +28,7 @@
         
         <Compile Include="src\pilipala\config.fs" />
         <Compile Include="src\pilipala\db.fs" />
+        <Compile Include="src\pilipala\taskQueue.fs" />
 
         <Compile Include="src\pilipala\pipeline\post.fs" />
 
@@ -69,8 +70,7 @@
         <Compile Include="src\pilipala\builder\useAuth.fs" />
         <Compile Include="src\pilipala\builder\useLog.fs" />
         <Compile Include="src\pilipala\builder\useService.fs" />
-        <Compile Include="src\pilipala\builder\usePostCache.fs" />
-        <Compile Include="src\pilipala\builder\useCommentCache.fs" />
+        <Compile Include="src\pilipala\builder\useDurabilityQueue.fs" />
         
        
         <Compile Include="src\assembly.fs" />

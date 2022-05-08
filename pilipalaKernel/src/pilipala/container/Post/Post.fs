@@ -47,4 +47,4 @@ type Post(postId: u64) =
     /// 正文
     member self.body = mut.body
 
-    member self.asMut() = ()
+    member self.asMut() = mut

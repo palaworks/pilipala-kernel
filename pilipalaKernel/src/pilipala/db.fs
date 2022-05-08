@@ -31,9 +31,13 @@ let private initConfig () =
     let config = config.JsonConfig()
     let databaseNode = config.["database"] //database节点
     let tableNode = databaseNode.["table"] //database.table节点
-
+    
     connMsg <-
         Ok
+  
+  
+  
+  
         <| { Host = databaseNode.Value "host"
              Port = databaseNode.Value "port"
              User = databaseNode.Value "user"

@@ -27,6 +27,7 @@ type MutComment internal (commentId: u64) =
     let entry = comment_entry (commentId)
 
     /// 评论id
+    /// 此项目不可自定义，由pilipala托管
     member self.commentId = commentId
     /// 所属元id
     member self.ownerMetaId
@@ -52,7 +53,7 @@ type MutComment internal (commentId: u64) =
     member self.site
         with get (): string = entry.site
         and set (v: string) = entry.site <- v
+        
     /// 创建时间
-    member self.ctime
-        with get (): DateTime = entry.ctime
-        and set (v: DateTime) = entry.ctime <- v
+    /// 此项目不可自定义，由pilipala托管
+    member self.ctime = entry.ctime
