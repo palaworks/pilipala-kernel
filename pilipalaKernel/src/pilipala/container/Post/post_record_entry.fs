@@ -7,81 +7,34 @@ open fsharper.typ.Ord
 open fsharper.op.Alias
 open pilipala
 open pilipala.taskQueue
-open pilipala.util.hash
+open pilipala.container.cache
 open pilipala.container
 open DbManaged.PgSql.ext.String
 
 type post_record_entry internal (recordId: u64) =
-
-    let fromCache key = cache.get recordId key
-    let intoCache key value = cache.set recordId key value
-    let rmCache key = cache.rm recordId key  
-
-    /// 取字段值
-    member inline private self.get key =
-        (fromCache key).unwrapOr
-        <| fun _ ->
-            db.tables
-            >>= fun ts ->
-                    let key = ""
-                    let table = ts.record
-
-                    let sql =
-                        $"SELECT {key} FROM {table} WHERE recordId = <recordId>"
-                        |> normalizeSql
-
-                    let paras: (string * obj) list = [ ("recordId", recordId) ]
-
-                    db.Managed().getFstVal (sql, paras)
-                    >>= fun r ->
-                            let value = r.unwrap ()
-
-                            //写入缓存并返回
-                            intoCache key value
-                            value |> coerce |> Ok
-        |> unwrap
-
-    /// 写字段值
-    member inline private self.set key value =
-        intoCache key value
-
-        fun _ ->
-            db.tables
-            >>= fun ts ->
-                    let table = ts.record
-
-                    (table, (key, value), ("recordId", recordId))
-                    |> db.Managed().executeUpdate
-                    >>= fun f ->
-
-                            //当更改记录数为 1 时才会提交事务并追加到缓存头
-                            match f <| eq 1 with
-                            | 1 -> Ok()
-                            | _ ->
-                                rmCache key
-                                Err FailedToWriteCacheException
-        |> queueTask
-
+ 
+    let cache =
+        ContainerCacheHandler(db.tables.unwrap().record, "recordId", recordId)
 
     /// 记录id
     member self.recordId = recordId
     /// 封面
     member self.cover
-        with get (): string = self.get "cover"
-        and set (v: string) = self.set "cover" v
+        with get (): string = cache.get "cover"
+        and set (v: string) = cache.set "cover" v
     /// 标题
     member self.title
-        with get (): string = self.get "title"
-        and set (v: string) = self.set "title" v
+        with get (): string = cache.get "title"
+        and set (v: string) = cache.set "title" v
     /// 概述
     member self.summary
-        with get (): string = self.get "summary"
-        and set (v: string) = self.set "summary" v
+        with get (): string = cache.get "summary"
+        and set (v: string) = cache.set "summary" v
     /// 正文
     member self.body
-        with get (): string = self.get "body"
-        and set (v: string) = self.set "body" v
+        with get (): string = cache.get "body"
+        and set (v: string) = cache.set "body" v
     /// 修改时间
     member self.mtime
-        with get (): DateTime = self.get "mtime"
-        and set (v: DateTime) = self.set "mtime" v
+        with get (): DateTime = cache.get "mtime"
+        and set (v: DateTime) = cache.set "mtime" v

@@ -1,8 +1,7 @@
 ﻿namespace pilipala.container
 
-/// 无法写缓存错误
-/// 这可能是由id错误或数据库连接存在问题导致的
-exception FailedToWriteCacheException
+/// 无法同步到数据库错误
+exception FailedToSyncDbException
 
 /// 无法创建文章记录
 exception FailedToCreateRecordException

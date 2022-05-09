@@ -7,7 +7,7 @@ open fsharper.typ.Result'
 let private taskQueue =
     ConcurrentQueue<unit -> Result'<unit, exn>>()
 
-let mutable queueTask = taskQueue.Enqueue
+let mutable queueTask = taskQueue.Enqueue //TODO 若不启用持久化队列，可从此处拦截
 
 let forceLeftQueuedTask () =
     queueTask <- fun f -> f () |> ignore //拦截请求
