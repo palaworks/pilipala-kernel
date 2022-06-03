@@ -4,6 +4,10 @@ open System.Threading.Tasks
 open System.Collections.Concurrent
 open fsharper.typ.Result'
 
+//TODO
+//此处的任务队列用于实现pilipala总体的负载均衡
+//持久化队列用于实现数据库访问的负载均衡
+
 let private taskQueue =
     ConcurrentQueue<unit -> Result'<unit, exn>>()
 

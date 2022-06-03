@@ -5,8 +5,11 @@ open fsharper.op
 open fsharper.op.Alias
 open fsharper.typ
 open fsharper.typ.Ord
+open DbManaged
+open DbManaged.PgSql
 open DbManaged.PgSql.ext.String
 open pilipala
+open pilipala.db
 open pilipala.util
 open pilipala.taskQueue
 
@@ -25,13 +28,11 @@ let private cache =
 
 /// 取缓存
 let get id key =
-    let exist, (weight, value) = cache.TryGetValue((id, key))
-
-    if exist then
+    match cache.TryGetValue((id, key)) with
+    | true, (weight, value) ->
         cache.[(id, key)] <- (palaflake.gen (), value) //更新权重
         value |> coerce |> Some
-    else
-        None
+    | _ -> None
 
 /// 写缓存
 let set id key value =
@@ -50,22 +51,19 @@ type ContainerCacheHandler(table, typeName, typeId) =
 
     ///取缓存
     member self.get key =
-        match get typeId key with
-        | Some v -> v
-        | None ->
+        get typeId key |> unwrapOr
+        <| fun _ ->
             let sql =
                 $"SELECT {key} FROM {table} WHERE {typeName} = <{typeName}>"
                 |> normalizeSql
 
             let paras: (string * obj) list = [ (typeName, typeId) ]
 
-            db.Managed().getFstVal (sql, paras)
-            >>= fun r ->
-                    let value = r.unwrap ()
-
+            mkCmd().getFstVal(sql, paras).executeQuery ()
+            >>= fun value ->
                     //写入缓存并返回
                     set typeId key value
-                    value |> Ok
+                    Some value
             |> unwrap
         |> coerce
 
@@ -74,14 +72,15 @@ type ContainerCacheHandler(table, typeName, typeId) =
         set typeId key value //先写入缓存
 
         fun _ ->
-            (table, (key, value), (typeName, typeId))
-            |> db.Managed().executeUpdate
-            >>= fun f ->
-
-                    //当更改记录数为 1 时才会提交事务并追加到缓存头
-                    match f <| eq 1 with
-                    | 1 -> Ok()
-                    | _ ->
-                        rm typeId key //撤回写入（这里作简单化处理，直接清除缓存）
-                        Err FailedToSyncDbException
+            let aff =
+                mkCmd()
+                    .update(table, (key, value), (typeName, typeId))
+                    .whenEq(1)
+                    .executeQuery ()
+            //当更改记录数为 1 时才会提交事务并追加到缓存头
+            if aff |> eq 1 then
+                Ok()
+            else
+                rm typeId key //撤回写入（这里作简单化处理，直接清除缓存）
+                Err FailedToSyncDbException
         |> queueTask

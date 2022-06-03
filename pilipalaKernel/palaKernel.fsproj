@@ -9,94 +9,92 @@
     </PropertyGroup>
 
     <ItemGroup>
-        
-        <Compile Include="src\util\io.fs" />
-        <Compile Include="src\util\hash.fs" />
-        <Compile Include="src\util\html.fs" />
-        <Compile Include="src\util\markdown.fs" />
-        <Compile Include="src\util\palaflake.fs" />
-        <Compile Include="src\util\uuid.fs" />
-        <Compile Include="src\util\stream.fs" />
-        <Compile Include="src\util\yaml.fs" />
-        <Compile Include="src\util\json.fs" />
-        <Compile Include="src\util\encoding\byte.fs" />
-        <Compile Include="src\util\encoding\base64.fs" />
-        <Compile Include="src\util\encoding\hex.fs" />
-        <Compile Include="src\util\socket\tcp.fs" />
-        <Compile Include="src\util\crypto\rsa.fs" />
-        <Compile Include="src\util\crypto\aes.fs" />
-        
-        <Compile Include="src\pilipala\config.fs" />
-        <Compile Include="src\pilipala\db.fs" />
-        <Compile Include="src\pilipala\taskQueue.fs" />
 
-        <Compile Include="src\pilipala\pipeline\post.fs" />
+        <Compile Include="src\util\io.fs"/>
+        <Compile Include="src\util\hash.fs"/>
+        <Compile Include="src\util\html.fs"/>
+        <Compile Include="src\util\markdown.fs"/>
+        <Compile Include="src\util\palaflake.fs"/>
+        <Compile Include="src\util\uuid.fs"/>
+        <Compile Include="src\util\stream.fs"/>
+        <Compile Include="src\util\yaml.fs"/>
+        <Compile Include="src\util\json.fs"/>
+        <Compile Include="src\util\encoding\byte.fs"/>
+        <Compile Include="src\util\encoding\base64.fs"/>
+        <Compile Include="src\util\encoding\hex.fs"/>
+        <Compile Include="src\util\socket\tcp.fs"/>
+        <Compile Include="src\util\crypto\rsa.fs"/>
+        <Compile Include="src\util\crypto\aes.fs"/>
+        <Compile Include="src\pilipala\db.fs"/>
+        <Compile Include="src\pilipala\taskQueue.fs"/>
 
-        <Compile Include="src\pilipala\pipeline\comment.fs" />
-        
-        <Compile Include="src\pilipala\container\err.fs" />
-        <Compile Include="src\pilipala\container\cache.fs" />
-        <Compile Include="src\pilipala\container\Post\post_meta_entry.fs" />
-        <Compile Include="src\pilipala\container\Post\post_record_entry.fs" />
-        <Compile Include="src\pilipala\container\Post\MutPost.fs" />
-        <Compile Include="src\pilipala\container\Post\Post.fs" />
-        <Compile Include="src\pilipala\container\Post\ext.fs" />
-        <Compile Include="src\pilipala\container\Comment\comment_entry.fs" />
-        <Compile Include="src\pilipala\container\Comment\MutComment.fs" />
-        <Compile Include="src\pilipala\container\Comment\Comment.fs" />
-        <Compile Include="src\pilipala\container\Comment\ext.fs" />
-        <Compile Include="src\pilipala\container\op.fs" />
-        
-        <Compile Include="src\pilipala\tag.fs" />
-        
-        <Compile Include="src\pilipala\auth\token.fs" />
-        <Compile Include="src\pilipala\auth\channel.fs" />
+        <Compile Include="src\pilipala\pipeline\post.fs"/>
 
-        <Compile Include="src\pilipala\palang\util.fs" />
-        <Compile Include="src\pilipala\palang\eval.fs" />
-        <Compile Include="src\pilipala\palang\analyse.fs" />
+        <Compile Include="src\pilipala\pipeline\comment.fs"/>
 
-        <Compile Include="src\pilipala\service\prelude.fs" />
-        <Compile Include="src\pilipala\service\PalangServ.fs" />
-        <Compile Include="src\pilipala\service\VersionServ.fs" />
-        <Compile Include="src\pilipala\service\ShutdownServ.fs" />
-        
-        <Compile Include="src\pilipala\plugin.fs" />
-        
-        <Compile Include="src\pilipala\log.fs" />
-        <Compile Include="src\pilipala\builder\builder.fs" />
-        <Compile Include="src\pilipala\builder\useConfig.fs" />
-        <Compile Include="src\pilipala\builder\usePluginSet.fs" />
-        <Compile Include="src\pilipala\builder\useAuth.fs" />
-        <Compile Include="src\pilipala\builder\useLog.fs" />
-        <Compile Include="src\pilipala\builder\useService.fs" />
-        <Compile Include="src\pilipala\builder\useDurabilityQueue.fs" />
-        
-       
-        <Compile Include="src\assembly.fs" />
+        <Compile Include="src\pilipala\container\err.fs"/>
+        <Compile Include="src\pilipala\container\cache.fs"/>
+        <Compile Include="src\pilipala\container\Post\post_meta_entry.fs"/>
+        <Compile Include="src\pilipala\container\Post\post_record_entry.fs"/>
+        <Compile Include="src\pilipala\container\Post\MutPost.fs"/>
+        <Compile Include="src\pilipala\container\Post\Post.fs"/>
+        <Compile Include="src\pilipala\container\Post\ext.fs"/>
+        <Compile Include="src\pilipala\container\Comment\comment_entry.fs"/>
+        <Compile Include="src\pilipala\container\Comment\MutComment.fs"/>
+        <Compile Include="src\pilipala\container\Comment\Comment.fs"/>
+        <Compile Include="src\pilipala\container\Comment\ext.fs"/>
+        <Compile Include="src\pilipala\container\op.fs"/>
+
+        <Compile Include="src\pilipala\tag.fs"/>
+
+        <Compile Include="src\pilipala\auth\token.fs"/>
+        <Compile Include="src\pilipala\auth\channel.fs"/>
+
+        <Compile Include="src\pilipala\palang\util.fs"/>
+        <Compile Include="src\pilipala\palang\eval.fs"/>
+        <Compile Include="src\pilipala\palang\analyse.fs"/>
+
+        <Compile Include="src\pilipala\service\prelude.fs"/>
+        <Compile Include="src\pilipala\service\PalangServ.fs"/>
+        <Compile Include="src\pilipala\service\VersionServ.fs"/>
+        <Compile Include="src\pilipala\service\ShutdownServ.fs"/>
+
+        <Compile Include="src\pilipala\plugin.fs"/>
+
+        <Compile Include="src\pilipala\log.fs"/>
+        <Compile Include="src\pilipala\builder\builder.fs"/>
+        <Compile Include="src\pilipala\builder\useDurabilityQueue.fs"/>
+        <Compile Include="src\pilipala\builder\useDb.fs"/>
+        <Compile Include="src\pilipala\builder\usePlugin.fs"/>
+        <Compile Include="src\pilipala\builder\useAuth.fs"/>
+        <Compile Include="src\pilipala\builder\useLog.fs"/>
+        <Compile Include="src\pilipala\builder\useService.fs"/>
+
+
+        <Compile Include="src\assembly.fs"/>
     </ItemGroup>
 
     <ItemGroup>
-        <PackageReference Include="Markdig" Version="0.26.0" />
-        <PackageReference Include="Microsoft.IdentityModel.Tokens" Version="6.13.1" />
-        <PackageReference Include="MySql.Data" Version="8.0.28" />
-        <PackageReference Include="Newtonsoft.Json" Version="13.0.1" />
-        <PackageReference Include="YamlDotNet" Version="11.2.1" />
+        <PackageReference Include="Markdig" Version="0.26.0"/>
+        <PackageReference Include="Microsoft.IdentityModel.Tokens" Version="6.13.1"/>
+        <PackageReference Include="MySql.Data" Version="8.0.28"/>
+        <PackageReference Include="Newtonsoft.Json" Version="13.0.1"/>
+        <PackageReference Include="YamlDotNet" Version="11.2.1"/>
     </ItemGroup>
 
     <ItemGroup>
-      <Reference Include="DbManaged, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null">
-        <HintPath>..\..\DbManaged\bin\Debug\net6.0\DbManaged.dll</HintPath>
-      </Reference>
-      <Reference Include="fsharper, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null">
-        <HintPath>..\..\fsharper\bin\Debug\net6.0\fsharper.dll</HintPath>
-      </Reference>
-      <Reference Include="palaflake, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null">
-        <HintPath>..\..\palaflake\impl\fs\palaflake\bin\Debug\net6.0\palaflake.dll</HintPath>
-      </Reference>
-      <Reference Include="WebSocketer, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null">
-        <HintPath>..\..\WebsSocketer\bin\Debug\net6.0\WebSocketer.dll</HintPath>
-      </Reference>
+        <Reference Include="DbManaged, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null">
+            <HintPath>..\..\DbManaged\bin\Debug\net6.0\DbManaged.dll</HintPath>
+        </Reference>
+        <Reference Include="fsharper, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null">
+            <HintPath>..\..\fsharper\bin\Debug\net6.0\fsharper.dll</HintPath>
+        </Reference>
+        <Reference Include="palaflake, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null">
+            <HintPath>..\..\palaflake\impl\fs\palaflake\bin\Debug\net6.0\palaflake.dll</HintPath>
+        </Reference>
+        <Reference Include="WebSocketer, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null">
+            <HintPath>..\..\WebsSocketer\bin\Debug\net6.0\WebSocketer.dll</HintPath>
+        </Reference>
     </ItemGroup>
 
 </Project>

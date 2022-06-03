@@ -1,6 +1,5 @@
 ﻿module pilipala.auth.channel
 
-open System
 open System.Security.Cryptography
 open WebSocketer.Type
 open pilipala.util.crypto

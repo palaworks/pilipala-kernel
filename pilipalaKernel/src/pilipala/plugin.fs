@@ -8,6 +8,8 @@ open System.Text.RegularExpressions
 open fsharper.op
 open fsharper.typ
 
+//虽然理论上该实现能够启动同一文件夹下的众多插件（dll），但建议的实践是一个插件（dll）放一个文件夹
+
 let getPluginInfos dir =
     DirectoryInfo(dir).GetFileSystemInfos().toList ()
 
@@ -43,7 +45,7 @@ let rec invokePluginInstances (instances: obj list) =
             x.tryInvoke "inject"
             ())
 
-let invokePlugins pluginDir =
+let invokePlugin pluginDir =
     pluginDir
     |> getPluginInfos
     |> getPluginFullNames

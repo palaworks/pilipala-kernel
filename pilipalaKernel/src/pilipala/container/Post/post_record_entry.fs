@@ -12,9 +12,9 @@ open pilipala.container
 open DbManaged.PgSql.ext.String
 
 type post_record_entry internal (recordId: u64) =
- 
+
     let cache =
-        ContainerCacheHandler(db.tables.unwrap().record, "recordId", recordId)
+        ContainerCacheHandler(db.tables.record, "recordId", recordId)
 
     /// 记录id
     member self.recordId = recordId

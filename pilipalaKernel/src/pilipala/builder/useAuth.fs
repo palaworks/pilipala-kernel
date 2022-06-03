@@ -58,9 +58,10 @@ type palaBuilder with
             let whenCheckFailed () = log "token invalid"
 
             //凭据校验
-            match check token with
-            | Ok true -> whenCheckPass ()
-            | _ -> whenCheckFailed () //凭据无效
+            if check token then
+                whenCheckPass ()
+            else
+                whenCheckFailed () //凭据无效
 
         let whenPubServDo ws handler = ws |> PubChannel |> handler //公共服务，无需验证
 

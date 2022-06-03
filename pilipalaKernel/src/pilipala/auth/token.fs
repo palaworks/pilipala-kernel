@@ -4,10 +4,13 @@ open System
 open fsharper.op
 open fsharper.typ
 open fsharper.typ.Ord
+open DbManaged
+open DbManaged.PgSql
+open DbManaged.PgSql.ext.String
 open pilipala
+open pilipala.db
 open pilipala.util.hash
 open pilipala.util.uuid
-open DbManaged.PgSql.ext.String
 
 /// 无法创建凭据错误
 exception FailedToCreateToken
@@ -22,69 +25,74 @@ exception DuplicateToken
 /// 创建凭据
 /// 返回凭据值
 let create () =
-    db.tables
-    >>= fun ts ->
+    let table = tables.token
 
-            let table = ts.token
-
-            let sql =
-                $"INSERT INTO {table} \
+    let sql =
+        $"INSERT INTO {table} \
                     ( tokenHash,  ctime,  atime) \
                     VALUES \
                     (<tokenHash>,<ctime>,<atime>)"
-                |> normalizeSql
+        |> normalizeSql
 
-            let uuid = gen N
+    let uuid = gen N
 
-            let paras: (string * obj) list =
-                [ ("tokenHash", uuid.sha1)
-                  ("ctime", DateTime.Now)
-                  ("atime", DateTime.Now) ]
+    let paras: (string * obj) list =
+        [ ("tokenHash", uuid.sha1)
+          ("ctime", DateTime.Now)
+          ("atime", DateTime.Now) ]
 
-            db.Managed().executeAny (sql, paras)
-            >>= fun f ->
-                    match f <| eq 1 with
-                    | 1 -> Ok uuid
-                    | _ -> Err FailedToCreateToken
+    mkCmd()
+        .query(sql, paras)
+        .whenEq(1)
+        .executeQuery ()
+    >>= fun aff ->
+            if aff |> eq 2 then
+                Ok uuid
+            else
+                Err FailedToCreateToken
 
 /// 抹除凭据
 let erase (token: string) =
-    db.tables
-    >>= fun ts ->
-            let table = ts.token
-            let tokenHash = token.sha1
+    let table = tables.token
+    let tokenHash = token.sha1
 
-            db.Managed().executeDelete table ("tokenHash", tokenHash)
-            >>= fun f ->
-                    match f <| eq 1 with
-                    | 1 -> Ok()
-                    | _ -> Err FailedToEraseToken
+    mkCmd()
+        .delete(table, "tokenHash", tokenHash)
+        .whenEq(1)
+        .executeQuery ()
+    >>= fun aff ->
+            if aff |> eq 1 then
+                Ok()
+            else
+                Err FailedToEraseToken
 
 /// 检查token是否合法
 let check (token: string) =
-    db.tables
-    >>= fun ts ->
-            let table = ts.token
+    let table = tables.token
 
-            let sql =
-                $"SELECT COUNT(*) FROM {table} WHERE tokenHash = <tokenHash>"
-                |> normalizeSql
+    let sql =
+        $"SELECT COUNT(*) FROM {table} WHERE tokenHash = <tokenHash>"
+        |> normalizeSql
 
-            let tokenHash = token.sha1
+    let tokenHash = token.sha1
 
-            let paras: (string * obj) list = [ ("tokenHash", tokenHash) ]
+    let paras: (string * obj) list = [ ("tokenHash", tokenHash) ]
 
-            db.Managed().getFstVal (sql, paras)
-            >>= fun n ->
-                    //如果查询到的凭据记录唯一
-                    match n with
-                    | Some x when x = 0 -> Ok false
-                    | Some x when coerce x = 1 ->
-                        //更新凭据访问记录
-                        (table, ("atime", DateTime.Now), ("tokenHash", tokenHash))
-                        |> db.Managed().executeUpdate
-                        >>= fun f ->
-                                match f <| eq 1 with
-                                | 1 -> Ok true
-                                | __ -> Err FailedToUpdateTokenAtime
-                    | _ -> Err DuplicateToken
+    mkCmd().getFstVal(sql, paras).executeQuery ()
+    >>= fun n ->
+            match n with
+            | Some x when x = 0 -> Ok false
+            //如果查询到的凭据记录唯一
+            | Some x when coerce x = 1 ->
+                //更新凭据访问记录
+                mkCmd()
+                    .update(table, ("atime", DateTime.Now), ("tokenHash", tokenHash))
+                    .whenEq(1)
+                    .executeQuery ()
+                >>= fun aff ->
+                        if aff |> eq 1 then
+                            Ok true
+                        else
+                            Err FailedToUpdateTokenAtime
+            | _ -> Err DuplicateToken
+    |> unwrap

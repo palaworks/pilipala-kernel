@@ -1,6 +1,6 @@
 ﻿namespace pilipala.container
 
-/// 无法同步到数据库错误
+/// 无法同步到数据库
 exception FailedToSyncDbException
 
 /// 无法创建文章记录
@@ -17,3 +17,6 @@ exception FailedToEraseMetaException
 exception FailedToCreateCommentException
 /// 无法抹除评论
 exception FailedToEraseCommentException
+
+/// 无效Id
+exception InvalidIdException

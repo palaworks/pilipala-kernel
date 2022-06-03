@@ -108,5 +108,5 @@ module fn =
         services.Add(servName, (accessLv, handler))
 
     let getService servName =
-        let exist, h = services.TryGetValue servName
-        if exist then Some h else None
+        services.TryGetValue servName
+        |> Option'.fromOkComma

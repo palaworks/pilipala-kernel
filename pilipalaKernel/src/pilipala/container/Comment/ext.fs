@@ -1,102 +1,121 @@
-module pilipala.container.comment.ext
+[<AutoOpen>]
+module pilipala.container.Comment.ext
 
 open System
 open fsharper.op
 open fsharper.typ
 open fsharper.typ.Ord
 open fsharper.op.Alias
+open DbManaged
+open DbManaged.PgSql
 open DbManaged.PgSql.ext.String
 open pilipala
+open pilipala.db
 open pilipala.util
 open pilipala.container
 open pilipala.container.Post
 
 
-type public Comment with
+type public comment_entry with
 
     /// 创建评论
     /// 返回评论id
     static member create() =
-        db.tables
-        >>= fun ts ->
-                let table = ts.comment
+        let table = tables.comment
 
-                let sql =
-                    $"INSERT INTO {table} \
+        let sql =
+            $"INSERT INTO {table} \
                     ( commentId,  ownerMetaId,  replyTo,  nick,  content,  email,  site,  ctime) \
                     VALUES \
                     (<commentId>,<ownerMetaId>,<replyTo>,<nick>,<content>,<email>,<site>,<ctime>)"
-                    |> normalizeSql
+            |> normalizeSql
 
-                let commentId = palaflake.gen ()
+        let commentId = palaflake.gen ()
 
-                let paras: (string * obj) list =
-                    [ ("commentId", commentId)
-                      ("ownerMetaId", 0)
-                      ("replyTo", 0)
-                      ("nick", "")
-                      ("content", "")
-                      ("email", "")
-                      ("site", "")
-                      ("ctime", DateTime.Now) ]
+        let paras: (string * obj) list =
+            [ ("commentId", commentId)
+              ("ownerMetaId", 0)
+              ("replyTo", 0)
+              ("nick", "")
+              ("content", "")
+              ("email", "")
+              ("site", "")
+              ("ctime", DateTime.Now) ]
 
-                db.Managed().executeAny (sql, paras)
-                >>= fun f ->
-
-                        match f <| eq 1 with
-                        | 1 -> Ok commentId
-                        | _ -> Err FailedToCreateCommentException
+        mkCmd()
+            .query(sql, paras)
+            .whenEq(1)
+            .executeQuery ()
+        >>= fun aff ->
+                if aff |> eq 1 then
+                    Ok commentId
+                else
+                    Err FailedToCreateCommentException
 
 
     /// 回收评论
     static member recycle(commentId: u64) =
-        db.tables
-        >>= fun ts ->
-                let table = ts.comment
+        let table = tables.comment
 
-                //将评论归属到 0 号元下
-                let set = ("ownerMetaId", 0UL)
-                let where = ("commentId", commentId)
+        //将评论归属到 0 号元下
+        let set = ("ownerMetaId", 0UL)
+        let where = ("commentId", commentId)
 
-                db.Managed().executeUpdate (table, set, where)
-                >>= fun f -> eq 1 |> f |> ignore |> Ok
+        mkCmd()
+            .update(table, set, where)
+            .whenEq(1)
+            .executeQuery ()
+        >>= fun aff ->
+                //TODO 应该有个异常
+                aff |> eq 1 |> ignore |> Ok
 
 
 
     /// 抹除评论
     static member erase(commentId: u64) =
-        db.tables
-        >>= fun ts ->
-                let table = ts.comment
+        let table = tables.comment
 
-                db.Managed().executeDelete table ("commentId", commentId)
-                >>= fun f ->
+        mkCmd()
+            .delete(table, "commentId", commentId)
+            .whenEq(1)
+            .executeQuery ()
+        >>= fun aff ->
+                if aff |> eq 1 then
+                    Ok()
+                else
+                    Err FailedToEraseCommentException
 
-                        match f <| eq 1 with
-                        | 1 -> Ok()
-                        | _ -> Err FailedToEraseCommentException
+    /// 检查Id合法性
+    static member check(commentId: u64) =
+        let table = tables.comment
 
+        let sql =
+            $"SELECT COUNT(*) FROM {table} WHERE commentId = <commentId>"
+            |> normalizeSql
+
+        let paras = [ ("commentId", commentId) ]
+
+        let count =
+            mkCmd().getFstVal(sql, paras).executeQuery ()
+            |> unwrap2
+
+        count <> 0
 
 type Post with
 
     /// 评论
     member self.Comments() =
-        db.tables
-        >>= fun ts ->
-                let table = ts.comment
+        let table = tables.comment
 
-                //按时间排序
-                let sql =
-                    $"SELECT commentId FROM {table} WHERE ownerMetaId = <ownerMetaId> \
-                          ORDER BY ctime"
-                    |> normalizeSql
+        //按时间排序
+        let sql =
+            $"SELECT commentId FROM {table} WHERE ownerMetaId = <ownerMetaId> \
+              ORDER BY ctime"
+            |> normalizeSql
 
-                let paras: (string * obj) list = [ ("ownerMetaId", self.postId) ]
+        let paras: (string * obj) list = [ ("ownerMetaId", self.postId) ]
 
-                db.Managed().getCol (sql, 0u, paras)
-                >>= fun x ->
-
-                        match x with
-                        | None -> []
-                        | Some rows -> map (fun (r: obj) -> Comment(downcast r)) rows
-                        |> Ok
+        mkCmd().getFstCol(sql, paras).executeQuery ()
+        >>= fun col ->
+                map (fun (r: obj) -> Comment(downcast r)) col
+                |> Ok

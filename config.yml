@@ -1,16 +1,21 @@
 database:
-  dataSource: localhost
+  host: localhost
   port: 3306
-  
+
   user: root
   password: 65a1561425f744e2b541303f628963f8
 
   poolSize: 32
 
-  schema: pilipala_fs
+  dbName: pilipala_fs
 
-  table: 
+  table:
+    meta: meta
     record: record
-    stack: stack
     comment: comment
     token: token
+
+  syncSpan: 180000
+plugin: ["./plugins/mailssage", "./plugins/llink"]
+auth:
+  port: 20222

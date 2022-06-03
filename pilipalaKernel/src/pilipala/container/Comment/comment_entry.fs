@@ -14,7 +14,7 @@ open DbManaged.PgSql.ext.String
 type comment_entry internal (commentId: u64) =
  
     let cache =
-        ContainerCacheHandler(db.tables.unwrap().comment, "commentId", commentId)
+        ContainerCacheHandler(db.tables.comment, "commentId", commentId)
 
     /// 评论id
     member self.commentId = commentId

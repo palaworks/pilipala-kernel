@@ -1,10 +1,7 @@
 ﻿namespace pilipala.builder
 
-open System
-open System.Collections.Generic
 open System.IO
 open fsharper.typ.Pipe.Pipable
-open pilipala.util.stream
 
 /// 在指定端口启动认证服务
 /// 认证通过后，会以 SecureChannel 为参数执行闭包 f
@@ -15,6 +12,9 @@ type palaBuilder() =
     member val internal buildPipeline = Pipe<unit>() with get, set
     /// 日志流生成器集合
     member val internal logStreamGetterList: (unit -> Stream) list = [] with get, set
+    /// 是否启用持久化队列
+    member val internal useDurabilityQueue: bool = false with get, set
+
     (*
     /// 使用页缓存
     member self.usePageCache() = ()
@@ -24,8 +24,8 @@ type palaBuilder() =
 
     (*
     内核构造顺序：
-    useConfig
-    usePluginSet
+    useDb
+    usePlugin
     useAuth
     useLog
     useLog

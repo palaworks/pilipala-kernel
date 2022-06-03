@@ -7,8 +7,8 @@ open System.Text.RegularExpressions
 open fsharper.op
 open fsharper.typ
 open pilipala.container
-open pilipala.container.post
-open pilipala.container.comment
+open pilipala.container.Post
+open pilipala.container.Comment
 open pilipala.palang
 open pilipala.util.encoding
 open pilipala.palang.util

@@ -1,27 +1,24 @@
+[<AutoOpen>]
 module internal pilipala.container.Post.ext
 
 open System
 open fsharper.op
 open fsharper.typ
 open fsharper.typ.Ord
-open pilipala
-open pilipala.util
-open pilipala.container
 open DbManaged.PgSql.ext.String
-open System
-open fsharper.op
-open fsharper.typ
-open fsharper.typ.Ord
 open fsharper.op.Alias
+open DbManaged
+open DbManaged.PgSql
+open DbManaged.PgSql.ext.String
 open pilipala
+open pilipala.db
 open pilipala.util
 open pilipala.util.hash
 open pilipala.container
-open DbManaged.PgSql.ext.String
 
-type record with
+type Post with
 
-    /// 根据文章主要正文生成md5
+    /// 根据文章正文生成md5
     member self.md5 =
         (self.cover + self.title + self.summary + self.body)
             .md5
@@ -29,94 +26,141 @@ type record with
     /// 以正文为参数执行闭包 f, 常用于概述为空时取得一个替代值
     member self.trySummary f = f self.body
 
-type record with
+type post_record_entry with
 
     /// 创建文章记录
     /// 返回文章记录id
     static member create() =
-        db.tables
-        >>= fun ts ->
-                let table = ts.record
+        let table = tables.record
 
-                let sql =
-                    $"INSERT INTO {table} \
+        let sql =
+            $"INSERT INTO {table} \
                         ( recordId,  cover,  title,  summary,  body,  mtime) \
                         VALUES \
                         (<recordId>,<cover>,<title>,<summary>,<body>,<mtime>)"
-                    |> normalizeSql
+            |> normalizeSql
 
-                let recordId = palaflake.gen ()
+        let recordId = palaflake.gen ()
 
-                let paras: (string * obj) list =
-                    [ ("recordId", recordId)
-                      ("cover", "")
-                      ("title", "")
-                      ("summary", "")
-                      ("body", "")
-                      ("mtime", DateTime.Now) ]
+        let paras: (string * obj) list =
+            [ ("recordId", recordId)
+              ("cover", "")
+              ("title", "")
+              ("summary", "")
+              ("body", "")
+              ("mtime", DateTime.Now) ]
 
-                db.Managed().executeAny (sql, paras)
-                >>= fun f ->
+        let aff =
+            mkCmd()
+                .query(sql, paras)
+                .whenEq(1)
+                .executeQuery ()
 
-                        match f <| eq 1 with
-                        | 1 -> Ok recordId
-                        | _ -> Err FailedToCreateRecordException
+        if aff |> eq 1 then
+            Ok recordId
+        else
+            Err FailedToCreateRecordException
 
     /// 抹除文章记录
     static member erase(recordId: u64) =
-        db.tables
-        >>= fun ts ->
-                let table = ts.record
+        let table = tables.record
 
-                db.Managed().executeDelete table ("recordId", recordId)
-                >>= fun f ->
+        let aff =
+            mkCmd()
+                .delete(table, "recordId", recordId)
+                .whenEq(1)
+                .executeQuery ()
 
-                        match f <| eq 1 with
-                        | 1 -> Ok()
-                        | _ -> Err FailedToEraseRecordException
+        if aff |> eq 1 then
+            Ok()
+        else
+            Err FailedToEraseRecordException
 
-type meta with
+    /// 检查Id合法性
+    static member check(metaId: u64) =
+        let table = tables.meta
+
+        let sql =
+            $"SELECT COUNT(*) FROM {table} WHERE metaId = <metaId>"
+            |> normalizeSql
+
+        let paras = [ ("metaId", metaId) ]
+
+        let count =
+            mkCmd()
+                .getFstVal(sql, paras)
+                .executeQuery()
+                .unwrap ()
+
+        count <> 0
+
+type post_meta_entry with
 
     static member create() =
-        db.tables
-        >>= fun ts ->
-                let table = ts.meta
+        let table = tables.meta
 
-                let sql =
-                    $"INSERT INTO {table} \
+        let sql =
+            $"INSERT INTO {table} \
                     ( metaId,  baseMetaId,  bindRecordId,  ctime,  atime,  view,  star) \
                     VALUES \
                     (<metaId>,<baseMetaId>,<bindRecordId>,<ctime>,<atime>,<view>,<star>)"
-                    |> normalizeSql
+            |> normalizeSql
 
-                let metaId = palaflake.gen ()
+        let metaId = palaflake.gen ()
 
-                let recordId = 0 //初始元空
+        let recordId = 0 //初始元空
 
-                let paras: (string * obj) list =
-                    [ ("metaId", metaId)
-                      ("baseMetaId", 0)
-                      ("bindRecordId", recordId)
-                      ("ctime", DateTime.Now)
-                      ("atime", DateTime.Now)
-                      ("view", 0)
-                      ("star", 0) ]
+        let paras: (string * obj) list =
+            [ ("metaId", metaId)
+              ("baseMetaId", 0)
+              ("bindRecordId", recordId)
+              ("ctime", DateTime.Now)
+              ("atime", DateTime.Now)
+              ("view", 0)
+              ("star", 0) ]
 
-                db.Managed().executeAny (sql, paras)
-                >>= fun f ->
-                        match f <| eq 1 with
-                        | 1 -> Ok metaId
-                        | _ -> Err FailedToCreateMetaException
+        let aff =
+            mkCmd()
+                .query(sql, paras)
+                .whenEq(1)
+                .executeQuery ()
+
+        if aff |> eq 1 then
+            Ok metaId
+        else
+            Err FailedToCreateMetaException
 
     /// 抹除文章元
     static member erase(metaId: u64) : Result'<unit, exn> =
-        db.tables
-        >>= fun ts ->
-                let table = ts.meta
+        let table = tables.meta
 
-                db.Managed().executeDelete table ("metaId", metaId)
-                >>= fun f ->
+        let aff =
+            mkCmd()
+                .delete(table, "metaId", metaId)
+                .whenEq(1)
+                .executeQuery ()
 
-                        match f <| eq 1 with
-                        | 1 -> Ok()
-                        | _ -> Err FailedToEraseMetaException
+        if aff |> eq 1 then
+            Ok()
+        else
+            Err FailedToEraseMetaException
+
+
+    /// 检查Id合法性
+    static member check(recordId: u64) =
+        let table = tables.record
+
+        let sql =
+            $"SELECT COUNT(*) FROM {table} WHERE recordId = <recordId>"
+            |> normalizeSql
+
+        let paras = [ ("recordId", recordId) ]
+
+
+        let count =
+            mkCmd()
+                .getFstVal(sql, paras)
+                .executeQuery()
+                .unwrap ()
+
+        count <> 0

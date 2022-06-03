@@ -4,9 +4,12 @@ open fsharper.op
 open fsharper.typ
 open fsharper.typ.Ord
 open fsharper.op.Alias
-open pilipala
-open pilipala.container.post
+open DbManaged
+open DbManaged.PgSql
 open DbManaged.PgSql.ext.String
+open pilipala
+open pilipala.db
+open pilipala.container.Post
 
 /// 无法创建标签错误
 exception FailedToCreateTag
@@ -34,22 +37,24 @@ let create (tagName: string) =
             $"CREATE TABLE tag_{tagName} \
                           (metaId BIGINT PRIMARY KEY NOT NULL)"
 
-        db.Managed().executeAny sql
-        >>= fun f ->
-                match f <| eq 0 with
-                | 0 -> tagName.ToLower() |> Ok
-                | _ -> Err FailedToCreateTag
+        mkCmd().query(sql).whenEq(0).executeQuery ()
+        >>= fun aff ->
+                if aff |> eq 0 then
+                    tagName.ToLower() |> Ok
+                else
+                    Err FailedToCreateTag
 
 /// 抹除标签
 let erase (tagName: string) =
 
     let sql = $"DROP TABLE tag_{tagName}"
 
-    db.Managed().executeAny sql
-    >>= fun f ->
-            match (fun _ -> true) |> f with
-            | 0 -> Ok()
-            | _ -> Err FailedToEraseTag
+    mkCmd().query(sql).alwaysCommit().executeQuery ()
+    >>= fun aff ->
+            if aff |> eq 0 then
+                Ok()
+            else
+                Err FailedToEraseTag
 
 /// 为文章元加标签
 let tagTo (metaId: u64) (tagName: string) =
@@ -60,36 +65,39 @@ let tagTo (metaId: u64) (tagName: string) =
 
     let paras: (string * obj) list = [ ("metaId", metaId) ]
 
-    db.Managed().executeAny (sql, paras)
-    >>= fun f ->
-            match f <| eq 1 with
-            | 1 -> Ok()
-            | _ -> Err FailedToTag
+    mkCmd()
+        .query(sql, paras)
+        .whenEq(1)
+        .executeQuery ()
+    >>= fun aff ->
+            if aff |> eq 1 then
+                Ok()
+            else
+                Err FailedToTag
 
 /// 为文章元去除标签
 let detagFor (metaId: u64) (tagName: string) =
-
-    db.Managed().executeDelete $"tag_{tagName}" ("metaId", metaId)
-    >>= fun f ->
-            match f <| eq 1 with
-            | 1 -> Ok()
-            | _ -> Err FailedToDetag
+    mkCmd()
+        .delete($"tag_{tagName}", "metaId", metaId)
+        .whenEq(1)
+        .executeQuery ()
+    >>= fun aff ->
+            if aff |> eq 1 then
+                Ok()
+            else
+                Err FailedToDetag
 
 /// 取得标签
 let getTag (tagName: string) =
 
     let sql = $"SELECT metaId FROM tag_{tagName}"
 
-    db.Managed().getCol (sql, 0u)
-    >>= fun r ->
-            Ok
-            <| match r with
-               | Some list -> [ for x in list -> x :?> u64 ]
-               | None -> []
+    mkCmd().getFstCol(sql).executeQuery ()
+    >>= fun list -> Ok [ for x in list -> x :?> u64 ]
 
 /// 过滤出是 tag 的文章
-let is (tag: Tag) (ps: Post list) = ps |> filter (fun p -> elem p.id tag)
+let is (tag: Tag) (ps: Post list) = ps |> filter (fun p -> elem p.postId tag)
 
 /// 过滤出不是 tag 的文章
 let not (tag: Tag) (ps: Post list) =
-    ps |> filter (fun p -> not <| elem p.id tag)
+    ps |> filter (fun p -> not <| elem p.postId tag)

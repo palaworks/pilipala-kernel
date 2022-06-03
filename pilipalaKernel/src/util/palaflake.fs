@@ -2,6 +2,6 @@
 
 open palaflake
 
-let private g = Generator(1uy, 2021us)
+let private g = Palaflaker(1uy, 2021us)
 /// 生成palaflake
 let gen () = g.Next()

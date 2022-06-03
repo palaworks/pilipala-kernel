@@ -21,3 +21,7 @@ let inline recycle< ^c, ^id, ^r when ^c: (static member recycle : ^id -> ^r)> id
 /// 抹除容器
 let inline erase< ^c, ^id, ^r when ^c: (static member erase : ^id -> ^r)> id =
     (^c: (static member erase : ^id -> ^r) id)
+
+/// 检查容器Id
+let inline check< ^c when ^c: (static member check : u64 -> bool)> id =
+    (^c: (static member check : u64 -> bool) id)

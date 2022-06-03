@@ -14,7 +14,7 @@ open DbManaged.PgSql.ext.String
 type post_meta_entry internal (metaId: u64) =
 
     let cache =
-        ContainerCacheHandler(db.tables.unwrap().meta, "metaId", metaId)
+        ContainerCacheHandler(db.tables.meta, "metaId", metaId)
 
     /// 元信息id
     member self.metaId = metaId
