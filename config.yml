@@ -1,21 +1,26 @@
 database:
-  host: localhost
-  port: 3306
+  connection:
+    host: localhost
+    port: 3306
+    usr: root
+    pwd: 65a1561425f744e2b541303f628963f8
+    using: pilipala_fs
 
-  user: root
-  password: 65a1561425f744e2b541303f628963f8
+  pooling:
+    size: 32
+    sync: 180
 
-  poolSize: 32
+  map:
+    meta: container.meta
+    record: container.record
+    comment: container.comment
+    token: auth.token
 
-  dbName: pilipala_fs
-
-  table:
-    meta: meta
-    record: record
-    comment: comment
-    token: token
-
-  syncSpan: 180000
 plugin: ["./plugins/mailssage", "./plugins/llink"]
+
+service: ["palang", "version", "shutdown"]
+
+log: ["pala-std-output", "pala-std-error"]
+
 auth:
   port: 20222

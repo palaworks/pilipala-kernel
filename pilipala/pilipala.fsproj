@@ -1,0 +1,85 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <TargetFramework>net6.0</TargetFramework>
+        <GenerateDocumentationFile>true</GenerateDocumentationFile>
+        <LangVersion>preview</LangVersion>
+        <WarnOn>3390;$(WarnOn)</WarnOn>
+        <RootNamespace>palaKernel</RootNamespace>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <Compile Include="src\id.fs" />
+        <Compile Include="src\db.fs" />
+
+        <Compile Include="src\pipeline\post.fs" />
+
+        <Compile Include="src\pipeline\comment.fs" />
+
+        <Compile Include="src\container\err.fs" />
+        <Compile Include="src\container\cache.fs" />
+        <Compile Include="src\container\Post\post_meta_entry.fs" />
+        <Compile Include="src\container\Post\post_record_entry.fs" />
+        <Compile Include="src\container\Post\MutPost.fs" />
+        <Compile Include="src\container\Post\Post.fs" />
+        <Compile Include="src\container\Post\ext.fs" />
+        <Compile Include="src\container\Comment\comment_entry.fs" />
+        <Compile Include="src\container\Comment\MutComment.fs" />
+        <Compile Include="src\container\Comment\Comment.fs" />
+        <Compile Include="src\container\Comment\ext.fs" />
+        <Compile Include="src\container\op.fs" />
+
+        <Compile Include="src\tag.fs" />
+
+        <Compile Include="src\log.fs" />
+
+        <Compile Include="src\auth\token.fs" />
+        <Compile Include="src\auth\channel.fs" />
+        <Compile Include="src\serv.fs" />
+
+        <Compile Include="src\palang\util.fs" />
+        <Compile Include="src\palang\eval.fs" />
+        <Compile Include="src\palang\analyse.fs" />
+
+        <Compile Include="src\plugin.fs" />
+        <Compile Include="src\builder\builder.fs" />
+        <Compile Include="src\builder\useDb.fs" />
+        <Compile Include="src\builder\usePlugin.fs" />
+        <Compile Include="src\builder\useAuth.fs" />
+        <Compile Include="src\builder\useLog.fs" />
+        <Compile Include="src\builder\useService.fs" />
+        <Compile Include="src\builder\useConfig.fs" />
+
+
+        <Compile Include="src\assembly.fs" />
+    </ItemGroup>
+
+    <ItemGroup>
+        <PackageReference Include="Markdig" Version="0.30.2" />
+        <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="7.0.0-preview.4.22229.4" />
+        <PackageReference Include="Microsoft.Extensions.Hosting" Version="7.0.0-preview.5.22301.12" />
+        <PackageReference Include="Microsoft.IdentityModel.Tokens" Version="6.19.0" />
+        <PackageReference Include="MySql.Data" Version="8.0.29" />
+        <PackageReference Include="Newtonsoft.Json" Version="13.0.2-beta1" />
+        <PackageReference Include="YamlDotNet" Version="11.2.1" />
+    </ItemGroup>
+
+    <ItemGroup>
+        <Reference Include="DbManaged, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null">
+            <HintPath>..\..\DbManaged\bin\Debug\net6.0\DbManaged.dll</HintPath>
+        </Reference>
+        <Reference Include="fsharper, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null">
+            <HintPath>..\..\fsharper\bin\Debug\net6.0\fsharper.dll</HintPath>
+        </Reference>
+        <Reference Include="palaflake, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null">
+            <HintPath>..\..\palaflake\impl\fs\palaflake\bin\Debug\net6.0\palaflake.dll</HintPath>
+        </Reference>
+        <Reference Include="pilipala.util, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null">
+          <HintPath>..\pilipala.util\bin\Debug\net6.0\pilipala.util.dll</HintPath>
+        </Reference>
+        <Reference Include="WebSocketer, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null">
+            <HintPath>..\..\WebsSocketer\bin\Debug\net6.0\WebSocketer.dll</HintPath>
+        </Reference>
+    </ItemGroup>
+
+</Project>
