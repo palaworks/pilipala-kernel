@@ -13,7 +13,6 @@ open fsharper.typ.Pipe.GenericPipable
 /// 数据库未初始化异常
 exception DbNotInitException
 
-(*
 let mutable tablesResult: Result'<{| record: string
                                      meta: string
                                      comment: string
@@ -28,7 +27,7 @@ let tables = tablesResult.unwrap ()
 let managed = managedResult.unwrap ()
 /// 命令行生成器
 let mkCmd () = managed.mkCmd ()
-*)
+
 [<Extension>]
 type ext() =
 

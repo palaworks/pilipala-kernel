@@ -21,7 +21,7 @@ let eval_erase type_name para_1 =
     | "meta" -> UInt64.Parse para_1 |> post_meta_entry.erase
     | "comment" -> UInt64.Parse para_1 |> comment_entry.erase
     | "tag" -> para_1 |> tag.erase //此处为标签名
-    | "token" -> para_1 |> token.erase //此处为凭据值
+    | "token" -> para_1 |> token.fn.erase //此处为凭据值
     | _ -> Err(UnknownSyntax type_name) //未知语法错误
     |> unwrap
 
@@ -55,7 +55,7 @@ let eval_create type_name tag_name =
                 .create()
                 .fmap (fun x -> x.ToString())
         | "tag" -> tag_name |> force |> tag.create
-        | "token" -> token.create ()
+        | "token" -> token.fn.create ()
         | _ -> Err(UnknownSyntax type_name) //未知语法错误
         |> unwrap
 

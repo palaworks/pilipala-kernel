@@ -5,6 +5,7 @@ open System.IO
 open System.Collections.Generic
 open System.Text.RegularExpressions
 open Microsoft.Extensions.DependencyInjection
+open WebSocketer.typ
 open fsharper.op
 open fsharper.typ.List
 open fsharper.op.Reflection
@@ -42,34 +43,57 @@ module attr =
 
     /// 服务属性，仅限于修饰类
     [<AttributeUsage(AttributeTargets.Class)>]
-    type ServAttribute(path: string, AccessLv: ServAccessLv) =
+    type ServAttribute(Path: string, EntryPoint: string, AccessLv: ServAccessLv) =
         inherit Attribute()
-        member val Path = path
+        member val Path = Path
+        member val EntryPoint = EntryPoint
         member val AccessLv = AccessLv
 
 [<AutoOpen>]
 module fn =
 
     /// 已注册服务集合
-    let private registeredServ = ServiceCollection()
-    let registeredServ.BuildServiceProvider()
-    //<servPath, ServAccessLv * (NetChannel -> ILog -> unit)>()
+    let internal registeredServ = ServiceCollection()
+
+    /// 已注册服务路径到服务的映射
+    let internal registeredServPath = Dictionary<string, Type>()
 
     /// 注册服务
-    let regServ<'s when 's: not struct> ()=
+    let regServ<'s when 's :> ServAttribute and 's: not struct> =
+        let t = typeof<'s>
 
-        registeredServ.AddTransient<'s>()
+        let attr: ServAttribute =
+            downcast t.GetCustomAttributes(typeof<ServAttribute>, false).[0]
 
-    let endReg=
-        registeredServ.BuildServiceProvider()
+        registeredServPath.TryAdd(attr.Path, t)
+        |> mustTrue
+
+        registeredServ.AddScoped<'s>() |> ignore
+
+(*
     /// 获取服务
-    let getServ<'s when 's: not struct> ()=
+    let getServ<'s when 's :> ServAttribute and 's: equality and 's: null> () =
+        registeredServ
+            .BuildServiceProvider()
+            .GetService<'s>()
+        |> Option'.fromNullable
 
-    let matchServ servPathRegexp =
-        [ for servPath in registeredServCons.Keys do
-              if Regex.IsMatch(servPath, servPathRegexp) then
-                  let ok, (lv, cons) =
-                      registeredServCons.TryGetValue(servPath)
+    /// 通过服务路径获取服务
+    let getServByPath<'s when 's :> ServAttribute> path : Option'<'s> =
+        let serv =
+            registeredServPath.[path]
+            |> registeredServ.BuildServiceProvider().GetService
 
-                  ok |> mustTrue
-                  cons: Lazy<NetChannel> -> Lazy<ILog> -> unit ]
+        if serv = null then
+            None
+        else
+            serv |> coerce |> Some
+
+    /// 匹配服务路径获取服务
+    let matchServ pathRegexp : ServAttribute list =
+        [ for path in registeredServPath.Keys do
+              if Regex.IsMatch(path, pathRegexp) then
+                  registeredServPath.[path]
+                  |> registeredServ.BuildServiceProvider().GetService
+                  |> coerce ]
+    *)

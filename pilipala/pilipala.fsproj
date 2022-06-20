@@ -47,7 +47,7 @@
         <Compile Include="src\builder\usePlugin.fs" />
         <Compile Include="src\builder\useAuth.fs" />
         <Compile Include="src\builder\useLog.fs" />
-        <Compile Include="src\builder\useService.fs" />
+        <Compile Include="src\builder\useServ.fs" />
         <Compile Include="src\builder\useConfig.fs" />
 
 

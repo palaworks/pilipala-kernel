@@ -1,16 +1,21 @@
 [<AutoOpen>]
 module pilipala.builder.useAuth
 
+open System
 open System.IO
+open System.Net
 open System.Net.Sockets
 open System.Threading.Tasks
 open System.Security.Cryptography
 open Microsoft.Extensions.Hosting
 open Microsoft.Extensions.DependencyInjection
-open WebSocketer.Type
+open WebSocketer.typ
 open fsharper.typ
+open fsharper.op.Alias
 open fsharper.op.Coerce
+open fsharper.op.Reflection
 open fsharper.typ.Pipe.Pipable
+open pilipala.builder
 open pilipala.log
 open pilipala.serv
 open pilipala.util.uuid
@@ -21,15 +26,15 @@ open pilipala.util.encoding
 
 //TODO：应使用随机化IV+CBC以代替ECB模式以获得最佳安全性
 
-type palaBuilder with
+let log (text: string) =
+    Console.WriteLine $"pilipala auth service : {text}"
+
+(*
+        | :? SocketException -> log "connection lost"
+        | _ -> log "auth failed"
+
 
     /// 使用认证
-    member self.useAuth port =
-        use sw = new StreamWriter(genLogStream ())
-
-        let log (text: string) =
-            sw.WriteLine $"pilipala auth service : {text}"
-
         let whenNeedAuthDo (ws: WebSocket) handler =
             ws.send "need auth" //服务端问候
             log "start authing"
@@ -68,25 +73,74 @@ type palaBuilder with
                 whenCheckFailed () //凭据无效
 
         let whenEveryoneDo ws handler = ws |> PubChannel |> handler //公共服务，无需验证
+*)
 
-        let func _ =
+// 对绘画密钥的引用包装
+//type SessionKey = { value: string }
+// 对验证端口的引用包装
+//type AuthPort = { value: u16 }
+
+/// 用于验证的服务主机
+type private HostService(scopeFac: IServiceScopeFactory) =
+    inherit BackgroundService()
+    with
+        override self.ExecuteAsync ct =
             fun _ ->
-                while true do
-                    try
-                        log "auth online"
-                        let ws = new WebSocket(port) //阻塞
-                        log "\nnew client connected"
+                while not ct.IsCancellationRequested do //持续循环到主机取消
 
-                        let cmd = ws.recv ()
-                        let servPath = cmd.Split(' ').[1]
+                    let servScope = scopeFac.CreateScope()
+                    let servProvider = servScope.ServiceProvider
 
-                        match getServ servPath with
-                        | Some (NeedAuth, handler) -> whenNeedAuthDo ws handler
-                        | Some (Everyone, handler) -> whenEveryoneDo ws handler
-                        | None -> log "serv rejected" //拒绝服务
-                    with
-                    | :? SocketException -> log "connection lost"
-                    | _ -> log "auth failed"
-            |> Task.RunIgnore
+                    //request <serv_path>
+                    let ws = servProvider.GetService<WebSocket>()
+                    let servPath = ws.recv().Split(' ').[1] //服务路径
 
-        self.buildPipeline.mappend (Pipe(func = func))
+                    let serv = //通过服务路径获取服务
+                        servProvider.GetService registeredServPath.[servPath]
+
+                    let servAttr: ServAttribute = coerce serv //服务特性
+                    let servALv = servAttr.AccessLv //服务访问级别
+
+                    serv.tryInvoke servAttr.EntryPoint //从服务入口点启动服务
+
+            |> Task.RunAsTask
+
+
+type palaBuilder with
+
+    member self.useAuth(port: u16) =
+        let server = //用于监听的服务器
+            TcpListener(IPAddress.Parse("localhost"), i32 port)
+
+        server.Start()
+
+        let host =
+            Host
+                .CreateDefaultBuilder()
+                .ConfigureServices(fun _ services ->
+                    //添加已注册服务
+                    for s in registeredServ do
+                        services.Add s
+
+                    services
+                        //添加WS
+                        .AddScoped<WebSocket>(fun _->
+                            server.AcceptTcpClient()
+                            |>fun c->new WebSocket(c)
+                            )
+                        //添加不安全网络信道
+                        .AddScoped<UnsafeNetChannel>(fun _ ->
+                            server.AcceptTcpClient()
+                            |> fun c -> new WebSocket(c)
+                            |> UnsafeNetChannel)
+                        //添加安全网络信道
+                        .AddScoped<SafeNetChannel>(fun _ ->
+                            server.AcceptTcpClient()
+                            |> fun c -> new WebSocket(c)
+                            |> fun ws -> SafeNetChannel(ws, gen N))
+                        //添加服务主机
+                        .AddHostedService<HostService>()
+                    |> ignore)
+                .Build()
+
+        self.buildPipeline.mappend (Pipe(func = host.Run))
