@@ -18,8 +18,8 @@
 
 * 客户端向服务器请求服务：  
 `request <serv_path>`
-  * 若`serv_path`是公共服务，则服务器会送回服务内容，并关闭连接。
-  * 若`serv_path`是私有服务，则服务器将按照下述流程继续。
+  * 若`serv_path`对应的服务是公共服务，则服务器进入会话阶段。
+  * 若`serv_path`对应的服务是私有服务，则服务器进入认证阶段。
   * 若`serv_path`非法，则服务器返回`bad request`，并关闭连接。
 
 ## 认证
@@ -58,10 +58,12 @@ qV6IYIOIhOBaHEpIyOX7zPVjLHax2AC+xsyzJuvLEhoJqOvvj0n4jXQC1J2Dbx9yP/y3UybccSbXj7ut
 * 服务器计算该凭据的哈希（sha1）：  
 `6D8AE03878DB3361FB70462C6AC36E73C6247537`
 * 服务器检索凭据数据库，发现匹配的凭据记录。
-* 服务器判定客户受信，返回受信通告：  
+* 服务器判定客户受信，返回通告：  
 `auth pass`
+* 若服务器判定客户不受信，返回通告：  
+`auth failed`
 
-## 使用服务
+## 使用服务(会话)
 
 例如，客户需将下述数据发往服务器：
 

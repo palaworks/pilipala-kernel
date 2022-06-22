@@ -19,6 +19,7 @@ logPath是用于路由日志结构的文本
 /log/mem
 /log/some_plugin/1a2b...
 *)
+(*
 type logPath = string
 
 [<AutoOpen>]
@@ -32,7 +33,6 @@ module typ =
         abstract member logAsync : string -> Task
         abstract member logLineAsync : string -> Task
 
-(*
     type Log(s: Stream) =
         let sw = new StreamWriter(s)
         do sw.AutoFlush <- true
@@ -42,7 +42,7 @@ module typ =
         member self.logAsync(text: string) = sw.WriteAsync text
         member self.logLineAsync(text: string) = sw.WriteLineAsync text
 
-        member self.Dispose() = sw.Dispose()
+        member self.Dispose() = sw.Dispose(*))
 *)
 
 
@@ -51,7 +51,8 @@ module fn =
     /// 已注册日志构造器集合
     let private registeredLogCons = Dictionary<logPath, unit -> ILog>()
 
-    let regLog logPath logCons = registeredLogCons.Add(logPath, logCons)
+    (*
+    let regLog logPath logCon = registeredLogCons.Add(logPath, logCons)
 
     let getLog logPath =
         let ok, logCons = registeredLogCons.TryGetValue(logPath)
@@ -64,3 +65,4 @@ module fn =
                   let ok, cons = registeredLogCons.TryGetValue(logPath)
                   ok |> mustTrue
                   cons () ]
+*)

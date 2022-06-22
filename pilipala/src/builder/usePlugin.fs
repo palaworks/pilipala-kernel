@@ -5,7 +5,7 @@ open fsharper.typ
 open fsharper.typ.Pipe.Pipable
 open pilipala
 
-type palaBuilder with
+type Builder with
 
     /// 使用插件
     member self.usePlugin path =

@@ -16,11 +16,15 @@ database:
     comment: container.comment
     token: auth.token
 
-plugin: ["./plugins/mailssage", "./plugins/llink"]
+plugin: ["./plugin/Mailssage", "./plugin/Llink"]
 
-service: ["palang", "version", "shutdown"]
+service: ["./serv/Palang", "./serv/Version", "./serv/Shutdown"]
 
-log: ["pala-std-output", "pala-std-error"]
+log:
+  pilipala.serv.Auth: Information
+  pilipala.serv.Palang: Information
+  pilipala.serv.Version: Information
+  pilipala.serv.Shutdown: Information
 
 auth:
   port: 20222

@@ -54,7 +54,7 @@ type Dictionary<'k, 'v> with
         self.Add(k, v)
         self
 
-type palaBuilder with
+type Builder with
 
     /// 启用持久化队列
     /// 启用该选项会延迟数据持久化以缓解数据库压力并提升访问速度

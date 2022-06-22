@@ -7,7 +7,7 @@ open pilipala.util.encoding
 
 //TODO 应使用随机化IV+CBC以代替ECB模式以获得最佳安全性
 
-type NetChannel private (ws: WebSocket, encryptor: string -> string, decryptor: string -> string) =
+type NetChannel internal (ws: WebSocket, encryptor: string -> string, decryptor: string -> string) =
 
     /// 启用AES256加密的信道
     new(ws: WebSocket, sessionKey: string) =
@@ -28,6 +28,7 @@ type NetChannel private (ws: WebSocket, encryptor: string -> string, decryptor: 
 
     member self.Read() = ws.recv () |> decryptor
 
+(*
 type UnsafeNetChannel(ws: WebSocket) =
 
     let nc = NetChannel(ws)
@@ -41,3 +42,4 @@ type SafeNetChannel(ws: WebSocket, sessionKey: string) =
 
     member self.Write = nc.Write
     member self.Read = nc.Read
+*)

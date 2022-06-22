@@ -3,13 +3,12 @@
 open System.IO
 open fsharper.typ.Pipe.Pipable
 open Microsoft.Extensions.Hosting
-open Microsoft.Extensions.DependencyInjection
 
 /// 在指定端口启动认证服务
 /// 认证通过后，会以 SecureChannel 为参数执行闭包 f
 
 /// 构建器
-type palaBuilder() =
+type Builder() =
     /// 构建函数管道
     member val internal buildPipeline = Pipe<unit>() with get, set
 

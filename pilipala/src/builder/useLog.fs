@@ -11,7 +11,7 @@ open pilipala.serv
 open pilipala.log
 open pilipala.util.stream
 
-type palaBuilder with
+type Builder with
 
     /// 使用日志
     /// 多次调用会将流依次组合

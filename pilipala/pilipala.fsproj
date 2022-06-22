@@ -5,7 +5,7 @@
         <GenerateDocumentationFile>true</GenerateDocumentationFile>
         <LangVersion>preview</LangVersion>
         <WarnOn>3390;$(WarnOn)</WarnOn>
-        <RootNamespace>palaKernel</RootNamespace>
+        <RootNamespace>pilipala</RootNamespace>
     </PropertyGroup>
 
     <ItemGroup>
@@ -35,7 +35,8 @@
 
         <Compile Include="src\auth\token.fs" />
         <Compile Include="src\auth\channel.fs" />
-        <Compile Include="src\serv.fs" />
+        <Compile Include="src\serv\reg.fs" />
+        <Compile Include="src\serv\host.fs" />
 
         <Compile Include="src\palang\util.fs" />
         <Compile Include="src\palang\eval.fs" />

@@ -1,4 +1,4 @@
-namespace pilipala.serv
+namespace pilipala.serv.reg
 
 open System
 open System.IO
@@ -22,8 +22,6 @@ servPath是用于路由服务结构的文本
 /serv/shutdown
 /serv/some_plugin/1a2b...
 *)
-
-type private servPath = string
 
 [<AutoOpen>]
 module err =
@@ -52,48 +50,34 @@ module attr =
 [<AutoOpen>]
 module fn =
 
-    /// 已注册服务集合
-    let internal registeredServ = ServiceCollection()
-
-    /// 已注册服务路径到服务的映射
-    let internal registeredServPath = Dictionary<string, Type>()
+    /// 已注册服务路径到服务信息的映射
+    let private registeredServInfo =
+        Dictionary<string, {| Type: Type
+                              EntryPoint: string
+                              AccessLv: ServAccessLv |}>
+            ()
 
     /// 注册服务
-    let regServ<'s when 's :> ServAttribute and 's: not struct> =
+    let regServ<'s when 's :> ServAttribute and 's: not struct> ()=
         let t = typeof<'s>
 
         let attr: ServAttribute =
             downcast t.GetCustomAttributes(typeof<ServAttribute>, false).[0]
 
-        registeredServPath.TryAdd(attr.Path, t)
+        (attr.Path,
+         {| Type = t
+            EntryPoint = attr.EntryPoint
+            AccessLv = attr.AccessLv |})
+        |> registeredServInfo.TryAdd
         |> mustTrue
 
-        registeredServ.AddScoped<'s>() |> ignore
+    /// 获取服务信息
+    let getServInfo path =
+        registeredServInfo.TryGetValue path
+        |> Option'.fromOkComma
 
-(*
-    /// 获取服务
-    let getServ<'s when 's :> ServAttribute and 's: equality and 's: null> () =
-        registeredServ
-            .BuildServiceProvider()
-            .GetService<'s>()
-        |> Option'.fromNullable
-
-    /// 通过服务路径获取服务
-    let getServByPath<'s when 's :> ServAttribute> path : Option'<'s> =
-        let serv =
-            registeredServPath.[path]
-            |> registeredServ.BuildServiceProvider().GetService
-
-        if serv = null then
-            None
-        else
-            serv |> coerce |> Some
-
-    /// 匹配服务路径获取服务
-    let matchServ pathRegexp : ServAttribute list =
-        [ for path in registeredServPath.Keys do
+    /// 匹配获取服务信息
+    let matchServInfo pathRegexp =
+        [ for path in registeredServInfo.Keys do
               if Regex.IsMatch(path, pathRegexp) then
-                  registeredServPath.[path]
-                  |> registeredServ.BuildServiceProvider().GetService
-                  |> coerce ]
-    *)
+                  registeredServInfo.[path] ]
