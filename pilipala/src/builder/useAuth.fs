@@ -1,14 +1,13 @@
 [<AutoOpen>]
 module pilipala.builder.useAuth
 
-open System
 open System.Net
 open System.Net.Sockets
+open fsharper.op.Alias
+open fsharper.typ.Pipe.Pipable
 open Microsoft.Extensions.Hosting
 open Microsoft.Extensions.DependencyInjection
 open WebSocketer.typ
-open fsharper.op.Alias
-open fsharper.typ.Pipe.Pipable
 open pilipala.builder
 open pilipala.serv.host
 

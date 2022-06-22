@@ -57,10 +57,8 @@ module fn =
                               AccessLv: ServAccessLv |}>
             ()
 
-    /// 注册服务
-    let regServ<'s when 's :> ServAttribute and 's: not struct> ()=
-        let t = typeof<'s>
-
+    /// 使用类型注册服务
+    let regServByType (t: Type) =
         let attr: ServAttribute =
             downcast t.GetCustomAttributes(typeof<ServAttribute>, false).[0]
 
@@ -70,6 +68,11 @@ module fn =
             AccessLv = attr.AccessLv |})
         |> registeredServInfo.TryAdd
         |> mustTrue
+
+    /// 注册服务
+    let regServ<'s when 's :> ServAttribute> () =
+        //when 's :> ServAttribute, 's obviously not struct
+        regServByType typeof<'s>
 
     /// 获取服务信息
     let getServInfo path =

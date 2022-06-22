@@ -1,16 +1,15 @@
 [<AutoOpen>]
-module pilipala.builder.useService
+module pilipala.builder.useServ
 
-open fsharper.typ
 open fsharper.typ.Pipe.Pipable
-open pilipala.log
 open pilipala.serv.reg
-open pilipala.serv
 
 type Builder with
 
-    /// 使用服务
-    member self.useServ<'s when 's :> ServAttribute and 's: not struct>() =
-        let func _ = regServ<'s> ()
+    member self.useServ t =
+
+        let func _ = regServByType t
 
         self.buildPipeline.mappend (Pipe(func = func))
+
+    member self.useServ<'s when 's :> ServAttribute>() = self.useServ typeof<'s>

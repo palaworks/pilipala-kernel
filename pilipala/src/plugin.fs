@@ -1,61 +1,49 @@
 namespace pilipala.plugin
 
 open System
-open System.IO
-open System.Reflection
-open System.Text.RegularExpressions
-open fsharper.op
-open fsharper.typ
+open System.Collections.Generic
+open Microsoft.Extensions.DependencyInjection
+
+(*
+插件需要遵循下列规范：
+插件根目录：
+./pilipala/plugin
+插件文件夹名和插件dll名和插件名需一致：
+./pilipala/plugin/Llink/Llink.dll
+插件的启动应由其构造函数完成，这与服务所谓的入口点不同。
+*)
 
 //虽然理论上该实现能够启动同一文件夹下的众多插件（dll），但建议的实践是一个插件（dll）放一个文件夹
+[<AutoOpen>]
 module typ =
-    /// 插件特性
-    type PluginAttribute()=
+    /// 插件特性，仅限修饰类
+    [<AttributeUsage(AttributeTargets.Class)>]
+    type PluginAttribute() =
         inherit Attribute()
 
+[<AutoOpen>]
 module fn =
-    
-    let getPluginInfos dir =
-        DirectoryInfo(dir).GetFileSystemInfos().toList ()
 
-    let rec getPluginFullNames (infos: FileSystemInfo list) =
-        infos
-        |> filter (fun x -> x.Extension = ".dll")
-        |> foldMap (fun x -> List' [ x.FullName ])
-        |> unwrap
+    let registeredPlugin = ServiceCollection()
+    let registeredPluginInfo = List<Type>()
 
-    let rec getPluginNameAndAsms (fullNames: string list) =
-        let getName fullName =
-            Regex("/([^/]+?).dll").Match(fullName).Groups.[1]
-                .Value
+    //dir目录下应有多个文件夹
+    //每个文件夹对应一个插件，例如：
+    //./pilipala/plugin/Llink
+    //./pilipala/plugin/Palang
+    //./pilipala/plugin/Mailssage
+    (*
+*)
 
-        fullNames
-        |> foldMap (fun fullName -> List' [ (getName fullName, Assembly.LoadFrom fullName) ])
-        |> unwrap
+    let regPluginByType t =
+        registeredPlugin.AddTransient t |> ignore
 
-    let rec getPluginTypes (nameAndAsms: (string * Assembly) list) =
-        nameAndAsms
-        |> foldMap (fun (name, asm: Assembly) -> List' [ asm.GetType($"pilipala.plugin.{name}") ])
-        |> unwrap
+    let regPlugin<'p when 'p :> PluginAttribute> () =
+        //when 'p :> PluginAttribute, 'p obviously not struct
+        regPluginByType typeof<'p>
 
-    let rec getPluginInstances (types: Type list) =
-        types
-        |> foldMap (fun x -> List' [ Activator.CreateInstance x ])
-        |> unwrap
+    let invokeAllPlugin () =
+        let provider = registeredPlugin.BuildServiceProvider()
 
-    let rec invokePluginInstances (instances: obj list) =
-        instances
-        |> map
-            (fun x ->
-                x.tryInvoke "inject"
-                ())
-
-    let invokePlugin path =
-        path
-        |> getPluginInfos
-        |> getPluginFullNames
-        |> getPluginNameAndAsms
-        |> getPluginTypes
-        |> getPluginInstances
-        |> invokePluginInstances
-        |> ignore
+        for t in registeredPluginInfo do
+            provider.GetService t |> ignore

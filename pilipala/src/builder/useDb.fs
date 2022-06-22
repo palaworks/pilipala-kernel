@@ -2,15 +2,12 @@
 module pilipala.builder.useDb
 
 open System.Collections.Generic
-open System.Data.Common
+open fsharper.op
+open fsharper.typ
+open fsharper.typ.Pipe.Pipable
 open DbManaged
 open DbManaged.PgSql
-open fsharper.op
 open pilipala
-open fsharper.typ.Pipe.Pipable
-open fsharper.op.Alias
-open fsharper.op.Coerce
-open fsharper.typ
 
 (*
 database:

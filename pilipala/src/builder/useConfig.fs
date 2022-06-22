@@ -3,20 +3,9 @@ module pilipala.builder.useConfig
 
 open System
 open System.Collections.Generic
-open System.Data.Common
-open System.Reflection
-open DbManaged
-open DbManaged.PgSql
-open Microsoft.FSharp.Core
 open fsharper.op
-open pilipala.container
 open pilipala.util.yaml
 open pilipala.util.json
-open pilipala
-open fsharper.typ.Pipe.Pipable
-open fsharper.op.Alias
-open fsharper.op.Coerce
-open fsharper.typ
 
 (*
 database:
@@ -91,7 +80,9 @@ type Builder with
         |> ignore
 
         for path in root.["plugin"] do
-            coerce path |> builder.usePlugin |> ignore
+            ((coerce path): string)
+            |> builder.usePlugin
+            |> ignore
 
         for servName in root.["service"] do
             let a = Type.GetType(coerce servName)
