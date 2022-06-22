@@ -57,7 +57,7 @@ module fn =
                               AccessLv: ServAccessLv |}>
             ()
 
-    /// 使用类型注册服务
+    /// 注册服务
     let regServByType (t: Type) =
         let attr: ServAttribute =
             downcast t.GetCustomAttributes(typeof<ServAttribute>, false).[0]

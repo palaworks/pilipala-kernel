@@ -1,14 +1,11 @@
 [<AutoOpen>]
 module pilipala.builder.usePlugin
 
-open System
 open System.IO
 open System.Reflection
-open System.Text.RegularExpressions
 open fsharper.op
 open fsharper.typ
 open fsharper.typ.Pipe.Pipable
-open pilipala
 open pilipala.plugin
 
 type Builder with
@@ -20,6 +17,10 @@ type Builder with
 
     member self.usePlugin<'p when 'p :> PluginAttribute>() = self.usePlugin typeof<'p>
 
+    /// 从程序集文件夹注册
+    /// dir示例：./plugin/Llink
+    /// 内含dll文件：Llink.dll
+    /// 在 pilipala.plugin 命名空间下应具有类型 Llink
     member self.usePlugin dir =
         let pluginDir = DirectoryInfo(dir)
         let pluginName = pluginDir.Name

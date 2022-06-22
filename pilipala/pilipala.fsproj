@@ -57,7 +57,7 @@
 
     <ItemGroup>
         <PackageReference Include="Markdig" Version="0.30.2" />
-        <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="7.0.0-preview.4.22229.4" />
+        <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="7.0.0-preview.5.22301.12" />
         <PackageReference Include="Microsoft.Extensions.Hosting" Version="7.0.0-preview.5.22301.12" />
         <PackageReference Include="Microsoft.IdentityModel.Tokens" Version="6.19.0" />
         <PackageReference Include="MySql.Data" Version="8.0.29" />

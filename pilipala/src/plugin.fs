@@ -24,7 +24,6 @@ module typ =
 [<AutoOpen>]
 module fn =
 
-    let registeredPlugin = ServiceCollection()
     let registeredPluginInfo = List<Type>()
 
     //dir目录下应有多个文件夹
@@ -32,18 +31,37 @@ module fn =
     //./pilipala/plugin/Llink
     //./pilipala/plugin/Palang
     //./pilipala/plugin/Mailssage
-    (*
-*)
 
-    let regPluginByType t =
-        registeredPlugin.AddTransient t |> ignore
+    /// 注册插件
+    let regPluginByType t = registeredPluginInfo.Add(t)
 
+    /// 注册插件
     let regPlugin<'p when 'p :> PluginAttribute> () =
         //when 'p :> PluginAttribute, 'p obviously not struct
         regPluginByType typeof<'p>
 
-    let invokeAllPlugin () =
-        let provider = registeredPlugin.BuildServiceProvider()
+    /// 启动插件
+    let launchPluginByType t =
+        let sc = ServiceCollection()
+
+        for p in registeredPluginInfo do
+            sc.AddTransient p |> ignore
+
+        let provider = sc.BuildServiceProvider()
+
+        provider.GetService t |> ignore
+
+    /// 启动插件
+    let launchPlugin<'p> () = launchPluginByType typeof<'p>
+
+    /// 启动所有插件
+    let launchAllPlugin () =
+        let sc = ServiceCollection()
+
+        for p in registeredPluginInfo do
+            sc.AddTransient p |> ignore
+
+        let provider = sc.BuildServiceProvider()
 
         for t in registeredPluginInfo do
             provider.GetService t |> ignore

@@ -16,10 +16,11 @@ open pilipala.util.encoding
 
 [<AutoOpen>]
 module fn =
-    /// 已注册日志集合
-    let private registeredLog = ServiceCollection()
+    /// 已注册日志信息
+    let registeredLogInfo = List<Type * LogLevel>()
 
-    /// 使用类型注册日志
-    let regLogByType t = registeredLog.AddTransient t |> ignore
     /// 注册日志
-    let regLog<'l when 'l :> ILogger> () = regLogByType typeof<'l>
+    let regLogByType t lv = registeredLogInfo.Add(t, lv)
+    
+    /// 注册日志
+    let regLog<'l when 'l :> ILogger> lv = regLogByType typeof<'l> lv

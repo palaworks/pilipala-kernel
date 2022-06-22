@@ -18,7 +18,7 @@ database:
 
 plugin: ["./plugin/Mailssage", "./plugin/Llink"]
 
-service: ["./serv/Palang", "./serv/Version", "./serv/Shutdown"]
+serv: ["./serv/Palang", "./serv/Version", "./serv/Shutdown"]
 
 log:
   pilipala.serv.Auth: Information
