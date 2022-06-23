@@ -11,7 +11,7 @@ open pilipala.plugin
 type Builder with
 
     member self.usePlugin t =
-        let func _ = regPluginByType t
+        let func _ = launchPluginByType t
 
         self.buildPipeline.mappend (Pipe(func = func))
 

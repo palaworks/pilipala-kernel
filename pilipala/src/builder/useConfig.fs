@@ -3,6 +3,7 @@ module pilipala.builder.useConfig
 
 open System
 open System.Collections.Generic
+open Newtonsoft.Json.Linq
 open fsharper.op
 open pilipala.util.yaml
 open pilipala.util.json
@@ -26,11 +27,15 @@ database:
     comment: container.comment
     token: auth.token
 
-plugin: ["./plugins/mailssage", "./plugins/llink"]
+plugin: ["./plugin/Mailssage", "./plugin/Llink"]
 
-service: ["palang", "version", "shutdown"]
+serv: ["./serv/Palang", "./serv/Version", "./serv/Shutdown"]
 
-log: ["pala-std-output", "pala-std-error"]
+log:
+  pilipala.serv.Auth: Information
+  pilipala.serv.Palang: Information
+  pilipala.serv.Version: Information
+  pilipala.serv.Shutdown: Information
 
 auth:
   port: 20222
@@ -79,17 +84,27 @@ type Builder with
         |> builder.useDb
         |> ignore
 
-        for path in root.["plugin"] do
-            ((coerce path): string)
-            |> builder.usePlugin
+        //日志必须被首先配置，因为插件容器和服务容器都需要日志进行DI
+
+        //注册日志过滤器
+        for it in root.["log"] do
+            let kv: JProperty = coerce it
+            let category = kv.Name
+            let lv = coerce kv.Value
+            builder.useLogFilter category lv |> ignore
+            
+        //注册服务
+        for dir in root.["serv"] do
+            ((coerce dir): string)
+            |> builder.useServ
             |> ignore
 
-        for servName in root.["service"] do
-            let a = Type.GetType(coerce servName)
-            //TODO
-
-            ()
-
+        //注册插件
+        for dir in root.["plugin"] do
+            ((coerce dir): string)
+            |> builder.usePlugin
+            |> ignore
+            
         root.["auth"].["port"]
         |> coerce
         |> builder.useAuth

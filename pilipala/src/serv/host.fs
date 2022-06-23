@@ -4,12 +4,14 @@ open System
 open System.Net.Sockets
 open System.Threading.Tasks
 open System.Security.Cryptography
-open Microsoft.Extensions.Hosting
-open Microsoft.Extensions.DependencyInjection
 open fsharper.typ
 open fsharper.op.Boxing
 open fsharper.op.Reflection
+open Microsoft.Extensions.Hosting
+open Microsoft.Extensions.Logging
+open Microsoft.Extensions.DependencyInjection
 open WebSocketer.typ
+open pilipala.log
 open pilipala.serv.reg
 open pilipala.util.uuid
 open pilipala.auth.token
@@ -35,7 +37,14 @@ type internal ServHost(scopeFac: IServiceScopeFactory) =
             let servType = servInfo.Type
 
             let sc =
-                ServiceCollection().AddTransient servType
+                ServiceCollection()
+                    .AddTransient(servType)
+                    .AddLogging(fun builder ->
+                        for kv in registeredLogFilter do
+                            (kv.Key, kv.Value) |> builder.AddFilter |> ignore
+
+                        for p in registeredLogProvider do
+                            p |> builder.AddProvider |> ignore)
 
             match servALv with
             | Everyone ->

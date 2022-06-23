@@ -1,6 +1,7 @@
 ﻿namespace pilipala.builder
 
 open System.IO
+open pilipala.plugin
 open fsharper.typ.Pipe.Pipable
 open Microsoft.Extensions.Hosting
 
@@ -35,11 +36,4 @@ type Builder() =
     *)
 
     /// 构建
-    member self.build() =
-        //TODO
-        let host = Host.CreateDefaultBuilder().Build()
-
-        self
-            .buildPipeline
-            .mappend(Pipe<unit>(func = fun _ -> host.Run()))
-            .build ()
+    member self.build() = self.buildPipeline.build ()

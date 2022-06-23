@@ -16,11 +16,15 @@ open pilipala.util.encoding
 
 [<AutoOpen>]
 module fn =
-    /// 已注册日志信息
-    let registeredLogInfo = List<Type * LogLevel>()
 
-    /// 注册日志
-    let regLogByType t lv = registeredLogInfo.Add(t, lv)
-    
-    /// 注册日志
-    let regLog<'l when 'l :> ILogger> lv = regLogByType typeof<'l> lv
+    /// 已注册日志信息
+    let internal registeredLogProvider = List<ILoggerProvider>()
+
+    /// 已注册日志过滤器
+    let internal registeredLogFilter = Dictionary<string, LogLevel>()
+
+    /// 注册日志提供者
+    let regLogProvider provider = registeredLogProvider.Add provider
+
+    /// 注册日志过滤器
+    let regLogFilter category lv = registeredLogFilter.Add(category, lv)
