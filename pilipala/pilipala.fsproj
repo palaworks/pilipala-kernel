@@ -11,6 +11,7 @@
     <ItemGroup>
         <Compile Include="src\id.fs" />
         <Compile Include="src\db.fs" />
+        <Compile Include="src\pipeline\interface.fs" />
 
         <Compile Include="src\pipeline\post.fs" />
 

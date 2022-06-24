@@ -1,14 +1,33 @@
-module pilipala.pipeline.comment
+namespace pilipala.pipeline.comment
 
 open System
 open fsharper.op.Alias
 open fsharper.typ.Pipe.Pipable
+open pilipala.pipeline
 
-let mutable commentIdRenderPipeline = Pipe<u64>()
-let mutable ownerMetaIdRenderPipeline = Pipe<u64>()
-let mutable replyToRenderPipeline = Pipe<u64>()
-let mutable nickRenderPipeline = Pipe<string>()
-let mutable contentRenderPipeline = Pipe<string>()
-let mutable emailRenderPipeline = Pipe<string>()
-let mutable siteRenderPipeline = Pipe<string>()
-let mutable ctimeRenderPipeline = Pipe<DateTime>()
+[<AutoOpen>]
+module get =
+    let nick = ref (Pipe<string>())
+    let content = ref (Pipe<string>())
+    let email = ref (Pipe<string>())
+    let site = ref (Pipe<string>())
+    let ctime = ref (Pipe<DateTime>())
+
+[<AutoOpen>]
+module typ =
+    type CommentRenderPipeline internal () =
+        let gen (p: Ref<Pipe<'t>>) =
+            { new IRenderPipeLine<'t> with
+                member i.Before(pipe: Pipe<'t>) =
+                    p.Value <- p.Value.import pipe
+                    i
+
+                member i.Then(pipe: Pipe<'t>) =
+                    p.Value <- p.Value.mappend pipe
+                    i }
+
+        member self.nick = gen nick
+        member self.content = gen content
+        member self.email = gen email
+        member self.site = gen site
+        member self.ctime = gen ctime

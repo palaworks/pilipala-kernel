@@ -23,9 +23,6 @@ type Post with
         (self.cover + self.title + self.summary + self.body)
             .md5
 
-    /// 以正文为参数执行闭包 f, 常用于概述为空时取得一个替代值
-    member self.trySummary f = f self.body
-
 type post_record_entry with
 
     /// 创建文章记录

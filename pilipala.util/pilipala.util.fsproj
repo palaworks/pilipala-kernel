@@ -13,17 +13,20 @@
         <Compile Include="src\crypto\aes.fs" />
         <Compile Include="src\crypto\rsa.fs" />
         <Compile Include="src\socket\tcp.fs" />
-        <Compile Include="src\hash.fs" />
+        <Compile Include="src\hash\md5.fs" />
+        <Compile Include="src\hash\sha1.fs" />
+        <Compile Include="src\hash\sha256.fs" />
+        <Compile Include="src\hash\bcrypt.fs" />
         <Compile Include="src\html.fs" />
         <Compile Include="src\io.fs" />
         <Compile Include="src\json.fs" />
         <Compile Include="src\markdown.fs" />
-        <Compile Include="src\stream.fs" />
         <Compile Include="src\uuid.fs" />
         <Compile Include="src\yaml.fs" />
     </ItemGroup>
 
     <ItemGroup>
+        <PackageReference Include="BCrypt.Net-Next" Version="4.0.3" />
         <PackageReference Include="Markdig" Version="0.30.2" />
         <PackageReference Include="Microsoft.IdentityModel.Tokens" Version="6.19.0" />
         <PackageReference Include="Newtonsoft.Json" Version="13.0.2-beta1" />
@@ -31,9 +34,9 @@
     </ItemGroup>
 
     <ItemGroup>
-      <Reference Include="fsharper, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null">
-        <HintPath>..\..\fsharper\bin\Debug\net6.0\fsharper.dll</HintPath>
-      </Reference>
+        <Reference Include="fsharper, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null">
+            <HintPath>..\..\fsharper\bin\Debug\net6.0\fsharper.dll</HintPath>
+        </Reference>
     </ItemGroup>
 
 </Project>

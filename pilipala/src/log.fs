@@ -1,18 +1,7 @@
 namespace pilipala.log
 
-open System
-open System.IO
-open System.Threading.Tasks
 open System.Collections.Generic
-open System.Text.RegularExpressions
-open Microsoft.Extensions.DependencyInjection
 open Microsoft.Extensions.Logging
-open fsharper.typ.Pipe.Pipable
-open fsharper.typ.List
-open fsharper.op.Assert
-open pilipala.util.uuid
-open pilipala.util.stream
-open pilipala.util.encoding
 
 [<AutoOpen>]
 module fn =
