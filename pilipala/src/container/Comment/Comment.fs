@@ -9,7 +9,7 @@ type Comment(commentId: u64) =
     let mut = MutComment(commentId)
 
     //构建管道并处理值（无意义符号，仅用于代码生成）
-    let (-->) v (p: Ref<Pipe<_>>) = p.Value.build().invoke v
+    let (-->) v (p: Ref<Pipe<_>>) = p.Value.fill v
 
     /// 评论id
     member self.commentId = commentId

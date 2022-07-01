@@ -21,12 +21,12 @@ exception FailedToUpdateTokenAtime
 /// 凭据重复
 exception DuplicateToken
 
-[<AutoOpen>]
-module fn =
+type internal TokenProvider(dp: DbProvider) =
+
     /// 创建凭据
     /// 返回凭据值
-    let create () =
-        let table = tables.token
+    member self.create() =
+        let table = dp.tables.token
 
         let sql =
             $"INSERT INTO {table} \
@@ -43,10 +43,8 @@ module fn =
               ("atime", DateTime.Now) ]
 
         let aff =
-            mkCmd()
-                .query(sql, paras)
-                .whenEq(1)
-                .executeQuery ()
+            dp.mkCmd().query(sql, paras).whenEq (1)
+            |> dp.managed.executeQuery
 
         if aff |> eq 2 then
             Ok uuid
@@ -54,15 +52,16 @@ module fn =
             Err FailedToCreateToken
 
     /// 抹除凭据
-    let erase (token: string) =
-        let table = tables.token
+    member self.erase(token: string) =
+        let table = dp.tables.token
         let tokenHash = token.sha1
 
         let aff =
-            mkCmd()
+            dp
+                .mkCmd()
                 .delete(table, "tokenHash", tokenHash)
-                .whenEq(1)
-                .executeQuery ()
+                .whenEq (1)
+            |> dp.managed.executeQuery
 
         if aff |> eq 1 then
             Ok()
@@ -70,8 +69,8 @@ module fn =
             Err FailedToEraseToken
 
     /// 检查token是否合法
-    let check (token: string) =
-        let table = tables.token
+    member self.check(token: string) =
+        let table = dp.tables.token
 
         let sql =
             $"SELECT COUNT(*) FROM {table} WHERE tokenHash = <tokenHash>"
@@ -82,7 +81,8 @@ module fn =
         let paras: (string * obj) list = [ ("tokenHash", tokenHash) ]
 
         let n =
-            mkCmd().getFstVal(sql, paras).executeQuery ()
+            dp.mkCmd().getFstVal (sql, paras)
+            |> dp.managed.executeQuery
 
         match n with
         | Some x when x = 0 -> false
@@ -90,10 +90,11 @@ module fn =
         | Some x when coerce x = 1 ->
             //更新凭据访问记录
             let aff =
-                mkCmd()
+                dp
+                    .mkCmd()
                     .update(table, ("atime", DateTime.Now), ("tokenHash", tokenHash))
-                    .whenEq(1)
-                    .executeQuery ()
+                    .whenEq (1)
+                |> dp.managed.executeQuery
 
             if aff |> eq 1 then
                 true

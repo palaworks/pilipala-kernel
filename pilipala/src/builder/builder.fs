@@ -1,9 +1,6 @@
 ﻿namespace pilipala.builder
 
-open System.IO
-open pilipala.plugin
-open fsharper.typ.Pipe.Pipable
-open Microsoft.Extensions.Hosting
+open fsharper.typ.Pipe
 
 /// 在指定端口启动认证服务
 /// 认证通过后，会以 SecureChannel 为参数执行闭包 f
@@ -36,4 +33,4 @@ type Builder() =
     *)
 
     /// 构建
-    member self.build() = self.buildPipeline.build ()
+    member self.build() = self.buildPipeline.fill ()

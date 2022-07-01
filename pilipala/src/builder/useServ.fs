@@ -5,9 +5,8 @@ open System.IO
 open System.Reflection
 open fsharper.op
 open fsharper.typ
-open fsharper.typ.Pipe.Pipable
+open fsharper.typ.Pipe
 open pilipala.plugin
-open fsharper.typ.Pipe.Pipable
 open pilipala.serv.reg
 
 type Builder with
@@ -16,7 +15,7 @@ type Builder with
 
         let func _ = regServByType t
 
-        self.buildPipeline.mappend (Pipe(func = func))
+        self.buildPipeline.export (StatePipe(activate = func))
 
     member self.useServ<'s when 's :> ServAttribute>() = self.useServ typeof<'s>
 

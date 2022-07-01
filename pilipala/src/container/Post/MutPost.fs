@@ -1,33 +1,16 @@
 namespace pilipala.container.Post
 
 open fsharper.op.Alias
-open pilipala.pipeline
+open pilipala.container.Post
 open System
-open fsharper.op
-open fsharper.typ
-open fsharper.typ.Ord
-open fsharper.op.Alias
-open pilipala
-open pilipala.util
-open pilipala.container
-open DbManaged.PgSql.ext.String
-open System
-open fsharper.op
-open fsharper.typ
-open fsharper.typ.Ord
-open fsharper.op.Alias
-open pilipala
-open pilipala.util
-open pilipala.util.hash
-open pilipala.container
-open DbManaged.PgSql.ext.String
+
 
 type MutPost internal (postId: u64) =
 
-    let meta_entry = post_meta_entry (postId)
+    let meta_entry = IPostMetaEntry.mk postId
 
     let record_entry =
-        post_record_entry (meta_entry.bindRecordId)
+        IPostRecordEntry.mk meta_entry.bindRecordId
 
     /// 文章id
     /// 此项目不可自定义，由pilipala托管
@@ -38,8 +21,8 @@ type MutPost internal (postId: u64) =
     member self.ctime
         with get (): DateTime = meta_entry.ctime
         and set (v: DateTime) = meta_entry.ctime <- v
-        
-    /// 访问时间 
+
+    /// 访问时间
     member self.atime
         with get (): DateTime = meta_entry.atime
         and set (v: DateTime) = meta_entry.atime <- v
@@ -48,15 +31,15 @@ type MutPost internal (postId: u64) =
     /// 此时间不可自定义，由pilipala托管
     member self.mtime = record_entry.mtime
 
-    /// 访问数 
+    /// 访问数
     member self.view
         with get (): u32 = meta_entry.view
         and set (v: u32) = meta_entry.view <- v
-    /// 星星数 
+    /// 星星数
     member self.star
         with get (): u32 = meta_entry.star
         and set (v: u32) = meta_entry.star <- v
-        
+
     /// 封面
     member self.cover
         with get (): string = record_entry.cover

@@ -11,20 +11,19 @@
     <ItemGroup>
         <Compile Include="src\id.fs" />
         <Compile Include="src\db.fs" />
-        <Compile Include="src\pipeline\interface.fs" />
 
-        <Compile Include="src\pipeline\post.fs" />
+        <Compile Include="src\pipeline\post\render.fs" />
 
-        <Compile Include="src\pipeline\comment.fs" />
+        <Compile Include="src\pipeline\post\storage.fs" />
+
+        <Compile Include="src\pipeline\comment\comment.fs" />
 
         <Compile Include="src\container\err.fs" />
-        <Compile Include="src\container\cache.fs" />
-        <Compile Include="src\container\Post\post_meta_entry.fs" />
-        <Compile Include="src\container\Post\post_record_entry.fs" />
+        <Compile Include="src\container\Post\mk.fs" />
         <Compile Include="src\container\Post\MutPost.fs" />
         <Compile Include="src\container\Post\Post.fs" />
         <Compile Include="src\container\Post\ext.fs" />
-        <Compile Include="src\container\Comment\comment_entry.fs" />
+        <Compile Include="src\container\Comment\mk.fs" />
         <Compile Include="src\container\Comment\MutComment.fs" />
         <Compile Include="src\container\Comment\Comment.fs" />
         <Compile Include="src\container\Comment\ext.fs" />
@@ -38,10 +37,6 @@
         <Compile Include="src\auth\channel.fs" />
         <Compile Include="src\serv\reg.fs" />
         <Compile Include="src\serv\host.fs" />
-
-        <Compile Include="src\palang\util.fs" />
-        <Compile Include="src\palang\eval.fs" />
-        <Compile Include="src\palang\analyse.fs" />
 
         <Compile Include="src\plugin.fs" />
         <Compile Include="src\builder\builder.fs" />
@@ -75,6 +70,9 @@
         </Reference>
         <Reference Include="palaflake, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null">
             <HintPath>..\..\palaflake\impl\fs\palaflake\bin\Debug\net6.0\palaflake.dll</HintPath>
+        </Reference>
+        <Reference Include="pilipala.frame, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null">
+          <HintPath>..\pilipala.frame\bin\Debug\net6.0\pilipala.frame.dll</HintPath>
         </Reference>
         <Reference Include="pilipala.util, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null">
           <HintPath>..\pilipala.util\bin\Debug\net6.0\pilipala.util.dll</HintPath>

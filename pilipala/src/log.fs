@@ -3,17 +3,17 @@ namespace pilipala.log
 open System.Collections.Generic
 open Microsoft.Extensions.Logging
 
-[<AutoOpen>]
-module fn =
-
+type internal LogProvider() =
+    
     /// 已注册日志信息
-    let internal registeredLogProvider = List<ILoggerProvider>()
+    member self.registeredLoggerProvider = List<ILoggerProvider>()
 
     /// 已注册日志过滤器
-    let internal registeredLogFilter = Dictionary<string, LogLevel>()
+    member self.registeredLoggerFilter = Dictionary<string, LogLevel>()
 
     /// 注册日志提供者
-    let regLogProvider provider = registeredLogProvider.Add provider
+    member self.regLogProvider provider = self.registeredLoggerProvider.Add provider
 
     /// 注册日志过滤器
-    let regLogFilter category lv = registeredLogFilter.Add(category, lv)
+    member self.regLogFilter category lv =
+        self.registeredLoggerFilter.Add(category, lv)

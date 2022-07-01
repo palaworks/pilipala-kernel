@@ -4,7 +4,7 @@ module pilipala.builder.useDb
 open System.Collections.Generic
 open fsharper.op
 open fsharper.typ
-open fsharper.typ.Pipe.Pipable
+open fsharper.typ.Pipe
 open DbManaged
 open DbManaged.PgSql
 open pilipala
@@ -60,4 +60,4 @@ type Builder with
                 Ok
                 <| new PgSqlManaged(msg, coerce config.["pooling"].["size"])
 
-        self.buildPipeline.mappend (Pipe(func = func))
+        self.buildPipeline.export (StatePipe(activate = func))

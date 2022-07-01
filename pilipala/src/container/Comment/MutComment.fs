@@ -24,7 +24,7 @@ open DbManaged.PgSql.ext.String
 
 type MutComment internal (commentId: u64) =
 
-    let entry = comment_entry (commentId)
+    let entry = ICommentEntry.mk commentId
 
     /// 评论id
     /// 此项目不可自定义，由pilipala托管
@@ -53,7 +53,7 @@ type MutComment internal (commentId: u64) =
     member self.site
         with get (): string = entry.site
         and set (v: string) = entry.site <- v
-        
+
     /// 创建时间
     /// 此项目不可自定义，由pilipala托管
     member self.ctime = entry.ctime

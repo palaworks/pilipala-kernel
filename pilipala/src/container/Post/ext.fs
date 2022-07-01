@@ -23,7 +23,7 @@ type Post with
         (self.cover + self.title + self.summary + self.body)
             .md5
 
-type post_record_entry with
+type IPostRecordEntry with
 
     /// 创建文章记录
     /// 返回文章记录id
@@ -91,7 +91,7 @@ type post_record_entry with
 
         count <> 0
 
-type post_meta_entry with
+type IPostMetaEntry with
 
     static member create() =
         let table = tables.meta

@@ -8,9 +8,9 @@ open DbManaged.PgSql
 open MySqlX.XDevAPI.Relational
 open fsharper.typ
 open fsharper.typ.Ord
-open fsharper.typ.Pipe.GenericPipable
 
 /// 数据库未初始化异常
+(*
 exception DbNotInitException
 
 let mutable tablesResult: Result'<{| record: string
@@ -20,14 +20,23 @@ let mutable tablesResult: Result'<{| record: string
     Err DbNotInitException
 
 let mutable managedResult: Result'<IDbManaged, exn> = Err DbNotInitException
+*)
 
-/// 表集合
-let tables = tablesResult.unwrap ()
-/// 管理器
-let managed = managedResult.unwrap ()
-/// 命令行生成器
-let mkCmd () = managed.mkCmd ()
-
+type DbProvider
+    (
+        tables: {| record: string
+                   meta: string
+                   comment: string
+                   token: string |},
+        managed: IDbManaged
+    ) =
+    /// 表集合
+    member self.tables = tables
+    /// 管理器
+    member self.managed = managed
+    /// 命令行生成器
+    member self.mkCmd() = managed.mkCmd ()
+    
 [<Extension>]
 type ext() =
 
@@ -36,7 +45,7 @@ type ext() =
 
     [<Extension>]
     static member inline whenEq(f: (int -> bool) -> 'r, n: int) = n |> eq |> f
-
+(*
     [<Extension>]
     static member inline executeQuery(f: DbConnection -> 'r) = f |> managed.executeQuery
 
@@ -45,3 +54,4 @@ type ext() =
 
     [<Extension>]
     static member inline queueQuery(f: DbConnection -> 'r) = f |> managed.queueQuery
+*)

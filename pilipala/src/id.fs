@@ -2,7 +2,7 @@ namespace pilipala.id
 
 open pilipala.util.palaflake
 
-[<AutoOpen>]
-module fn =
-    /// 全局palaflake生成器
-    let palaflake = Generator(0uy, 2022us)
+type IdProvider(machineId) =
+
+    /// 获得palaflake生成器
+    member self.palaflake = Generator(machineId, 2022us)

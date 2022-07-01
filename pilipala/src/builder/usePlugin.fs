@@ -5,7 +5,7 @@ open System.IO
 open System.Reflection
 open fsharper.op
 open fsharper.typ
-open fsharper.typ.Pipe.Pipable
+open fsharper.typ.Pipe
 open pilipala.plugin
 
 type Builder with
@@ -13,7 +13,7 @@ type Builder with
     member self.usePlugin t =
         let func _ = launchPluginByType t
 
-        self.buildPipeline.mappend (Pipe(func = func))
+        self.buildPipeline.export (StatePipe(activate = func))
 
     member self.usePlugin<'p when 'p :> PluginAttribute>() = self.usePlugin typeof<'p>
 
