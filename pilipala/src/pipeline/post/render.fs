@@ -2,84 +2,87 @@ namespace pilipala.pipeline.post
 
 open System
 open System.Collections.Generic
+open fsharper.typ.Procedure
 open fsharper.op
-open fsharper.typ
 open fsharper.op.Alias
 open fsharper.typ.Pipe
+open fsharper.op.Coerce
+open fsharper.op.Foldable
 open DbManaged.PgSql
 open pilipala.db
 open pilipala.pipeline
 
 type BuilderItem<'I, 'O> =
     { before: IGenericPipe<'I, 'I> List
-      after: IGenericPipe<'O, 'O> List }
+      after: IGenericPipe<'O, 'O> List
+      beforeFail: IGenericPipe<'I, 'I> List }
 
 type internal PostRenderPipelineBuilder() =
-    (*
+    let gen () =
+        { before = List<IGenericPipe<'I, 'I>>()
+          after = List<IGenericPipe<'O, 'O>>()
+          beforeFail = List<IGenericPipe<'I, 'I>>() }
+
+    member self.cover: BuilderItem<u64, string> = gen ()
+    member self.title: BuilderItem<u64, string> = gen ()
+    member self.summary: BuilderItem<u64, string> = gen ()
+    member self.body: BuilderItem<u64, string> = gen ()
+
+    member self.ctime: BuilderItem<u64, DateTime> = gen ()
+    member self.mtime: BuilderItem<u64, DateTime> = gen ()
+    member self.atime: BuilderItem<u64, DateTime> = gen ()
+
+    member self.view: BuilderItem<u64, u32> = gen ()
+    member self.star: BuilderItem<u64, u32> = gen ()
+
+type PostRenderPipeline internal (builder: PostRenderPipelineBuilder, dp: DbProvider) =
     let get table target idKey (idVal: u64) =
         dp.mkCmd().getFstVal (table, target, idKey, idVal)
         |> dp.managed.executeQuery
         >>= coerce
 
-    let coverNotFound = GenericPipe<u64, string>()
+    let gen (builderItem: BuilderItem<_, _>) table target idKey =
+        let before =
+            builderItem.before.foldr (fun p (acc: IGenericPipe<_, _>) -> acc.export p) (GenericPipe<_, _>(id))
 
-    //可以在原管道附加缓存层来建立缓存机制
-    member self.genMeta<'T> target =
-        let cache id = get dp.tables.meta target "metaId" id
+        let after =
+            builderItem.after.foldl (fun (acc: IGenericPipe<_, _>) -> acc.export) (GenericPipe<_, _>(id))
 
-        GenericCachePipe<u64, 'T>(cache = cache)
+        let beforeFail =
+            builderItem.beforeFail.foldr (fun p (acc: IGenericPipe<_, _>) -> acc.export p) (GenericPipe<_, _>(id))
 
-    member self.genRecord<'T> target =
-        let cache id =
-            get dp.tables.record target "recordId" id
+        let fail id =
+            beforeFail.fill id |> fun id -> failwith $"{id}"
 
-        GenericCachePipe<u64, 'T>(cache = cache)
-*)
+        let data id = get table target idKey id
+
+        before
+            .export(GenericCachePipe<_, _>(data, fail))
+            .export after
+
     member self.cover =
-        { before = List<IGenericPipe<u64, u64>>()
-          after = List<IGenericPipe<string, string>>() }
+        gen builder.cover dp.tables.record "cover" "recordId"
 
     member self.title =
-        { before = List<IGenericPipe<u64, u64>>()
-          after = List<IGenericPipe<string, string>>() }
+        gen builder.title dp.tables.record "title" "recordId"
 
     member self.summary =
-        { before = List<IGenericPipe<u64, u64>>()
-          after = List<IGenericPipe<string, string>>() }
+        gen builder.summary dp.tables.record "summary" "recordId"
 
     member self.body =
-        { before = List<IGenericPipe<u64, u64>>()
-          after = List<IGenericPipe<string, string>>() }
+        gen builder.body dp.tables.record "body" "recordId"
 
     member self.ctime =
-        { before = List<IGenericPipe<u64, u64>>()
-          after = List<IGenericPipe<DateTime, DateTime>>() }
+        gen builder.ctime dp.tables.meta "ctime" "metaId"
 
     member self.mtime =
-        { before = List<IGenericPipe<u64, u64>>()
-          after = List<IGenericPipe<DateTime, DateTime>>() }
+        gen builder.mtime dp.tables.record "mtime" "recordId"
 
     member self.atime =
-        { before = List<IGenericPipe<u64, u64>>()
-          after = List<IGenericPipe<DateTime, DateTime>>() }
+        gen builder.atime dp.tables.meta "atime" "metaId"
 
     member self.view =
-        { before = List<IGenericPipe<u64, u64>>()
-          after = List<IGenericPipe<u32, u32>>() }
+        gen builder.view dp.tables.meta "view" "metaId"
 
     member self.star =
-        { before = List<IGenericPipe<u64, u64>>()
-          after = List<IGenericPipe<u32, u32>>() }
-
-type PostRenderPipeline internal (builder: PostRenderPipelineBuilder) =
-
-    member self.cover =
-        let before= foldr GenericPipe<u64,string>() builder.cover.before|>
-    member self.title = gen builder.title
-    member self.summary = gen builder.summary
-    member self.body = gen builder.body
-    member self.ctime = gen builder.ctime
-    member self.mtime = gen builder.mtime
-    member self.atime = gen builder.atime
-    member self.view = gen builder.view
-    member self.star = gen builder.star
+        gen builder.star dp.tables.meta "star" "metaId"
