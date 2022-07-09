@@ -21,7 +21,7 @@ exception FailedToUpdateTokenAtime
 /// 凭据重复
 exception DuplicateToken
 
-type internal TokenProvider(dp: DbProvider) =
+type internal TokenProvider(dp: IDbProvider) =
 
     /// 创建凭据
     /// 返回凭据值

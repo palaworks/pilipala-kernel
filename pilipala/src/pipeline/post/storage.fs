@@ -1,96 +1,102 @@
 namespace pilipala.pipeline.post
 
 open System
+open System.Collections.Generic
 open fsharper.op
-open fsharper.op.Alias
 open fsharper.typ
+open fsharper.typ.Ord
 open fsharper.typ.Pipe
+open fsharper.op.Alias
+open fsharper.op.Error
+open fsharper.op.Coerce
+open fsharper.op.Foldable
+open fsharper.typ.Procedure
 open DbManaged.PgSql
 open pilipala.db
 open pilipala.pipeline
 
-module internal storage =
-    let set table target idKey (idVal: u64, value) =
-        mkCmd()
-            .update(table, (target, value), (idKey, idVal))
-            .whenEq(1)
-            .executeQuery ()
+type internal PostStoragePipelineBuilder() =
+    let gen () =
+        { collection = List<PipelineCombineMode<'I, 'O>>()
+          beforeFail = List<IGenericPipe<'I, 'I>>() }
 
-    //可以在dataPipe添加逻辑，比如更新渲染管道缓存
-    //这样，当数据库操作失败时，dataPipe逻辑将不被执行
-    //出口可以追加与数据库访问成功与否无关的管道，例如日志记录
-    let genMeta<'T> target =
-        fun (idVal, value) ->
-            let aff =
-                set tables.meta target "metaId" (idVal, value)
+    member self.cover: BuilderItem<u64 * string> =
+        gen ()
 
-            if aff = 1 then
-                //如果数据库调用成功，None使得后备数据源（其他缓存逻辑）使用参数u64*'T执行
-                None
-            else
-                //如果不成功，Some会让管道立即返回，终止其他逻辑的进行
-                Some(idVal, value)
-        |> CachePipe<u64 * 'T>
-        |> ref
+    member self.title: BuilderItem<u64 * string> =
+        gen ()
 
-    let genRecord<'T> target =
-        fun (idVal, value) ->
-            let aff =
-                set tables.record target "recordId" (idVal, value)
+    member self.summary: BuilderItem<u64 * string> =
+        gen ()
 
-            if aff = 1 then
-                None
-            else
-                Some(idVal, value)
-        |> CachePipe<u64 * 'T>
-        :> IPipe<_>
-        |> ref
+    member self.body: BuilderItem<u64 * string> =
+        gen ()
 
-    let cover = genRecord<string> "cover"
+    member self.ctime: BuilderItem<u64 * DateTime> =
+        gen ()
 
-    let title = genRecord<string> "title"
+    member self.mtime: BuilderItem<u64 * DateTime> =
+        gen ()
 
-    let summary = genRecord<string> "summary"
+    member self.atime: BuilderItem<u64 * DateTime> =
+        gen ()
 
-    let body = genRecord<string> "body"
+    member self.view: BuilderItem<u64 * u32> =
+        gen ()
 
-    let ctime = genMeta<DateTime> "ctime"
+    member self.star: BuilderItem<u64 * u32> =
+        gen ()
 
-    let mtime = genRecord<DateTime> "mtime"
+type PostStoragePipeline internal (builder: PostStoragePipelineBuilder, dp: IDbProvider) =
+    let set table targetKey idKey (idVal: u64, targetVal) =
+        match dp
+                  .mkCmd()
+                  .update (table, (targetKey, targetVal), (idKey, idVal))
+              <| eq 1
+              |> dp.managed.executeQuery
+            with
+        | 1 -> Some(idVal, targetVal)
+        | _ -> None
 
-    let atime = genMeta<DateTime> "atime"
+    let gen (builderItem: BuilderItem<_>) table targetKey idKey =
+        let beforeFail =
+            builderItem.beforeFail.foldr (fun p (acc: IPipe<_>) -> acc.export p) (Pipe<_>())
 
-    let view = genMeta<u32> "view"
+        let data = set table targetKey idKey
 
-    let star = genMeta<u32> "star"
+        let fail = beforeFail.fill .> panicwith
 
-[<AutoOpen>]
-module storage_typ =
+        builderItem.collection.foldl
+        <| fun acc x ->
+            match x with
+            | Before before -> before.export acc
+            | Replace f -> f acc
+            | After after -> acc.export after
+        <| CachePipe<_>(data, fail)
 
-    open storage
+    member self.cover =
+        gen builder.cover dp.tables.record "cover" "recordId"
 
-    type PostStoragePipeline internal () =
-        let gen (p: Ref<CachePipe<'T>>) =
-            { new IStoragePipeLine<'T> with
-                member i.Before pipe =
-                    p.Value <- CachePipe<'T>(pipe.fill .> p.Value.fill)
-                    i
+    member self.title =
+        gen builder.title dp.tables.record "title" "recordId"
 
-                member i.After pipe =
-                    let mut = p.Value.asMut ()
-                    mut.data <- mut.data .> pipe.fill
-                    i
+    member self.summary =
+        gen builder.summary dp.tables.record "summary" "recordId"
 
-                member i.Replace f =
-                    p.Value <- CachePipe<'T>((f p.Value).fill)
-                    i }
+    member self.body =
+        gen builder.body dp.tables.record "body" "recordId"
 
-        member self.cover = gen cover
-        member self.title = gen title
-        member self.summary = gen summary
-        member self.body = gen body
-        member self.ctime = gen ctime
-        member self.mtime = gen mtime
-        member self.atime = gen atime
-        member self.view = gen view
-        member self.star = gen star
+    member self.ctime =
+        gen builder.ctime dp.tables.meta "ctime" "metaId"
+
+    member self.mtime =
+        gen builder.mtime dp.tables.record "mtime" "recordId"
+
+    member self.atime =
+        gen builder.atime dp.tables.meta "atime" "metaId"
+
+    member self.view =
+        gen builder.view dp.tables.meta "view" "metaId"
+
+    member self.star =
+        gen builder.star dp.tables.meta "star" "metaId"

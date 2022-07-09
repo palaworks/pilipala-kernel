@@ -1,11 +1,10 @@
-module internal pilipala.db
+namespace pilipala.db
 
 open System.Data.Common
 open System.Threading.Tasks
 open System.Runtime.CompilerServices
 open DbManaged
 open DbManaged.PgSql
-open MySqlX.XDevAPI.Relational
 open fsharper.typ
 open fsharper.typ.Ord
 
@@ -20,7 +19,7 @@ let mutable tablesResult: Result'<{| record: string
     Err DbNotInitException
 
 let mutable managedResult: Result'<IDbManaged, exn> = Err DbNotInitException
-*)
+
 
 type DbProvider
     (
@@ -37,6 +36,7 @@ type DbProvider
     /// 命令行生成器
     member self.mkCmd() = managed.mkCmd ()
     
+*)
 [<Extension>]
 type ext() =
 

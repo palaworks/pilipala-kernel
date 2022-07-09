@@ -27,7 +27,7 @@ exception FailedToDetag
 /// 标签别名
 type Tag = u64 list
 
-type internal TagProvider(dp: DbProvider) =
+type internal TagProvider(dp: IDbProvider) =
 
     /// 创建标签
     /// 返回被创建标签名

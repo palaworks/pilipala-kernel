@@ -1,4 +1,4 @@
-namespace pilipala.serv.reg
+namespace pilipala.serv
 
 open System
 open System.IO

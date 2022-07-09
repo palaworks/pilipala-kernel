@@ -9,7 +9,7 @@ open Microsoft.Extensions.Hosting
 open Microsoft.Extensions.DependencyInjection
 open WebSocketer.typ
 open pilipala.builder
-open pilipala.serv.host
+open pilipala.serv
 
 //TODO：应使用随机化IV+CBC以代替ECB模式以获得最佳安全性
 

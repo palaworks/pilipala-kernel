@@ -7,7 +7,9 @@ open fsharper.typ
 open fsharper.typ.Pipe
 open DbManaged
 open DbManaged.PgSql
+open Microsoft.Extensions.DependencyInjection
 open pilipala
+open pilipala.db
 
 (*
 database:
@@ -42,22 +44,7 @@ type Builder with
     /// 启用该选项会延迟数据持久化以缓解数据库压力并提升访问速度
     member self.useDb(config: Dictionary<string, Dictionary<string, obj>>) =
         let func _ =
-            let msg =
-                { host = coerce config.["connection"].["host"]
-                  port = coerce config.["connection"].["host"]
-                  usr = coerce config.["connection"].["host"]
-                  pwd = coerce config.["connection"].["pwd"]
-                  db = coerce config.["connection"].["using"] }
-
-            db.tablesResult <-
-                Ok
-                <| {| meta = coerce config.["map"].["meta"]
-                      record = coerce config.["map"].["record"]
-                      comment = coerce config.["map"].["comment"]
-                      token = coerce config.["map"].["token"] |}
-
-            db.managedResult <-
-                Ok
-                <| new PgSqlManaged(msg, coerce config.["pooling"].["size"])
+            self.DI.AddSingleton<DbProviderConsMsg>(fun _ -> { config = config })
+            |> ignore
 
         self.buildPipeline.export (StatePipe(activate = func))

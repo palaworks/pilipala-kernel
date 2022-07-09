@@ -1,4 +1,4 @@
-namespace pilipala.serv.host
+namespace pilipala.serv
 
 open System
 open System.Net.Sockets
@@ -12,7 +12,6 @@ open Microsoft.Extensions.Logging
 open Microsoft.Extensions.DependencyInjection
 open WebSocketer.typ
 open pilipala.log
-open pilipala.serv.reg
 open pilipala.util.uuid
 open pilipala.auth.token
 open pilipala.util.crypto

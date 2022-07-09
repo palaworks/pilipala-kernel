@@ -1,23 +1,18 @@
 ﻿namespace pilipala.pipeline
 
+open System.Collections.Generic
 open fsharper.typ.Pipe
 
-/// 渲染管道
-type IRenderPipeLine<'I, 'O> =
+type PipelineCombineMode<'I, 'O> =
     /// 在管道入口插入管道（数据库获取之前）
-    abstract Before : IPipe<'I> -> IRenderPipeLine<'I, 'O>
+    | Before of IPipe<'I>
+    /// 替换管道
+    | Replace of (IGenericPipe<'I, 'O> -> IGenericPipe<'I, 'O>)
     /// 在管道出口插入管道（数据库获取之后）
-    abstract After : IPipe<'O> -> IRenderPipeLine<'I, 'O>
+    | After of IPipe<'O>
 
-    /// 替换管道
-    abstract Replace : (IGenericPipe<'I, 'O> -> IGenericPipe<'I, 'O>) -> IRenderPipeLine<'I, 'O>
+type BuilderItem<'I, 'O> =
+    { collection: PipelineCombineMode<'I, 'O> List
+      beforeFail: IGenericPipe<'I, 'I> List }
 
-/// 存储管道
-type IStoragePipeLine<'T> =
-    /// 在管道入口插入管道（数据库写入之前）
-    abstract Before : IPipe<'T> -> IStoragePipeLine<'T>
-    /// 在管道出口插入管道（数据库写入之后）
-    abstract After : IPipe<'T> -> IStoragePipeLine<'T>
-
-    /// 替换管道
-    abstract Replace : (IPipe<'T> -> IPipe<'T>) -> IStoragePipeLine<'T>
+type BuilderItem<'T> = BuilderItem<'T, 'T>

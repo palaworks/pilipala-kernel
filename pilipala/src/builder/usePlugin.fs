@@ -6,12 +6,18 @@ open System.Reflection
 open fsharper.op
 open fsharper.typ
 open fsharper.typ.Pipe
+open Microsoft.Extensions.DependencyInjection
 open pilipala.plugin
 
 type Builder with
 
     member self.usePlugin t =
-        let func _ = launchPluginByType t
+        let func _ =
+            self
+                .DI
+                .BuildServiceProvider()
+                .GetService<PluginProvider>()
+                .launchPluginByType t
 
         self.buildPipeline.export (StatePipe(activate = func))
 
