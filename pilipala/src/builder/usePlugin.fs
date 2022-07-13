@@ -33,7 +33,7 @@ type Builder with
 
         let pluginDll =
             pluginDir.GetFileSystemInfos().toList ()
-            |> filterOne (fun x -> x.Name = $"{pluginName}.dll")
+            |> filterOnce (fun x -> x.Name = $"{pluginName}.dll")
             |> unwrap
 
         let pluginDllPath = pluginDll.FullName

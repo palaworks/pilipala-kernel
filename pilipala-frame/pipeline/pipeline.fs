@@ -1,6 +1,8 @@
 ﻿namespace pilipala.pipeline
 
+open System
 open System.Collections.Generic
+open fsharper.op.Alias
 open fsharper.typ.Pipe
 
 type PipelineCombineMode<'I, 'O> =

@@ -65,21 +65,26 @@
     <ItemGroup>
         <Reference Include="DbManaged, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null">
             <HintPath>..\..\DbManaged\bin\Debug\net6.0\DbManaged.dll</HintPath>
+            <Private>False</Private>
         </Reference>
         <Reference Include="fsharper, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null">
             <HintPath>..\..\fsharper\bin\Debug\net6.0\fsharper.dll</HintPath>
+            <Private>False</Private>
         </Reference>
         <Reference Include="palaflake, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null">
             <HintPath>..\..\palaflake\impl\fs\palaflake\bin\Debug\net6.0\palaflake.dll</HintPath>
+            <Private>False</Private>
         </Reference>
-        <Reference Include="pilipala.frame, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null">
-          <HintPath>..\pilipala.frame\bin\Debug\net6.0\pilipala.frame.dll</HintPath>
+        <Reference Include="pilipala-frame">
+          <HintPath>..\pilipala-frame\bin\Debug\net6.0\pilipala-frame.dll</HintPath>
         </Reference>
         <Reference Include="pilipala.util, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null">
           <HintPath>..\pilipala.util\bin\Debug\net6.0\pilipala.util.dll</HintPath>
+          <Private>False</Private>
         </Reference>
         <Reference Include="WebSocketer, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null">
             <HintPath>..\..\WebsSocketer\bin\Debug\net6.0\WebSocketer.dll</HintPath>
+            <Private>False</Private>
         </Reference>
     </ItemGroup>
 

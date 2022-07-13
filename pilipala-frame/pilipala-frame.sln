@@ -1,6 +1,6 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "pilipala.frame", "pilipala.frame.fsproj", "{AD52AF28-2165-47C8-8905-2394BF58F14C}"
+Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "pilipala-frame", "pilipala-frame.fsproj", "{AD52AF28-2165-47C8-8905-2394BF58F14C}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

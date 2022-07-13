@@ -8,7 +8,7 @@ open fsharper.op.Alias
 open pilipala
 open pilipala.container.cache
 open pilipala.container
-open DbManaged.PgSql.ext.String
+
 
 module ICommentEntry =
     let mk (commentId: u64) =

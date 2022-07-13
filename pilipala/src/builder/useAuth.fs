@@ -16,12 +16,13 @@ open pilipala.serv
 type Builder with
 
     member self.useAuth(port: u16) =
-        let server = //用于监听的服务器
-            TcpListener(IPAddress.Parse("localhost"), i32 port)
 
-        server.Start()
+        let func () =
+            let server = //用于监听的服务器
+                TcpListener(IPAddress.Parse("localhost"), i32 port)
 
-        let host =
+            server.Start()
+
             Host
                 .CreateDefaultBuilder()
                 .ConfigureServices(fun services ->
@@ -34,5 +35,6 @@ type Builder with
                         .AddHostedService<ServHost>()
                     |> ignore)
                 .Build()
+                .Run()
 
-        self.buildPipeline.export (StatePipe(activate = host.Run))
+        self.buildPipeline.export (StatePipe(func))

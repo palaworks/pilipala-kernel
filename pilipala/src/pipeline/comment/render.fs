@@ -12,27 +12,20 @@ open DbManaged.PgSql
 open pilipala.db
 open pilipala.pipeline
 
-type internal CommentRenderPipelineBuilder() =
-    let gen () =
-        { collection = List<PipelineCombineMode<'I, 'O>>()
-          beforeFail = List<IGenericPipe<'I, 'I>>() }
+module ICommentRenderPipelineBuilder =
+    let mk () =
+        let gen () =
+            { collection = List<PipelineCombineMode<'I, 'O>>()
+              beforeFail = List<IGenericPipe<'I, 'I>>() }
 
-    member self.nick: BuilderItem<u64, string> =
-        gen ()
+        { new ICommentRenderPipelineBuilder with
+            member self.nick = gen ()
+            member self.content = gen ()
+            member self.email = gen ()
+            member self.site = gen ()
+            member self.ctime = gen () }
 
-    member self.content: BuilderItem<u64, string> =
-        gen ()
-
-    member self.email: BuilderItem<u64, string> =
-        gen ()
-
-    member self.site: BuilderItem<u64, string> =
-        gen ()
-
-    member self.ctime: BuilderItem<u64, DateTime> =
-        gen ()
-
-type CommentRenderPipeline internal (builder: CommentRenderPipelineBuilder, dp: IDbProvider) =
+type CommentRenderPipeline internal (builder: ICommentRenderPipelineBuilder, dp: IDbProvider) =
     let get targetKey (idVal: u64) =
         dp
             .mkCmd()

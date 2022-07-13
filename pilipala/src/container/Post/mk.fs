@@ -7,21 +7,21 @@ open fsharper.typ.Ord
 open fsharper.op.Alias
 open pilipala
 open pilipala.container.Post
-open pilipala.container.cache
 open pilipala.container
-open DbManaged.PgSql.ext.String
+
+open pilipala.pipeline.post
 
 
 module IPostMetaEntry =
     let mk (metaId: u64) =
-        let cache =
-            ContainerCacheHandler(db.tables.meta, "metaId", metaId)
+        let render = PostRenderPipeline()
+        let storage = PostStoragePipeline()
 
         { new IPostMetaEntry with
 
             member self.metaId = metaId
 
-            member self.baseMetaId: u64 = cache.get "baseMetaId"
+            member self.baseMetaId: u64 = render.get "baseMetaId"
 
             member self.baseMetaId
                 with set (v: u64) = cache.set "baseMetaId" v
@@ -54,8 +54,7 @@ module IPostMetaEntry =
 module IPostRecordEntry =
     let mk (recordId: u64) =
 
-        let cache =
-            ContainerCacheHandler(db.tables.record, "recordId", recordId)
+        let cache = ContainerCacheHandler(db.tables.record, "recordId", recordId)
 
         { new IPostRecordEntry with
 
@@ -63,7 +62,7 @@ module IPostRecordEntry =
 
             member self.cover: string = cache.get "cover"
 
-            member self.cover
+            member self.cove
                 with set (v: string) = cache.set "cover" v
 
             member self.title: string = cache.get "title"

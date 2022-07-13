@@ -14,39 +14,24 @@ open DbManaged.PgSql
 open pilipala.db
 open pilipala.pipeline
 
-type internal PostRenderPipelineBuilder() =
-    let gen () =
-        { collection = List<PipelineCombineMode<'I, 'O>>()
-          beforeFail = List<IGenericPipe<'I, 'I>>() }
+module IPostRenderPipelineBuilder =
+    let mk () =
+        let gen () =
+            { collection = List<PipelineCombineMode<'I, 'O>>()
+              beforeFail = List<IGenericPipe<'I, 'I>>() }
 
-    member self.cover: BuilderItem<u64, string> =
-        gen ()
+        { new IPostRenderPipelineBuilder with
+            member self.cover = gen ()
+            member self.title = gen ()
+            member self.summary = gen ()
+            member self.body = gen ()
+            member self.ctime = gen ()
+            member self.mtime = gen ()
+            member self.atime = gen ()
+            member self.view = gen ()
+            member self.star = gen () }
 
-    member self.title: BuilderItem<u64, string> =
-        gen ()
-
-    member self.summary: BuilderItem<u64, string> =
-        gen ()
-
-    member self.body: BuilderItem<u64, string> =
-        gen ()
-
-    member self.ctime: BuilderItem<u64, DateTime> =
-        gen ()
-
-    member self.mtime: BuilderItem<u64, DateTime> =
-        gen ()
-
-    member self.atime: BuilderItem<u64, DateTime> =
-        gen ()
-
-    member self.view: BuilderItem<u64, u32> =
-        gen ()
-
-    member self.star: BuilderItem<u64, u32> =
-        gen ()
-
-type PostRenderPipeline internal (builder: PostRenderPipelineBuilder, dp: IDbProvider) =
+type PostRenderPipeline internal (builder: IPostRenderPipelineBuilder, dp: IDbProvider) =
     let get table target idKey (idVal: u64) =
         dp.mkCmd().getFstVal (table, target, idKey, idVal)
         |> dp.managed.executeQuery

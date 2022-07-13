@@ -6,10 +6,15 @@
     </PropertyGroup>
 
     <ItemGroup>
+        <Compile Include="id.fs" />
         <Compile Include="db.fs" />
-        <Compile Include="pipeline.fs" />
         <Compile Include="container.Post.fs" />
         <Compile Include="container.Comment.fs" />
+        <Compile Include="pipeline\pipeline.fs" />
+        <Compile Include="pipeline\post\render.fs" />
+        <Compile Include="pipeline\post\storage.fs" />
+        <Compile Include="pipeline\comment\render.fs" />
+        <Compile Include="pipeline\comment\storage.fs" />
     </ItemGroup>
 
     <ItemGroup>

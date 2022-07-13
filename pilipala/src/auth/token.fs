@@ -6,7 +6,6 @@ open fsharper.typ
 open fsharper.typ.Ord
 open DbManaged
 open DbManaged.PgSql
-open DbManaged.PgSql.ext.String
 open pilipala
 open pilipala.db
 open pilipala.util.hash
@@ -33,7 +32,7 @@ type internal TokenProvider(dp: IDbProvider) =
                     ( tokenHash,  ctime,  atime) \
                     VALUES \
                     (<tokenHash>,<ctime>,<atime>)"
-            |> normalizeSql
+            |> dp.managed.normalizeSql
 
         let uuid = gen N
 
@@ -60,7 +59,7 @@ type internal TokenProvider(dp: IDbProvider) =
             dp
                 .mkCmd()
                 .delete(table, "tokenHash", tokenHash)
-                .whenEq (1)
+                .whenEq 1
             |> dp.managed.executeQuery
 
         if aff |> eq 1 then
@@ -74,7 +73,7 @@ type internal TokenProvider(dp: IDbProvider) =
 
         let sql =
             $"SELECT COUNT(*) FROM {table} WHERE tokenHash = <tokenHash>"
-            |> normalizeSql
+            |> dp.managed.normalizeSql
 
         let tokenHash = token.sha1
 
@@ -93,7 +92,7 @@ type internal TokenProvider(dp: IDbProvider) =
                 dp
                     .mkCmd()
                     .update(table, ("atime", DateTime.Now), ("tokenHash", tokenHash))
-                    .whenEq (1)
+                    .whenEq 1
                 |> dp.managed.executeQuery
 
             if aff |> eq 1 then

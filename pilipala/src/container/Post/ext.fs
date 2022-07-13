@@ -5,11 +5,11 @@ open System
 open fsharper.op
 open fsharper.typ
 open fsharper.typ.Ord
-open DbManaged.PgSql.ext.String
+
 open fsharper.op.Alias
 open DbManaged
 open DbManaged.PgSql
-open DbManaged.PgSql.ext.String
+
 open pilipala.id
 open pilipala.db
 open pilipala.util
@@ -35,7 +35,7 @@ type IPostRecordEntry with
                         ( recordId,  cover,  title,  summary,  body,  mtime) \
                         VALUES \
                         (<recordId>,<cover>,<title>,<summary>,<body>,<mtime>)"
-            |> normalizeSql
+            |> dp.managed.normalizeSql
 
         let recordId = palaflake.Next()
 
@@ -79,7 +79,7 @@ type IPostRecordEntry with
 
         let sql =
             $"SELECT COUNT(*) FROM {table} WHERE metaId = <metaId>"
-            |> normalizeSql
+            |> dp.managed.normalizeSql
 
         let paras = [ ("metaId", metaId) ]
 
@@ -101,7 +101,7 @@ type IPostMetaEntry with
                     ( metaId,  baseMetaId,  bindRecordId,  ctime,  atime,  view,  star) \
                     VALUES \
                     (<metaId>,<baseMetaId>,<bindRecordId>,<ctime>,<atime>,<view>,<star>)"
-            |> normalizeSql
+            |> dp.managed.normalizeSql
 
         let metaId = palaflake.Next()
 
@@ -149,7 +149,7 @@ type IPostMetaEntry with
 
         let sql =
             $"SELECT COUNT(*) FROM {table} WHERE recordId = <recordId>"
-            |> normalizeSql
+            |> dp.managed.normalizeSql
 
         let paras = [ ("recordId", recordId) ]
 

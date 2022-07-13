@@ -8,7 +8,7 @@ open fsharper.typ.Ord
 open fsharper.op.Alias
 open DbManaged
 open DbManaged.PgSql
-open DbManaged.PgSql.ext.String
+
 open pilipala.id
 open pilipala.db
 open pilipala.util
@@ -28,7 +28,7 @@ type public comment_entry with
                     ( commentId,  ownerMetaId,  replyTo,  nick,  content,  email,  site,  ctime) \
                     VALUES \
                     (<commentId>,<ownerMetaId>,<replyTo>,<nick>,<content>,<email>,<site>,<ctime>)"
-            |> normalizeSql
+            |> dp.managed.normalizeSql
 
         let commentId = palaflake.Next()
 
@@ -93,7 +93,7 @@ type public comment_entry with
 
         let sql =
             $"SELECT COUNT(*) FROM {table} WHERE commentId = <commentId>"
-            |> normalizeSql
+            |> dp.managed.normalizeSql
 
         let paras = [ ("commentId", commentId) ]
 
@@ -113,7 +113,7 @@ type Post with
         let sql =
             $"SELECT commentId FROM {table} WHERE ownerMetaId = <ownerMetaId> \
               ORDER BY ctime"
-            |> normalizeSql
+            |> dp.managed.normalizeSql
 
         let paras: (string * obj) list = [ ("ownerMetaId", self.postId) ]
 

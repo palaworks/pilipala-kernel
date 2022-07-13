@@ -10,7 +10,7 @@ open fsharper.op.Alias
 open pilipala
 open pilipala.util
 open pilipala.container
-open DbManaged.PgSql.ext.String
+
 open System
 open fsharper.op
 open fsharper.typ
@@ -20,7 +20,7 @@ open pilipala
 open pilipala.util
 open pilipala.util.hash
 open pilipala.container
-open DbManaged.PgSql.ext.String
+
 
 type MutComment internal (commentId: u64) =
 

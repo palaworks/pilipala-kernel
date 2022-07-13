@@ -15,27 +15,20 @@ open DbManaged.PgSql
 open pilipala.db
 open pilipala.pipeline
 
-type internal CommentStoragePipelineBuilder() =
-    let gen () =
-        { collection = List<PipelineCombineMode<'I, 'O>>()
-          beforeFail = List<IGenericPipe<'I, 'I>>() }
+module CommentStoragePipelineBuilder =
+    let mk () =
+        let gen () =
+            { collection = List<PipelineCombineMode<'I, 'O>>()
+              beforeFail = List<IGenericPipe<'I, 'I>>() }
 
-    member self.nick: BuilderItem<u64 * string> =
-        gen ()
+        { new ICommentStoragePipelineBuilder with
+            member self.nick = gen ()
+            member self.content = gen ()
+            member self.email = gen ()
+            member self.site = gen ()
+            member self.ctime = gen () }
 
-    member self.content: BuilderItem<u64 * string> =
-        gen ()
-
-    member self.email: BuilderItem<u64 * string> =
-        gen ()
-
-    member self.site: BuilderItem<u64 * string> =
-        gen ()
-
-    member self.ctime: BuilderItem<u64 * DateTime> =
-        gen ()
-
-type CommentStoragePipeline internal (builder: CommentStoragePipelineBuilder, dp: IDbProvider) =
+type CommentStoragePipeline internal (builder: ICommentStoragePipelineBuilder, dp: IDbProvider) =
     let set targetKey (idVal: u64, targetVal) =
         match dp
                   .mkCmd()

@@ -6,7 +6,7 @@ open fsharper.typ.Ord
 open fsharper.op.Alias
 open DbManaged
 open DbManaged.PgSql
-open DbManaged.PgSql.ext.String
+
 open pilipala
 open pilipala.db
 open pilipala.container.Post
@@ -68,7 +68,7 @@ type internal TagProvider(dp: IDbProvider) =
 
         let sql =
             $"INSERT INTO tag_{tagName} (metaId) VALUES (<metaId>)"
-            |> normalizeSql
+            |> dp.managed.normalizeSql
 
         let paras: (string * obj) list = [ ("metaId", metaId) ]
 
