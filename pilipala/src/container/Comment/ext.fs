@@ -18,6 +18,7 @@ open pilipala.container.Post
 
 type public comment_entry with
 
+    (*
     /// 创建评论
     /// 返回评论id
     static member create() =
@@ -52,7 +53,7 @@ type public comment_entry with
             Ok commentId
         else
             Err FailedToCreateCommentException
-
+*)
 
     /// 回收评论
     static member recycle(commentId: u64) =

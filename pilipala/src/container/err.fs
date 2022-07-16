@@ -4,7 +4,7 @@
 exception FailedToSyncDbException
 
 /// 无法创建文章记录
-exception FailedToCreateRecordException
+exception FailedToCreatePostRecordException
 /// 无法抹除文章记录
 exception FailedToEraseRecordException
 

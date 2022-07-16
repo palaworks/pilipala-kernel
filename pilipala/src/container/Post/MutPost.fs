@@ -7,30 +7,25 @@ open System
 
 type MutPost internal (postId: u64) =
 
-    let meta_entry = IPostMetaEntry.mk postId
-
-    let record_entry =
-        IPostRecordEntry.mk meta_entry.bindRecordId
-
-    /// 文章id
-    /// 此项目不可自定义，由pilipala托管
-    member self.postId = postId
-
+    
+    member self.Body
+        with get():string
     /// 创建时间
     /// 此时间不可自定义，由pilipala托管
-    member self.ctime
+    member self.CreateTime
         with get (): DateTime = meta_entry.ctime
         and set (v: DateTime) = meta_entry.ctime <- v
 
     /// 访问时间
-    member self.atime
+    member self.AccessTime
         with get (): DateTime = meta_entry.atime
         and set (v: DateTime) = meta_entry.atime <- v
 
     /// 修改时间
     /// 此时间不可自定义，由pilipala托管
-    member self.mtime = record_entry.mtime
+    member self.ModifyTime = record_entry.mtime
 
+    (*
     /// 访问数
     member self.view
         with get (): u32 = meta_entry.view
@@ -56,3 +51,7 @@ type MutPost internal (postId: u64) =
     member self.body
         with get (): string = record_entry.body
         and set (v: string) = record_entry.body <- v
+    /// 文章id
+    /// 此项目不可自定义，由pilipala托管
+    member self.postId = postId
+*)

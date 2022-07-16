@@ -14,11 +14,15 @@
 
         <Compile Include="src\pipeline\post\render.fs" />
 
-        <Compile Include="src\pipeline\post\storage.fs" />
+        <Compile Include="src\pipeline\post\modify.fs" />
+
+        <Compile Include="src\pipeline\post\init.fs" />
 
         <Compile Include="src\pipeline\comment\render.fs" />
 
-        <Compile Include="src\pipeline\comment\storage.fs" />
+        <Compile Include="src\pipeline\comment\modify.fs" />
+
+        <Compile Include="src\pipeline\comment\init.fs" />
 
         <Compile Include="src\container\err.fs" />
         <Compile Include="src\container\Post\mk.fs" />

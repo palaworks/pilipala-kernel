@@ -1,17 +1,70 @@
-﻿namespace pilipala.container.Post
+﻿namespace pilipala.container.post
 
+open System
+open System.Collections.Generic
+open fsharper.typ.Procedure
+open fsharper.op
+open fsharper.typ
+open fsharper.op.Error
+open fsharper.op.Alias
+open fsharper.typ.Pipe
+open fsharper.op.Coerce
+open fsharper.op.Foldable
+open DbManaged.PgSql
+open pilipala.db
+open pilipala.pipeline
 open System
 open fsharper.op
 open fsharper.typ
 open fsharper.typ.Ord
 open fsharper.op.Alias
+open DbManaged
+open DbManaged.PgSql
 open pilipala
 open pilipala.container.Post
 open pilipala.container
-
+open pilipala.db
+open pilipala.id
 open pilipala.pipeline.post
 
+(*
+type Post() =
+     /// 标题
+      Title: string
+      /// 正文
+      Body: string
 
+      /// 创建时间
+      CreateTime: DateTime
+      /// 访问时间
+      AccessTime: DateTime
+      /// 修改时间
+      ModifyTime: DateTime
+*)
+
+
+type PostRecordProvider(render: PostRenderPipeline, modify: PostModifyPipeline, init: PostInitPipeline) =
+
+    member self.fetch(post_id: u64) =
+        { new IPost with
+            member i.Body
+                with get () = snd (render.Body.fill post_id)
+                and set v = modify.Body.fill (post_id, v) |> ignore
+
+            member i.CreateTime
+                with get () = snd (render.CreateTime.fill post_id)
+                and set v = modify.CreateTime.fill (post_id, v) |> ignore
+
+            member i.AccessTime
+                with get () = snd (render.AccessTime.fill post_id)
+                and set v = modify.AccessTime.fill (post_id, v) |> ignore
+
+            member i.ModifyTime
+                with get () = snd (render.ModifyTime.fill post_id)
+                and set v = modify.ModifyTime.fill (post_id, v) |> ignore }
+
+    member self.create(post: IPost) = fst (init.Batch.fill post)
+(*
 module IPostMetaEntry =
     let mk (metaId: u64) =
         let render = PostRenderPipeline()
@@ -84,3 +137,4 @@ module IPostRecordEntry =
 
             member self.mtime
                 with set (v: DateTime) = cache.set "mtime" v }
+*)

@@ -19,13 +19,16 @@ module ICommentRenderPipelineBuilder =
               beforeFail = List<IGenericPipe<'I, 'I>>() }
 
         { new ICommentRenderPipelineBuilder with
+            member i.Body = gen () }
+(*
             member self.nick = gen ()
             member self.content = gen ()
             member self.email = gen ()
             member self.site = gen ()
-            member self.ctime = gen () }
+            member self.ctime = gen ()
+            *)
 
-type CommentRenderPipeline internal (builder: ICommentRenderPipelineBuilder, dp: IDbProvider) =
+type CommentRenderPipeline internal (renderBuilder: ICommentRenderPipelineBuilder, dp: IDbProvider) =
     let get targetKey (idVal: u64) =
         dp
             .mkCmd()
@@ -33,14 +36,14 @@ type CommentRenderPipeline internal (builder: ICommentRenderPipelineBuilder, dp:
         |> dp.managed.executeQuery
         >>= coerce
 
-    let gen (builderItem: BuilderItem<_, _>) targetKey =
+    let gen (renderBuilderItem: BuilderItem<_, _>) targetKey =
         let beforeFail =
-            builderItem.beforeFail.foldr (fun p (acc: IGenericPipe<_, _>) -> acc.export p) (GenericPipe<_, _>(id))
+            renderBuilderItem.beforeFail.foldr (fun p (acc: IGenericPipe<_, _>) -> acc.export p) (GenericPipe<_, _>(id))
 
         let data = get targetKey
         let fail = beforeFail.fill .> panicwith
 
-        builderItem.collection.foldl
+        renderBuilderItem.collection.foldl
         <| fun acc x ->
             match x with
             | Before before -> before.export acc
@@ -48,13 +51,17 @@ type CommentRenderPipeline internal (builder: ICommentRenderPipelineBuilder, dp:
             | After after -> acc.export after
         <| GenericCachePipe<_, _>(data, fail)
 
-    member self.nick = gen builder.nick "cover"
+    member self.Body =
+        gen renderBuilder.Body "cover"
+(*
+    member self.nick = gen renderBuilder.nick "cover"
 
     member self.content =
-        gen builder.content "title"
+        gen renderBuilder.content "title"
 
-    member self.email = gen builder.email "summary"
+    member self.email = gen renderBuilder.email "summary"
 
-    member self.site = gen builder.site "body"
+    member self.site = gen renderBuilder.site "body"
 
-    member self.ctime = gen builder.ctime "ctime"
+    member self.ctime = gen renderBuilder.ctime "ctime"
+*)

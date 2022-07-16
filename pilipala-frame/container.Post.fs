@@ -2,7 +2,7 @@ namespace pilipala.container.Post
 
 open System
 open fsharper.op.Alias
-
+(**)
 type IPostMetaEntry =
     /// 元信息id
     abstract metaId : u64

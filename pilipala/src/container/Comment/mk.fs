@@ -1,22 +1,27 @@
 ﻿namespace pilipala.container.Comment
 
 open System
+open dbm_test.MySql
 open fsharper.op
+open fsharper.typ.Pipe
 open fsharper.typ
 open fsharper.typ.Ord
 open fsharper.op.Alias
 open pilipala
-open pilipala.container.cache
-open pilipala.container
+open pilipala.container.comment
+open pilipala.pipeline.comment
 
 
-module ICommentEntry =
-    let mk (commentId: u64) =
+type CommentRecordProvider(render: CommentRenderPipeline, modify: CommentModifyPipeline, init: CommentInitPipeline) =
 
-        let cache =
-            ContainerCacheHandler(db.tables.comment, "commentId", commentId)
+    member self.fetch(comment_id: u64) =
+        { new IComment with
+            member i.Body
+                with get () = snd (render.Body.fill comment_id)
+                and set v = modify.Body.fill (comment_id, v) |> ignore }
 
-        { new ICommentEntry with
+    member self.create(comment: IComment) = fst (init.Batch.fill comment)
+(*
             /// 评论id
             member self.commentId = commentId
             member self.ownerMetaId: u64 = cache.get "ownerMetaId"
@@ -52,4 +57,5 @@ module ICommentEntry =
             member self.ctime: DateTime = cache.get "ctime"
 
             member self.ctime
-                with set (v: DateTime) = cache.set "ctime" v }
+                with set (v: DateTime) = cache.set "ctime" v
+*)

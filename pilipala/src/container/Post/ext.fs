@@ -24,7 +24,7 @@ type Post with
             .md5
 
 type IPostRecordEntry with
-
+(*
     /// 创建文章记录
     /// 返回文章记录id
     static member create() =
@@ -57,7 +57,7 @@ type IPostRecordEntry with
             Ok recordId
         else
             Err FailedToCreateRecordException
-
+*)
     /// 抹除文章记录
     static member erase(recordId: u64) =
         let table = tables.record
@@ -92,7 +92,7 @@ type IPostRecordEntry with
         count <> 0
 
 type IPostMetaEntry with
-
+(*
     static member create() =
         let table = tables.meta
 
@@ -126,7 +126,7 @@ type IPostMetaEntry with
             Ok metaId
         else
             Err FailedToCreateMetaException
-
+*)
     /// 抹除文章元
     static member erase(metaId: u64) : Result'<unit, exn> =
         let table = tables.meta

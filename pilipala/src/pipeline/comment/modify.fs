@@ -15,20 +15,23 @@ open DbManaged.PgSql
 open pilipala.db
 open pilipala.pipeline
 
-module CommentStoragePipelineBuilder =
+module CommentModifyPipelineBuilder =
     let mk () =
         let gen () =
             { collection = List<PipelineCombineMode<'I, 'O>>()
               beforeFail = List<IGenericPipe<'I, 'I>>() }
 
-        { new ICommentStoragePipelineBuilder with
+        { new ICommentModifyPipelineBuilder with
+            member i.Body = gen () }
+(*
             member self.nick = gen ()
             member self.content = gen ()
             member self.email = gen ()
             member self.site = gen ()
-            member self.ctime = gen () }
+            member self.ctime = gen ()
+            *)
 
-type CommentStoragePipeline internal (builder: ICommentStoragePipelineBuilder, dp: IDbProvider) =
+type CommentModifyPipeline internal (modifyBuilder: ICommentModifyPipelineBuilder, dp: IDbProvider) =
     let set targetKey (idVal: u64, targetVal) =
         match dp
                   .mkCmd()
@@ -39,14 +42,14 @@ type CommentStoragePipeline internal (builder: ICommentStoragePipelineBuilder, d
         | 1 -> Some(idVal, targetVal)
         | _ -> None
 
-    let gen (builderItem: BuilderItem<_>) targetKey =
+    let gen (modifyBuilderItem: BuilderItem<_>) targetKey =
         let beforeFail =
-            builderItem.beforeFail.foldr (fun p (acc: IPipe<_>) -> acc.export p) (Pipe<_>())
+            modifyBuilderItem.beforeFail.foldr (fun p (acc: IPipe<_>) -> acc.export p) (Pipe<_>())
 
         let data = set targetKey
         let fail = beforeFail.fill .> panicwith
 
-        builderItem.collection.foldl
+        modifyBuilderItem.collection.foldl
         <| fun acc x ->
             match x with
             | Before before -> before.export acc
@@ -54,13 +57,17 @@ type CommentStoragePipeline internal (builder: ICommentStoragePipelineBuilder, d
             | After after -> acc.export after
         <| CachePipe<_>(data, fail)
 
-    member self.nick = gen builder.nick "nick"
+    member self.Body =
+        gen modifyBuilder.Body "comment_body"
+(*
+    member self.nick = gen modifyBuilder.nick "nick"
 
     member self.content =
-        gen builder.content "content"
+        gen modifyBuilder.content "content"
 
-    member self.email = gen builder.email "email"
+    member self.email = gen modifyBuilder.email "email"
 
-    member self.site = gen builder.site "site"
+    member self.site = gen modifyBuilder.site "site"
 
-    member self.ctime = gen builder.ctime "ctime"
+    member self.ctime = gen modifyBuilder.ctime "ctime"
+*)
