@@ -1,4 +1,4 @@
-namespace pilipala.db
+namespace pilipala.data.db
 
 open System.Data.Common
 open System.Threading.Tasks
@@ -35,7 +35,7 @@ type DbProvider
     member self.managed = managed
     /// 命令行生成器
     member self.mkCmd() = managed.mkCmd ()
-    
+
 *)
 [<Extension>]
 type ext() =

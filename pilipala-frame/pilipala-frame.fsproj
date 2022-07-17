@@ -7,9 +7,6 @@
 
     <ItemGroup>
         <Compile Include="id.fs" />
-        <Compile Include="db.fs" />
-        <Compile Include="container.Post.fs" />
-        <Compile Include="container.Comment.fs" />
         <Compile Include="container\post.fs" />
         <Compile Include="container\comment.fs" />
         <Compile Include="pipeline\pipeline.fs" />
@@ -19,6 +16,8 @@
         <Compile Include="pipeline\comment\render.fs" />
         <Compile Include="pipeline\comment\modify.fs" />
         <Compile Include="pipeline\comment\init.fs" />
+        <Compile Include="data\db.fs" />
+        <Compile Include="data\kv.fs" />
     </ItemGroup>
 
     <ItemGroup>

@@ -2,6 +2,7 @@ namespace pilipala.pipeline.post
 
 open System
 open System.Collections.Generic
+open System.Runtime.Intrinsics.X86
 open fsharper.typ.Procedure
 open fsharper.op
 open fsharper.typ
@@ -37,7 +38,7 @@ type PostRenderPipeline internal (renderBuilder: IPostRenderPipelineBuilder, dp:
     let get table target idKey (idVal: u64) =
         dp.mkCmd().getFstVal (table, target, idKey, idVal)
         |> dp.managed.executeQuery
-        >>= coerce
+        |> fmap (fun v -> idVal, coerce v)
 
     let gen (renderBuilderItem: BuilderItem<_, _>) table targetKey idKey =
         let beforeFail =

@@ -35,7 +35,7 @@ type Builder with
 
         let servDll =
             servDir.GetFileSystemInfos().toList ()
-            |> filterOne (fun x -> x.Name = $"{servName}.dll")
+            |> filterOnce (fun x -> x.Name = $"{servName}.dll")
             |> unwrap
 
         let servDllPath = servDll.FullName

@@ -4,12 +4,14 @@ open System
 open fsharper.typ
 open Markdig
 open Markdig.Extensions
+open pilipala.util.html
 
+type Markdown = { value: string }
 
-type String with
+type Markdown with
 
     /// 将markdown字符串转换为html字符串
-    member self.markdownInHtml =
+    member self.intoHtml =
 
         let exts: IMarkdownExtension list =
             [ Tables.PipeTableExtension() //表格解析
@@ -27,4 +29,4 @@ type String with
 
         let pipeline = builder.Build()
 
-        Markdown.ToHtml(self, pipeline) //序列化到Json
+        { value = Markdown.ToHtml(self.value, pipeline) }: Html

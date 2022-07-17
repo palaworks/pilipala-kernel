@@ -17,10 +17,10 @@
         <Compile Include="src\hash\sha1.fs" />
         <Compile Include="src\hash\sha256.fs" />
         <Compile Include="src\hash\bcrypt.fs" />
-        <Compile Include="src\text\yaml.fs" />
-        <Compile Include="src\text\markdown.fs" />
         <Compile Include="src\text\json.fs" />
+        <Compile Include="src\text\yaml.fs" />
         <Compile Include="src\text\html.fs" />
+        <Compile Include="src\text\markdown.fs" />
         <Compile Include="src\io.fs" />
         <Compile Include="src\uuid.fs" />
     </ItemGroup>

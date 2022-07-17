@@ -34,7 +34,7 @@ type CommentRenderPipeline internal (renderBuilder: ICommentRenderPipelineBuilde
             .mkCmd()
             .getFstVal (dp.tables.comment, targetKey, "commentId", idVal)
         |> dp.managed.executeQuery
-        >>= coerce
+        |> fmap (fun v -> idVal, coerce v)
 
     let gen (renderBuilderItem: BuilderItem<_, _>) targetKey =
         let beforeFail =

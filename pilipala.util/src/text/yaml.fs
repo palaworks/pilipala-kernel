@@ -3,12 +3,15 @@
 open System
 open System.IO
 open YamlDotNet.Serialization
+open pilipala.util.json
 
+type Yaml = { value: string }
 
-type String with
+type Yaml with
     /// 将yaml字符串转换为json字符串
-    member self.yamlInJson =
-        new StringReader(self)
-        |> DeserializerBuilder().Build().Deserialize
-        |> SerializerBuilder().JsonCompatible().Build()
-            .Serialize
+    member self.intoJson: Json =
+        { value =
+            new StringReader(self.value)
+            |> DeserializerBuilder().Build().Deserialize
+            |> SerializerBuilder().JsonCompatible().Build()
+                .Serialize }
