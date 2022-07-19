@@ -8,8 +8,8 @@ open DbManaged
 open DbManaged.PgSql
 
 open pilipala
-open pilipala.db
-open pilipala.container.Post
+open pilipala.data.db
+open pilipala.container.post
 
 /// 无法创建标签错误
 exception FailedToCreateTag

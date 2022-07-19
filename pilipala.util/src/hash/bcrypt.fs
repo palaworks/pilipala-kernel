@@ -1,13 +1,11 @@
-﻿namespace pilipala.util.hash
+﻿[<AutoOpen>]
+module pilipala.util.hash.bcrypt
 
 open System
 open BCrypt.Net
 
-[<AutoOpen>]
-module bcrypt =
+type String with
 
-    type String with
-
-        /// 字符串的bcrypt签名
-        /// 使用随机salt
-        member self.bcrypt = BCrypt.HashPassword(self)
+    /// 字符串的bcrypt签名
+    /// 使用随机salt
+    member self.bcrypt = BCrypt.HashPassword(self)

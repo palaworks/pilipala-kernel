@@ -3,13 +3,14 @@ module pilipala.builder.useDb
 
 open System.Collections.Generic
 open fsharper.op
+open fsharper.op.Alias
 open fsharper.typ
 open fsharper.typ.Pipe
 open DbManaged
 open DbManaged.PgSql
 open Microsoft.Extensions.DependencyInjection
 open pilipala
-open pilipala.db
+open pilipala.data.db
 
 (*
 database:
@@ -42,9 +43,9 @@ type Builder with
 
     /// 启用持久化队列
     /// 启用该选项会延迟数据持久化以缓解数据库压力并提升访问速度
-    member self.useDb(config: Dictionary<string, Dictionary<string, obj>>) =
+    member self.useDb(config: DbProviderConsMsg) =
         let func _ =
-            self.DI.AddSingleton<DbProviderConsMsg>(fun _ -> { config = config })
+            self.DI.AddSingleton<DbProviderConsMsg>(fun _ -> config)
             |> ignore
 
         self.buildPipeline.export (StatePipe(activate = func))

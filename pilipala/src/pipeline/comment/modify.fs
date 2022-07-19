@@ -12,7 +12,7 @@ open fsharper.op.Coerce
 open fsharper.op.Foldable
 open fsharper.typ.Procedure
 open DbManaged.PgSql
-open pilipala.db
+open pilipala.data.db
 open pilipala.pipeline
 
 module CommentModifyPipelineBuilder =

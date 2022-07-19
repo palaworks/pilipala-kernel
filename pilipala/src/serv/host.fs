@@ -11,15 +11,23 @@ open Microsoft.Extensions.Hosting
 open Microsoft.Extensions.Logging
 open Microsoft.Extensions.DependencyInjection
 open WebSocketer.typ
+open pilipala.id
 open pilipala.log
-open pilipala.util.uuid
+open pilipala.util.id
 open pilipala.auth.token
 open pilipala.util.crypto
 open pilipala.auth.channel
 open pilipala.util.encoding
 
 /// 服务执行主机
-type internal ServHost(scopeFac: IServiceScopeFactory, sp: ServProvider, lp: LogProvider, tp: TokenProvider) =
+type internal ServHost
+    (
+        scopeFac: IServiceScopeFactory,
+        sp: ServProvider,
+        lp: LogProvider,
+        tp: TokenProvider,
+        uuid: IUuidGenerator
+    ) =
     inherit BackgroundService()
 
     let func _ =
@@ -28,9 +36,13 @@ type internal ServHost(scopeFac: IServiceScopeFactory, sp: ServProvider, lp: Log
         let servProvider = servScope.ServiceProvider
 
         //request <serv_path>
-        let ws = servProvider.GetService<WebSocket>()
+        let ws =
+            servProvider.GetService<WebSocket>()
+
         let servPath = ws.recv().Split(' ').[1] //服务路径
-        let servInfo = sp.getServInfo servPath |> unwrap
+
+        let servInfo =
+            sp.getServInfo servPath |> unwrap
 
         let servALv = servInfo.AccessLv //服务访问级别
         let servType = servInfo.Type
@@ -58,7 +70,7 @@ type internal ServHost(scopeFac: IServiceScopeFactory, sp: ServProvider, lp: Log
             ws.send "need auth" //服务端问候
             let pubKey = ws.recv () //接收客户公钥
 
-            let sessionKey = gen N //生成会话密钥
+            let sessionKey = uuid.next () //生成会话密钥
 
             sessionKey //将会话密钥使用客户公钥加密后送回
             |> rsa.encrypt pubKey RSAEncryptionPadding.Pkcs1

@@ -57,10 +57,6 @@
             <HintPath>..\..\fsharper\bin\Debug\net6.0\fsharper.dll</HintPath>
             <Private>False</Private>
         </Reference>
-        <Reference Include="palaflake, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null">
-            <HintPath>..\..\palaflake\impl\fs\palaflake\bin\Debug\net6.0\palaflake.dll</HintPath>
-            <Private>False</Private>
-        </Reference>
         <Reference Include="pilipala-frame">
             <HintPath>..\pilipala-frame\bin\Debug\net6.0\pilipala-frame.dll</HintPath>
         </Reference>

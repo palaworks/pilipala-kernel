@@ -1,11 +1,21 @@
 namespace pilipala.data.db
 
 open System.Collections.Generic
+open fsharper.op.Alias
 open System.Data.Common
 open DbManaged
 
 type DbProviderConsMsg =
-    { config: Dictionary<string, Dictionary<string, obj>> }
+    { connection: {| host: string
+                     port: u32
+                     usr: string
+                     pwd: string
+                     using: string |}
+      pooling: {| size: u32; sync: u32 |}
+      map: {| post: string
+              comment: string
+              token: string
+              usr: string |} }
 
 type IDbProvider =
 

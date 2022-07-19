@@ -1,4 +1,5 @@
-﻿module pilipala.util.socket.tcp
+﻿[<AutoOpen>]
+module pilipala.util.socket.tcp
 
 open System
 open System.Net
@@ -12,7 +13,8 @@ let connect (ip: string) (port: u16) =
     let socket =
         new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp)
 
-    let endPoint = IPEndPoint(IPAddress.Parse ip, int port)
+    let endPoint =
+        IPEndPoint(IPAddress.Parse ip, int port)
 
     try
         socket.Connect endPoint
@@ -27,7 +29,8 @@ let listen (port: u16) f =
     let listenSocket =
         new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp)
 
-    let endPoint = IPEndPoint(IPAddress.Any, int port)
+    let endPoint =
+        IPEndPoint(IPAddress.Any, int port)
 
     listenSocket.Bind endPoint
     listenSocket.Listen 0 //TODO
@@ -74,7 +77,7 @@ type Socket with
             | readLen when readLen = buf.Length -> //尚未读完
                 acc @ buf.toList () |> fetch
             | readLen -> //缓冲区未满，说明全部接收完毕
-                acc @ buf.[0..readLen - 1].toList ()
+                acc @ buf.[0 .. readLen - 1].toList ()
 
         [] |> fetch |> List.toArray
 

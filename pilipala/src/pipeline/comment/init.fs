@@ -13,7 +13,7 @@ open fsharper.op.Foldable
 open fsharper.typ.Procedure
 open DbManaged
 open pilipala.container.comment
-open pilipala.db
+open pilipala.data.db
 open pilipala.id
 open pilipala.pipeline
 

@@ -7,9 +7,10 @@ open fsharper.typ.Ord
 open DbManaged
 open DbManaged.PgSql
 open pilipala
-open pilipala.db
+open pilipala.data.db
+open pilipala.id
+open pilipala.util.id
 open pilipala.util.hash
-open pilipala.util.uuid
 
 /// 无法创建凭据错误
 exception FailedToCreateToken
@@ -20,7 +21,7 @@ exception FailedToUpdateTokenAtime
 /// 凭据重复
 exception DuplicateToken
 
-type internal TokenProvider(dp: IDbProvider) =
+type internal TokenProvider(dp: IDbProvider, uuid: IUuidGenerator) =
 
     /// 创建凭据
     /// 返回凭据值
@@ -34,10 +35,9 @@ type internal TokenProvider(dp: IDbProvider) =
                     (<tokenHash>,<ctime>,<atime>)"
             |> dp.managed.normalizeSql
 
-        let uuid = gen N
 
         let paras: (string * obj) list =
-            [ ("tokenHash", uuid.sha1)
+            [ ("tokenHash", uuid.next().sha1)
               ("ctime", DateTime.Now)
               ("atime", DateTime.Now) ]
 
@@ -77,7 +77,8 @@ type internal TokenProvider(dp: IDbProvider) =
 
         let tokenHash = token.sha1
 
-        let paras: (string * obj) list = [ ("tokenHash", tokenHash) ]
+        let paras: (string * obj) list =
+            [ ("tokenHash", tokenHash) ]
 
         let n =
             dp.mkCmd().getFstVal (sql, paras)

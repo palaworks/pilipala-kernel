@@ -1,12 +1,12 @@
-﻿module pilipala.util.markdown
+﻿[<AutoOpen>]
+module pilipala.util.text.markdown
 
 open System
 open fsharper.typ
 open Markdig
 open Markdig.Extensions
-open pilipala.util.html
 
-type Markdown = { value: string }
+type Markdown = { markdown: string }
 
 type Markdown with
 
@@ -29,4 +29,4 @@ type Markdown with
 
         let pipeline = builder.Build()
 
-        { value = Markdown.ToHtml(self.value, pipeline) }: Html
+        { html = Markdown.ToHtml(self.markdown, pipeline) }

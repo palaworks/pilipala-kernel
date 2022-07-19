@@ -11,14 +11,19 @@ database:
     sync: 180
 
   map:
-    meta: container.meta
-    record: container.record
-    comment: container.comment
-    token: auth.token
+    post: tables.post
+    comment: tables.comment
+    token: tables.token
+    usr: tables.token
 
-plugin: ["./plugin/Mailssage", "./plugin/Llink"]
+plugin:
+  - ./plugin/Mailssage
+  - ./plugin/Llink
 
-serv: ["./serv/Palang", "./serv/Version", "./serv/Shutdown"]
+serv:
+  - ./serv/Palang
+  - ./serv/Version
+  - ./serv/Shutdown
 
 log:
   pilipala.serv.Auth: Information

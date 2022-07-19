@@ -9,7 +9,7 @@ open fsharper.op.Alias
 open fsharper.typ.Pipe
 open fsharper.op.Foldable
 open DbManaged.PgSql
-open pilipala.db
+open pilipala.data.db
 open pilipala.pipeline
 
 module ICommentRenderPipelineBuilder =

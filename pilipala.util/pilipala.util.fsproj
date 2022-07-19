@@ -7,6 +7,7 @@
     </PropertyGroup>
 
     <ItemGroup>
+        <Compile Include="src\io.fs" />
         <Compile Include="src\encoding\byte.fs" />
         <Compile Include="src\encoding\hex.fs" />
         <Compile Include="src\encoding\base64.fs" />
@@ -16,13 +17,14 @@
         <Compile Include="src\hash\md5.fs" />
         <Compile Include="src\hash\sha1.fs" />
         <Compile Include="src\hash\sha256.fs" />
+        <Compile Include="src\hash\sha512.fs" />
         <Compile Include="src\hash\bcrypt.fs" />
         <Compile Include="src\text\json.fs" />
         <Compile Include="src\text\yaml.fs" />
         <Compile Include="src\text\html.fs" />
         <Compile Include="src\text\markdown.fs" />
-        <Compile Include="src\io.fs" />
-        <Compile Include="src\uuid.fs" />
+        <Compile Include="src\id\uuid.fs" />
+        <Compile Include="src\id\palaflake.fs" />
     </ItemGroup>
 
     <ItemGroup>

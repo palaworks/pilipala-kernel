@@ -1,4 +1,5 @@
-﻿module pilipala.util.crypto.rsa
+﻿[<AutoOpen>]
+module pilipala.util.crypto.rsa
 
 open System
 open System.Text

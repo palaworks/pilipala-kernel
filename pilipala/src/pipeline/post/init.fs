@@ -6,7 +6,7 @@ open fsharper.typ.Pipe
 open fsharper.op.Error
 open fsharper.op.Foldable
 open DbManaged
-open pilipala.db
+open pilipala.data.db
 open pilipala.id
 open pilipala.pipeline
 open pilipala.container.post

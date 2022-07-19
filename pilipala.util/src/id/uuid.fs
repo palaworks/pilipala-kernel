@@ -1,7 +1,7 @@
-﻿module pilipala.util.uuid
+﻿[<AutoOpen>]
+module pilipala.util.id.uuid
 
 open System
-
 
 /// UUID格式
 type UuidFormat =
@@ -13,5 +13,6 @@ type UuidFormat =
 
 /// 生成UUID
 /// pilipala采用N型uuid作为标准格式
-let gen (format: UuidFormat) =
-    Guid.NewGuid().ToString(format.ToString())
+type Generator(format: UuidFormat) =
+    member self.next() =
+        Guid.NewGuid().ToString(format.ToString())

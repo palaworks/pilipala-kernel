@@ -1,4 +1,5 @@
-﻿module pilipala.util.crypto.aes
+﻿[<AutoOpen>]
+module pilipala.util.crypto.aes
 
 open System
 open System.IO

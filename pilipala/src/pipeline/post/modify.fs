@@ -12,7 +12,7 @@ open fsharper.op.Coerce
 open fsharper.op.Foldable
 open fsharper.typ.Procedure
 open DbManaged.PgSql
-open pilipala.db
+open pilipala.data.db
 open pilipala.pipeline
 
 module IPostModifyPipelineBuilder =
@@ -22,16 +22,16 @@ module IPostModifyPipelineBuilder =
               beforeFail = List<IGenericPipe<'I, 'I>>() }
 
         { new IPostModifyPipelineBuilder with
+            member i.Title = gen ()
             member i.Body = gen ()
             member i.CreateTime = gen ()
             member i.AccessTime = gen ()
             member i.ModifyTime = gen () }
 (*
-            member self.cover = gen ()
-            member self.title = gen ()
-            member self.summary = gen ()
-            member self.view = gen ()
-            member self.star = gen ()
+            member self.cover = gen ()//交由插件实现
+            member self.summary = gen ()//交由插件实现
+            member self.view = gen ()//交由插件实现
+            member self.star = gen ()//交由插件实现
             *)
 
 type PostModifyPipeline internal (modifyBuilder: IPostModifyPipelineBuilder, dp: IDbProvider) =
