@@ -12,7 +12,7 @@ open fsharper.op.Alias
 
 module IKvProvider =
 
-    let mk () =
+    let make () =
         let map = ConcurrentDictionary<obj, obj>()
 
         { new IKvProvider with

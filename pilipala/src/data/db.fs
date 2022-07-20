@@ -8,35 +8,11 @@ open DbManaged.PgSql
 open fsharper.typ
 open fsharper.typ.Ord
 
-/// 数据库未初始化异常
 (*
+/// 数据库未初始化异常
 exception DbNotInitException
-
-let mutable tablesResult: Result'<{| record: string
-                                     meta: string
-                                     comment: string
-                                     token: string |}, exn> =
-    Err DbNotInitException
-
-let mutable managedResult: Result'<IDbManaged, exn> = Err DbNotInitException
-
-
-type DbProvider
-    (
-        tables: {| record: string
-                   meta: string
-                   comment: string
-                   token: string |},
-        managed: IDbManaged
-    ) =
-    /// 表集合
-    member self.tables = tables
-    /// 管理器
-    member self.managed = managed
-    /// 命令行生成器
-    member self.mkCmd() = managed.mkCmd ()
-
 *)
+
 [<Extension>]
 type ext() =
 

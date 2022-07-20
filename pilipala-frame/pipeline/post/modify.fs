@@ -10,9 +10,3 @@ type IPostModifyPipelineBuilder =
     abstract CreateTime: BuilderItem<u64 * DateTime>
     abstract AccessTime: BuilderItem<u64 * DateTime>
     abstract ModifyTime: BuilderItem<u64 * DateTime>
-(*
-    abstract member cover: BuilderItem<u64 * string>
-    abstract member summary: BuilderItem<u64 * string>
-    abstract member view: BuilderItem<u64 * u32>
-    abstract member star: BuilderItem<u64 * u32>
-    *)

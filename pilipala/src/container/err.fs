@@ -1,5 +1,6 @@
 ﻿namespace pilipala.container
 
+(*
 /// 无法同步到数据库
 exception FailedToSyncDbException
 
@@ -20,3 +21,4 @@ exception FailedToEraseCommentException
 
 /// 无效Id
 exception InvalidIdException
+*)

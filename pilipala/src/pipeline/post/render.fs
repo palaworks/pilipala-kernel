@@ -16,36 +16,32 @@ open pilipala.data.db
 open pilipala.pipeline
 
 module IPostRenderPipelineBuilder =
-    let mk () =
-        let gen () =
+    let make () =
+        let inline gen () =
             { collection = List<PipelineCombineMode<'I, 'O>>()
               beforeFail = List<IGenericPipe<'I, 'I>>() }
 
+        //cover/summary/view/star 交由插件实现
         { new IPostRenderPipelineBuilder with
             member i.Title = gen ()
             member i.Body = gen ()
             member i.CreateTime = gen ()
             member i.AccessTime = gen ()
             member i.ModifyTime = gen () }
-(*
-            member self.cover = gen ()//交由插件实现
-            member self.summary = gen ()//交由插件实现
-            member self.view = gen ()//交由插件实现
-            member self.star = gen ()//交由插件实现
-            *)
 
-type PostRenderPipeline internal (renderBuilder: IPostRenderPipelineBuilder, dp: IDbProvider) =
-    let get table target idKey (idVal: u64) =
-        dp.mkCmd().getFstVal (table, target, idKey, idVal)
-        |> dp.managed.executeQuery
+type PostRenderPipeline internal (renderBuilder: IPostRenderPipelineBuilder, db: IDbProvider) =
+    let get target (idVal: u64) =
+        db
+            .makeCmd()
+            .getFstVal (db.tables.post, target, "post_id", idVal)
+        |> db.managed.executeQuery
         |> fmap (fun v -> idVal, coerce v)
 
-    let gen (renderBuilderItem: BuilderItem<_, _>) table targetKey idKey =
+    let gen (renderBuilderItem: BuilderItem<_, _>) targetKey =
         let beforeFail =
             renderBuilderItem.beforeFail.foldr (fun p (acc: IGenericPipe<_, _>) -> acc.export p) (GenericPipe<_, _>(id))
 
-        let data: u64 -> Option'<_> =
-            get table targetKey idKey
+        let data: u64 -> Option'<_> = get targetKey
 
         let fail: u64 -> _ =
             beforeFail.fill .> panicwith
@@ -58,27 +54,17 @@ type PostRenderPipeline internal (renderBuilder: IPostRenderPipelineBuilder, dp:
             | After after -> acc.export after
         <| GenericCachePipe<_, _>(data, fail)
 
+    member self.Title =
+        gen renderBuilder.Title "post_title"
+
     member self.Body =
-        gen renderBuilder.Body dp.tables.record "post_body" "post_id"
+        gen renderBuilder.Body "post_body"
 
     member self.CreateTime =
-        gen renderBuilder.CreateTime dp.tables.meta "post_create_time" "post_id"
+        gen renderBuilder.CreateTime "post_create_time"
 
     member self.AccessTime =
-        gen renderBuilder.AccessTime dp.tables.meta "post_access_time" "post_id"
+        gen renderBuilder.AccessTime "post_access_time"
 
     member self.ModifyTime =
-        gen renderBuilder.ModifyTime dp.tables.record "post_modify_time" "post_id"
-
-(*
-    member self.title =
-        gen renderBuilder.title dp.tables.record "title" "recordId"
-    member self.cover =
-        gen renderBuilder.cover dp.tables.record "cover" "recordId"
-    member self.summary =
-        gen renderBuilder.summary dp.tables.record "summary" "recordId"
-    member self.view =
-        gen renderBuilder.view dp.tables.meta "view" "metaId"
-    member self.star =
-        gen renderBuilder.star dp.tables.meta "star" "metaId"
-*)
+        gen renderBuilder.ModifyTime "post_modify_time"

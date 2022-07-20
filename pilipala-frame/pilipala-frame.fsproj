@@ -6,7 +6,6 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <Compile Include="id.fs" />
         <Compile Include="container\post.fs" />
         <Compile Include="container\comment.fs" />
         <Compile Include="pipeline\pipeline.fs" />
@@ -18,6 +17,8 @@
         <Compile Include="pipeline\comment\init.fs" />
         <Compile Include="data\db.fs" />
         <Compile Include="data\kv.fs" />
+        <Compile Include="id\uuid.fs" />
+        <Compile Include="id\palaflake.fs" />
     </ItemGroup>
 
     <ItemGroup>

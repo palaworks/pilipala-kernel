@@ -16,40 +16,35 @@ open pilipala.data.db
 open pilipala.pipeline
 
 module IPostModifyPipelineBuilder =
-    let mk () =
-        let gen () =
+    let make () =
+        let inline gen () =
             { collection = List<PipelineCombineMode<'I, 'O>>()
               beforeFail = List<IGenericPipe<'I, 'I>>() }
 
+        //cover/summary/view/star 交由插件实现
         { new IPostModifyPipelineBuilder with
             member i.Title = gen ()
             member i.Body = gen ()
             member i.CreateTime = gen ()
             member i.AccessTime = gen ()
             member i.ModifyTime = gen () }
-(*
-            member self.cover = gen ()//交由插件实现
-            member self.summary = gen ()//交由插件实现
-            member self.view = gen ()//交由插件实现
-            member self.star = gen ()//交由插件实现
-            *)
 
-type PostModifyPipeline internal (modifyBuilder: IPostModifyPipelineBuilder, dp: IDbProvider) =
-    let set table targetKey idKey (idVal: u64, targetVal) =
-        match dp
-                  .mkCmd()
-                  .update (table, (targetKey, targetVal), (idKey, idVal))
+type PostModifyPipeline internal (modifyBuilder: IPostModifyPipelineBuilder, db: IDbProvider) =
+    let set targetKey (idVal: u64, targetVal) =
+        match db
+                  .makeCmd()
+                  .update (db.tables.post, (targetKey, targetVal), ("post_id", idVal))
               <| eq 1
-              |> dp.managed.executeQuery
+              |> db.managed.executeQuery
             with
         | 1 -> Some(idVal, targetVal)
         | _ -> None
 
-    let gen (modifyBuilderItem: BuilderItem<_>) table targetKey idKey =
+    let gen (modifyBuilderItem: BuilderItem<_>) targetKey =
         let beforeFail =
             modifyBuilderItem.beforeFail.foldr (fun p (acc: IPipe<_>) -> acc.export p) (Pipe<_>())
 
-        let data = set table targetKey idKey
+        let data = set targetKey
 
         let fail = beforeFail.fill .> panicwith
 
@@ -61,31 +56,17 @@ type PostModifyPipeline internal (modifyBuilder: IPostModifyPipelineBuilder, dp:
             | After after -> acc.export after
         <| CachePipe<_>(data, fail)
 
+    member self.Title =
+        gen modifyBuilder.Title "body"
+
     member self.Body =
-        gen modifyBuilder.Body dp.tables.record "body" "recordId"
+        gen modifyBuilder.Body "body"
 
     member self.CreateTime =
-        gen modifyBuilder.CreateTime dp.tables.meta "ctime" "metaId"
+        gen modifyBuilder.CreateTime "ctime"
 
     member self.AccessTime =
-        gen modifyBuilder.AccessTime dp.tables.meta "atime" "metaId"
+        gen modifyBuilder.AccessTime "atime"
 
     member self.ModifyTime =
-        gen modifyBuilder.ModifyTime dp.tables.record "mtime" "recordId"
-
-(*
-    member self.cover =
-        gen modifyBuilder.cover dp.tables.record "cover" "recordId"
-
-    member self.title =
-        gen modifyBuilder.title dp.tables.record "title" "recordId"
-
-    member self.summary =
-        gen modifyBuilder.summary dp.tables.record "summary" "recordId"
-
-    member self.view =
-        gen modifyBuilder.view dp.tables.meta "view" "metaId"
-
-    member self.star =
-        gen modifyBuilder.star dp.tables.meta "star" "metaId"
-*)
+        gen modifyBuilder.ModifyTime "mtime"

@@ -16,49 +16,57 @@ open pilipala.container.comment
 open pilipala.data.db
 open pilipala.id
 open pilipala.pipeline
+open pilipala.pipeline.comment
 
 module CommentInitPipelineBuilder =
-    let mk () =
-        let gen () =
+    let make () =
+        let inline gen () =
             { collection = List<PipelineCombineMode<'I, 'O>>()
               beforeFail = List<IGenericPipe<'I, 'I>>() }
 
         { new ICommentInitPipelineBuilder with
             member i.Batch = gen () }
-(*
-            member self.nick = gen ()
-            member self.content = gen ()
-            member self.email = gen ()
-            member self.site = gen ()
-            member self.ctime = gen ()
-            *)
+
+type BindTo =
+    | Post of u64
+    | Comment of u64
 
 type CommentInitPipeline
     internal
     (
         initBuilder: ICommentInitPipelineBuilder,
         palaflake: IPalaflakeGenerator,
-        db: IDbProvider
+        db: IDbProvider,
+        bind_to: BindTo,
+        user_id: u64
     ) =
 
     let data (comment: IComment) =
 
         let sql =
             $"INSERT INTO {db.tables.comment} \
-              ( comment_id,  comment_body,  comment_create_time ) \
+              ( comment_id , bind_id , user_id , comment_body , comment_create_time , comment_is_reply ) \
               VALUES \
-              (<comment_id>,<comment_body>,<comment_create_time>)"
+              (<comment_id>,<bind_id>,<user_id>,<comment_body>,<comment_create_time>,<comment_is_reply>)"
             |> db.managed.normalizeSql
 
         let comment_id = palaflake.next ()
 
+        let bind_id, comment_is_reply =
+            match bind_to with
+            | Post post_id -> post_id, false
+            | Comment comment_id -> comment_id, true
+
         let paras: (_ * obj) list =
             [ ("comment_id", comment_id)
+              ("bind_id", bind_id)
+              ("user_id", user_id)
               ("comment_body", comment.Body)
-              ("comment_create_time", DateTime.Now) ]
+              ("comment_create_time", comment.CreateTime)
+              ("comment_is_reply", comment_is_reply) ]
 
         let aff =
-            db.mkCmd().query(sql, paras).whenEq 1
+            db.makeCmd().query(sql, paras).whenEq 1
             |> db.managed.executeQuery
 
         if aff = 1 then
@@ -81,15 +89,3 @@ type CommentInitPipeline
         <| GenericCachePipe<_, _>(data, fail)
 
     member self.Batch = gen initBuilder.Batch
-(*
-    member self.nick = gen initBuilder.nick "nick"
-
-    member self.content =
-        gen initBuilder.content "content"
-
-    member self.email = gen initBuilder.email "email"
-
-    member self.site = gen initBuilder.site "site"
-
-    member self.ctime = gen initBuilder.ctime "ctime"
-*)

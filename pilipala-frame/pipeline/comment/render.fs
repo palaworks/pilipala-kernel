@@ -5,11 +5,6 @@ open fsharper.op.Alias
 open pilipala.pipeline
 
 type ICommentRenderPipelineBuilder =
+    //abstract UserName: BuilderItem<u64, u64 * string>
     abstract Body: BuilderItem<u64, u64 * string>
-(*
-    abstract member nick: BuilderItem<u64, u64 * string>
-    abstract member content: BuilderItem<u64, u64 * string>
-    abstract member email: BuilderItem<u64, u64 * string>
-    abstract member site: BuilderItem<u64, u64 * string>
-    abstract member ctime: BuilderItem<u64, u64 * DateTime>
-*)
+    abstract CreateTime: BuilderItem<u64, u64 * DateTime>

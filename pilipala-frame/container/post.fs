@@ -3,7 +3,10 @@ namespace pilipala.container.post
 open System
 
 type IPost =
-    abstract member Body: string with get, set
-    abstract member CreateTime: DateTime with get, set
-    abstract member AccessTime: DateTime with get, set
-    abstract member ModifyTime: DateTime with get, set
+    abstract Title: string with get, set
+    abstract Body: string with get, set
+    abstract CreateTime: DateTime with get, set
+    abstract AccessTime: DateTime with get, set
+    abstract ModifyTime: DateTime with get, set
+//逻辑字段
+//abstract Comments: IComment list with get, set

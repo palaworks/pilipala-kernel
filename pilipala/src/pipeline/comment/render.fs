@@ -13,27 +13,26 @@ open pilipala.data.db
 open pilipala.pipeline
 
 module ICommentRenderPipelineBuilder =
-    let mk () =
-        let gen () =
+    let make () =
+        let inline gen () =
             { collection = List<PipelineCombineMode<'I, 'O>>()
               beforeFail = List<IGenericPipe<'I, 'I>>() }
 
+        //site 交由插件实现
+        //user_name交由用户组件实现（user_email）
+        //email交由用户组件实现（user_email）
+        //floor由comment_create_time推断
+        //replies由comment_is_reply布尔决定：为true时视bind_id为回复到的comment_id
         { new ICommentRenderPipelineBuilder with
-            member i.Body = gen () }
-(*
-            member self.nick = gen ()
-            member self.content = gen ()
-            member self.email = gen ()
-            member self.site = gen ()
-            member self.ctime = gen ()
-            *)
+            member i.Body = gen ()
+            member i.CreateTime = gen () }
 
-type CommentRenderPipeline internal (renderBuilder: ICommentRenderPipelineBuilder, dp: IDbProvider) =
+type CommentRenderPipeline internal (renderBuilder: ICommentRenderPipelineBuilder, db: IDbProvider) =
     let get targetKey (idVal: u64) =
-        dp
-            .mkCmd()
-            .getFstVal (dp.tables.comment, targetKey, "commentId", idVal)
-        |> dp.managed.executeQuery
+        db
+            .makeCmd()
+            .getFstVal (db.tables.comment, targetKey, "comment_id", idVal)
+        |> db.managed.executeQuery
         |> fmap (fun v -> idVal, coerce v)
 
     let gen (renderBuilderItem: BuilderItem<_, _>) targetKey =
@@ -52,16 +51,7 @@ type CommentRenderPipeline internal (renderBuilder: ICommentRenderPipelineBuilde
         <| GenericCachePipe<_, _>(data, fail)
 
     member self.Body =
-        gen renderBuilder.Body "cover"
-(*
-    member self.nick = gen renderBuilder.nick "cover"
+        gen renderBuilder.Body "comment_body"
 
-    member self.content =
-        gen renderBuilder.content "title"
-
-    member self.email = gen renderBuilder.email "summary"
-
-    member self.site = gen renderBuilder.site "body"
-
-    member self.ctime = gen renderBuilder.ctime "ctime"
-*)
+    member self.CreateTime =
+        gen renderBuilder.CreateTime "comment_create_time"

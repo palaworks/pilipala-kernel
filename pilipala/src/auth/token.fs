@@ -21,19 +21,19 @@ exception FailedToUpdateTokenAtime
 /// 凭据重复
 exception DuplicateToken
 
-type internal TokenProvider(dp: IDbProvider, uuid: IUuidGenerator) =
+type internal TokenProvider(db: IDbProvider, uuid: IUuidGenerator) =
 
     /// 创建凭据
     /// 返回凭据值
     member self.create() =
-        let table = dp.tables.token
+        let table = db.tables.token
 
         let sql =
             $"INSERT INTO {table} \
                     ( tokenHash,  ctime,  atime) \
                     VALUES \
                     (<tokenHash>,<ctime>,<atime>)"
-            |> dp.managed.normalizeSql
+            |> db.managed.normalizeSql
 
 
         let paras: (string * obj) list =
@@ -42,8 +42,8 @@ type internal TokenProvider(dp: IDbProvider, uuid: IUuidGenerator) =
               ("atime", DateTime.Now) ]
 
         let aff =
-            dp.mkCmd().query(sql, paras).whenEq (1)
-            |> dp.managed.executeQuery
+            db.makeCmd().query(sql, paras).whenEq (1)
+            |> db.managed.executeQuery
 
         if aff |> eq 2 then
             Ok uuid
@@ -52,15 +52,15 @@ type internal TokenProvider(dp: IDbProvider, uuid: IUuidGenerator) =
 
     /// 抹除凭据
     member self.erase(token: string) =
-        let table = dp.tables.token
+        let table = db.tables.token
         let tokenHash = token.sha1
 
         let aff =
-            dp
-                .mkCmd()
+            db
+                .makeCmd()
                 .delete(table, "tokenHash", tokenHash)
                 .whenEq 1
-            |> dp.managed.executeQuery
+            |> db.managed.executeQuery
 
         if aff |> eq 1 then
             Ok()
@@ -69,11 +69,11 @@ type internal TokenProvider(dp: IDbProvider, uuid: IUuidGenerator) =
 
     /// 检查token是否合法
     member self.check(token: string) =
-        let table = dp.tables.token
+        let table = db.tables.token
 
         let sql =
             $"SELECT COUNT(*) FROM {table} WHERE tokenHash = <tokenHash>"
-            |> dp.managed.normalizeSql
+            |> db.managed.normalizeSql
 
         let tokenHash = token.sha1
 
@@ -81,8 +81,8 @@ type internal TokenProvider(dp: IDbProvider, uuid: IUuidGenerator) =
             [ ("tokenHash", tokenHash) ]
 
         let n =
-            dp.mkCmd().getFstVal (sql, paras)
-            |> dp.managed.executeQuery
+            db.makeCmd().getFstVal (sql, paras)
+            |> db.managed.executeQuery
 
         match n with
         | Some x when x = 0 -> false
@@ -90,11 +90,11 @@ type internal TokenProvider(dp: IDbProvider, uuid: IUuidGenerator) =
         | Some x when coerce x = 1 ->
             //更新凭据访问记录
             let aff =
-                dp
-                    .mkCmd()
+                db
+                    .makeCmd()
                     .update(table, ("atime", DateTime.Now), ("tokenHash", tokenHash))
                     .whenEq 1
-                |> dp.managed.executeQuery
+                |> db.managed.executeQuery
 
             if aff |> eq 1 then
                 true

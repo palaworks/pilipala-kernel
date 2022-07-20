@@ -16,28 +16,22 @@ open pilipala.data.db
 open pilipala.pipeline
 
 module CommentModifyPipelineBuilder =
-    let mk () =
-        let gen () =
+    let make () =
+        let inline gen () =
             { collection = List<PipelineCombineMode<'I, 'O>>()
               beforeFail = List<IGenericPipe<'I, 'I>>() }
 
         { new ICommentModifyPipelineBuilder with
-            member i.Body = gen () }
-(*
-            member self.nick = gen ()
-            member self.content = gen ()
-            member self.email = gen ()
-            member self.site = gen ()
-            member self.ctime = gen ()
-            *)
+            member i.Body = gen ()
+            member i.CreateTime = gen () }
 
-type CommentModifyPipeline internal (modifyBuilder: ICommentModifyPipelineBuilder, dp: IDbProvider) =
+type CommentModifyPipeline internal (modifyBuilder: ICommentModifyPipelineBuilder, db: IDbProvider) =
     let set targetKey (idVal: u64, targetVal) =
-        match dp
-                  .mkCmd()
-                  .update (dp.tables.comment, (targetKey, targetVal), ("commentId", idVal))
+        match db
+                  .makeCmd()
+                  .update (db.tables.comment, (targetKey, targetVal), ("comment_id", idVal))
               <| eq 1
-              |> dp.managed.executeQuery
+              |> db.managed.executeQuery
             with
         | 1 -> Some(idVal, targetVal)
         | _ -> None
@@ -59,15 +53,6 @@ type CommentModifyPipeline internal (modifyBuilder: ICommentModifyPipelineBuilde
 
     member self.Body =
         gen modifyBuilder.Body "comment_body"
-(*
-    member self.nick = gen modifyBuilder.nick "nick"
 
-    member self.content =
-        gen modifyBuilder.content "content"
-
-    member self.email = gen modifyBuilder.email "email"
-
-    member self.site = gen modifyBuilder.site "site"
-
-    member self.ctime = gen modifyBuilder.ctime "ctime"
-*)
+    member self.CreateTime =
+        gen modifyBuilder.CreateTime "comment_create_time"

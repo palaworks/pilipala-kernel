@@ -3,6 +3,7 @@ namespace pilipala.pipeline.post
 open System.Collections.Generic
 open fsharper.typ
 open fsharper.typ.Pipe
+open fsharper.op.Alias
 open fsharper.op.Error
 open fsharper.op.Foldable
 open DbManaged
@@ -12,34 +13,43 @@ open pilipala.pipeline
 open pilipala.container.post
 
 module IPostInitPipelineBuilder =
-    let mk () =
-        let gen () =
+    let make () =
+        let inline gen () =
             { collection = List<PipelineCombineMode<'I, 'O>>()
               beforeFail = List<IGenericPipe<'I, 'I>>() }
 
         { new IPostInitPipelineBuilder with
             member i.Batch = gen () }
 
-type PostInitPipeline internal (initBuilder: IPostInitPipelineBuilder, palaflake: IPalaflakeGenerator, db: IDbProvider) =
+type PostInitPipeline
+    internal
+    (
+        initBuilder: IPostInitPipelineBuilder,
+        palaflake: IPalaflakeGenerator,
+        db: IDbProvider,
+        user_group: u8
+    ) =
     let data (post: IPost) =
         let sql =
-            $"INSERT INTO {db.tables.record} \
-              ( post_id,  post_body,  post_create_time,  post_access_time,  post_modify_time ) \
+            $"INSERT INTO {db.tables.post} \
+              ( post_id , post_title , post_body , post_create_time , post_access_time , post_modify_time , user_group ) \
               VALUES \
-              (<post_id>,<post_body>,<post_create_time>,<post_access_time>,<post_modify_time>)"
+              (<post_id>,<post_title>,<post_body>,<post_create_time>,<post_access_time>,<post_modify_time>,<user_group>)"
             |> db.managed.normalizeSql
 
         let post_id = palaflake.next ()
 
         let paras: (_ * obj) list =
             [ ("post_id", post_id)
+              ("post_title", post.Title)
               ("post_body", post.Body)
               ("post_create_time", post.CreateTime)
               ("post_access_time", post.AccessTime)
-              ("post_modify_time", post.ModifyTime) ]
+              ("post_modify_time", post.AccessTime)
+              ("user_group", user_group) ]
 
         let aff =
-            db.mkCmd().query(sql, paras).whenEq 1
+            db.makeCmd().query(sql, paras).whenEq 1
             |> db.managed.executeQuery
 
         if aff = 1 then

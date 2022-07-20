@@ -15,7 +15,7 @@ type DbProviderConsMsg =
       map: {| post: string
               comment: string
               token: string
-              usr: string |} }
+              user: string |} }
 
 type IDbProvider =
 
@@ -23,11 +23,11 @@ type IDbProvider =
     abstract managed: IDbManaged
 
     /// 命令行生成器
-    abstract mkCmd: unit -> DbCommand
+    abstract makeCmd: unit -> DbCommand
 
     /// 表集合
     abstract tables:
-        {| record: string
-           meta: string
+        {| post: string
            comment: string
-           token: string |}
+           token: string
+           user: string |}

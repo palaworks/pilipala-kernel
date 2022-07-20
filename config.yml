@@ -14,7 +14,7 @@ database:
     post: tables.post
     comment: tables.comment
     token: tables.token
-    usr: tables.token
+    user: tables.token
 
 plugin:
   - ./plugin/Mailssage
