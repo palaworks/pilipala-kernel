@@ -20,6 +20,8 @@ type Object with
             (self, IsoDateTimeConverter(DateTimeFormat = "yyyy-MM-dd HH:mm:ss"))
             |> JsonConvert.SerializeObject }
 
+(*
 type String with
 
     member self.parseToJObject = JObject.Parse self
+*)
