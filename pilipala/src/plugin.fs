@@ -1,7 +1,6 @@
 namespace pilipala.plugin
 
 open System
-open System.Collections.Generic
 open Microsoft.Extensions.Logging
 open Microsoft.Extensions.DependencyInjection
 open pilipala.log

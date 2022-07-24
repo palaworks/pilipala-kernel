@@ -1,13 +1,6 @@
 ﻿namespace pilipala.container.Comment
 
-open System
-open dbm_test.MySql
-open fsharper.op
-open fsharper.typ.Pipe
-open fsharper.typ
-open fsharper.typ.Ord
 open fsharper.op.Alias
-open pilipala
 open pilipala.container.comment
 open pilipala.pipeline.comment
 

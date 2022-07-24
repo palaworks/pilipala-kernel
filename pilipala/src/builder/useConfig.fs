@@ -3,7 +3,6 @@ module pilipala.builder.useConfig
 
 open System
 open System.Collections.Generic
-open Newtonsoft.Json.Linq
 open fsharper.op
 open fsharper.op.Alias
 open pilipala.data.db

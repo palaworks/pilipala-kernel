@@ -4,11 +4,9 @@ open System
 open System.Collections.Generic
 open fsharper.op
 open fsharper.typ
-open fsharper.op.Error
 open fsharper.op.Alias
 open fsharper.typ.Pipe
 open fsharper.op.Foldable
-open DbManaged.PgSql
 open pilipala.data.db
 open pilipala.pipeline
 

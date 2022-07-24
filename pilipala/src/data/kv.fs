@@ -2,13 +2,8 @@ namespace pilipala.data.kv
 
 open System
 open System.Collections.Concurrent
-open Newtonsoft
-open Microsoft.Extensions.DependencyInjection
-open Newtonsoft.Json
-open fsharper.typ
 open fsharper.op
-open fsharper.typ.Pipe
-open fsharper.op.Alias
+open fsharper.typ
 
 module IKvProvider =
 

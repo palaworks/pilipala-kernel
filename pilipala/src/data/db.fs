@@ -1,8 +1,6 @@
 namespace pilipala.data.db
 
 open System.Data.Common
-open System.Threading.Tasks
-open System.Runtime.CompilerServices
 open DbManaged
 open DbManaged.PgSql
 open fsharper.typ
@@ -24,6 +22,9 @@ module ext_IDbOperationBuilder =
         member db.inToken cmd = cmd, db.tables.token
 
     type IDbOperationBuilder with
+        [<CustomOperation("getFstVal")>]
+        member db.getFstVal(cmd, sql, paras) = (cmd: DbCommand).getFstVal (sql, paras)
+
         [<CustomOperation("getFstVal")>]
         member db.getFstVal((cmd, table), targetKey, whereKey, whereVal) =
             (cmd: DbCommand)

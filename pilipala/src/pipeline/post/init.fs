@@ -1,13 +1,12 @@
 namespace pilipala.pipeline.post
 
+open System
 open System.Collections.Generic
 open fsharper.typ
 open fsharper.typ.Pipe
 open fsharper.op.Alias
 open fsharper.op.Error
 open fsharper.op.Foldable
-open DbManaged
-open DbManaged.PgSql
 open pilipala.id
 open pilipala.data.db
 open pilipala.pipeline
@@ -47,8 +46,8 @@ type PostInitPipeline
                 inPost
                 insert fields
                 whenEq 1
+                execute
             }
-            |> db.managed.executeQuery
 
         if aff = 1 then
             Some(post_id, post)

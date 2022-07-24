@@ -19,7 +19,6 @@
         <Compile Include="src\pipeline\comment\render.fs" />
         <Compile Include="src\pipeline\comment\modify.fs" />
         <Compile Include="src\pipeline\comment\init.fs" />
-        <Compile Include="src\container\err.fs" />
         <Compile Include="src\container\post\provider.fs" />
         <Compile Include="src\container\post\ext.fs" />
         <Compile Include="src\container\comment\provider.fs" />

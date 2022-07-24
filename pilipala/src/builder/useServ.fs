@@ -7,7 +7,6 @@ open fsharper.op
 open fsharper.typ
 open fsharper.typ.Pipe
 open Microsoft.Extensions.DependencyInjection
-open pilipala.plugin
 open pilipala.serv
 
 type Builder with

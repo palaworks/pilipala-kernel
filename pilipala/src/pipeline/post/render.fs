@@ -2,16 +2,11 @@ namespace pilipala.pipeline.post
 
 open System
 open System.Collections.Generic
-open System.Runtime.Intrinsics.X86
-open fsharper.typ.Procedure
 open fsharper.op
 open fsharper.typ
-open fsharper.op.Error
 open fsharper.op.Alias
 open fsharper.typ.Pipe
-open fsharper.op.Coerce
 open fsharper.op.Foldable
-open DbManaged.PgSql
 open pilipala.data.db
 open pilipala.pipeline
 

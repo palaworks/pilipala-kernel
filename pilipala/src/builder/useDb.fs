@@ -1,15 +1,8 @@
 [<AutoOpen>]
 module pilipala.builder.useDb
 
-open System.Collections.Generic
-open fsharper.op
-open fsharper.op.Alias
-open fsharper.typ
 open fsharper.typ.Pipe
-open DbManaged
-open DbManaged.PgSql
 open Microsoft.Extensions.DependencyInjection
-open pilipala
 open pilipala.data.db
 
 (*

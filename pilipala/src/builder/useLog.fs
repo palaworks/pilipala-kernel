@@ -2,7 +2,6 @@
 module pilipala.builder.useLog
 
 open fsharper.typ.Pipe
-open Microsoft.Extensions.Logging
 open Microsoft.Extensions.DependencyInjection
 open pilipala.log
 

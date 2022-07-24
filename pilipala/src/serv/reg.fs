@@ -1,19 +1,10 @@
 namespace pilipala.serv
 
 open System
-open System.IO
 open System.Collections.Generic
 open System.Text.RegularExpressions
-open Microsoft.Extensions.DependencyInjection
-open WebSocketer.typ
 open fsharper.op
-open fsharper.typ.List
-open fsharper.op.Reflection
-open fsharper.typ.Procedure
-open fsharper.typ.Array
-open fsharper.typ.Option'
-open pilipala.log
-open pilipala.auth.channel
+open fsharper.typ
 
 (*
 servPath是用于路由服务结构的文本

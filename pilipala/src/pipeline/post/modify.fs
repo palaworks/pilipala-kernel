@@ -4,14 +4,9 @@ open System
 open System.Collections.Generic
 open fsharper.op
 open fsharper.typ
-open fsharper.typ.Ord
 open fsharper.typ.Pipe
 open fsharper.op.Alias
-open fsharper.op.Error
-open fsharper.op.Coerce
 open fsharper.op.Foldable
-open fsharper.typ.Procedure
-open DbManaged.PgSql
 open pilipala.data.db
 open pilipala.pipeline
 
@@ -59,16 +54,16 @@ type PostModifyPipeline internal (modifyBuilder: IPostModifyPipelineBuilder, db:
         <| CachePipe<_>(data, fail)
 
     member self.Title =
-        gen modifyBuilder.Title "body"
+        gen modifyBuilder.Title "post_title"
 
     member self.Body =
-        gen modifyBuilder.Body "body"
+        gen modifyBuilder.Body "post_body"
 
     member self.CreateTime =
-        gen modifyBuilder.CreateTime "ctime"
+        gen modifyBuilder.CreateTime "post_create_time"
 
     member self.AccessTime =
-        gen modifyBuilder.AccessTime "atime"
+        gen modifyBuilder.AccessTime "post_access_time"
 
     member self.ModifyTime =
-        gen modifyBuilder.ModifyTime "mtime"
+        gen modifyBuilder.ModifyTime "post_modify_time"

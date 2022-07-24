@@ -7,13 +7,12 @@ open System.Security.Cryptography
 open fsharper.typ
 open fsharper.op.Boxing
 open fsharper.op.Reflection
+open WebSocketer.typ
 open Microsoft.Extensions.Hosting
 open Microsoft.Extensions.Logging
 open Microsoft.Extensions.DependencyInjection
-open WebSocketer.typ
 open pilipala.id
 open pilipala.log
-open pilipala.util.id
 open pilipala.auth.token
 open pilipala.util.crypto
 open pilipala.auth.channel

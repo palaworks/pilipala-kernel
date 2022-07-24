@@ -4,12 +4,8 @@ open System
 open fsharper.op
 open fsharper.typ
 open fsharper.typ.Ord
-open DbManaged
-open DbManaged.PgSql
-open pilipala
 open pilipala.data.db
 open pilipala.id
-open pilipala.util.id
 open pilipala.util.hash
 
 /// 无法创建凭据错误
@@ -71,12 +67,14 @@ type internal TokenProvider(db: IDbOperationBuilder, uuid: IUuidGenerator) =
 
         let tokenHash = token.sha1
 
-        let paras: (string * obj) list =
+        let paras: (_ * obj) list =
             [ ("tokenHash", tokenHash) ]
 
         let n =
-            db.makeCmd().getFstVal (sql, paras)
-            |> db.managed.executeQuery
+            db {
+                getFstVal sql paras
+                execute
+            }
 
         match n with
         | Some x when x = 0 -> false
