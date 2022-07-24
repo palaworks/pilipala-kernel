@@ -7,6 +7,8 @@ type PostProvider(render: PostRenderPipeline, modify: PostModifyPipeline, init: 
 
     member self.fetch(post_id: u64) =
         { new IPost with
+            member i.Id = post_id
+
             member i.Title
                 with get () = snd (render.Title.fill post_id)
                 and set v = modify.Title.fill (post_id, v) |> ignore

@@ -7,8 +7,9 @@ open fsharper.op.Alias
 open fsharper.op.Error
 open fsharper.op.Foldable
 open DbManaged
-open pilipala.data.db
+open DbManaged.PgSql
 open pilipala.id
+open pilipala.data.db
 open pilipala.pipeline
 open pilipala.container.post
 
@@ -26,20 +27,13 @@ type PostInitPipeline
     (
         initBuilder: IPostInitPipelineBuilder,
         palaflake: IPalaflakeGenerator,
-        db: IDbProvider,
+        db: IDbOperationBuilder,
         user_group: u8
     ) =
     let data (post: IPost) =
-        let sql =
-            $"INSERT INTO {db.tables.post} \
-              ( post_id , post_title , post_body , post_create_time , post_access_time , post_modify_time , user_group ) \
-              VALUES \
-              (<post_id>,<post_title>,<post_body>,<post_create_time>,<post_access_time>,<post_modify_time>,<user_group>)"
-            |> db.managed.normalizeSql
-
         let post_id = palaflake.next ()
 
-        let paras: (_ * obj) list =
+        let fields: (_ * obj) list =
             [ ("post_id", post_id)
               ("post_title", post.Title)
               ("post_body", post.Body)
@@ -49,7 +43,11 @@ type PostInitPipeline
               ("user_group", user_group) ]
 
         let aff =
-            db.makeCmd().query(sql, paras).whenEq 1
+            db {
+                inPost
+                insert fields
+                whenEq 1
+            }
             |> db.managed.executeQuery
 
         if aff = 1 then

@@ -8,26 +8,56 @@ open DbManaged.PgSql
 open fsharper.typ
 open fsharper.typ.Ord
 
-(*
-/// 数据库未初始化异常
-exception DbNotInitException
-*)
+[<AutoOpen>]
+module ext_IDbOperationBuilder =
+    type IDbOperationBuilder with
+        member db.Yield _ = db.makeCmd ()
 
-[<Extension>]
-type ext() =
+    type IDbOperationBuilder with
+        [<CustomOperation("inComment")>]
+        member db.inComment cmd = cmd, db.tables.comment
 
-    [<Extension>]
-    static member inline alwaysCommit(f: (int -> bool) -> 'r) = always true |> f
+        [<CustomOperation("inPost")>]
+        member db.inPost cmd = cmd, db.tables.post
 
-    [<Extension>]
-    static member inline whenEq(f: (int -> bool) -> 'r, n: int) = n |> eq |> f
-(*
-    [<Extension>]
-    static member inline executeQuery(f: DbConnection -> 'r) = f |> managed.executeQuery
+        [<CustomOperation("inToken")>]
+        member db.inToken cmd = cmd, db.tables.token
 
-    [<Extension>]
-    static member inline executeQueryAsync(f: DbConnection -> Task<'r>) = f |> managed.executeQueryAsync
+    type IDbOperationBuilder with
+        [<CustomOperation("getFstVal")>]
+        member db.getFstVal((cmd, table), targetKey, whereKey, whereVal) =
+            (cmd: DbCommand)
+                .getFstVal (table, targetKey, whereKey, whereVal)
 
-    [<Extension>]
-    static member inline queueQuery(f: DbConnection -> 'r) = f |> managed.queueQuery
-*)
+        [<CustomOperation("update")>]
+        member db.update((cmd, table), targetKey, targetVal, whereKey, whereVal) =
+            (cmd: DbCommand)
+                .update (table, (targetKey, targetVal), (whereKey, whereVal))
+
+        [<CustomOperation("insert")>]
+        member db.insert((cmd, table), fields) = (cmd: DbCommand).insert (table, fields)
+
+        [<CustomOperation("delete")>]
+        member db.delete((cmd, table), whereKey, whereVal) =
+            (cmd: DbCommand)
+                .delete (table, whereKey, whereVal)
+
+    type IDbOperationBuilder with
+        [<CustomOperation("whenEq")>]
+        member db.whenEq(f, n) = f (eq n)
+
+        [<CustomOperation("alwaysCommit")>]
+        member db.always f = f (always true)
+
+    type IDbOperationBuilder with
+        [<CustomOperation("execute")>]
+        member db.execute f = db.managed.executeQuery f
+
+        [<CustomOperation("executeAsync")>]
+        member db.executeQueryAsync f = db.managed.executeQueryAsync f
+
+        [<CustomOperation("queue")>]
+        member db.queueQuery f = db.managed.queueQuery f
+
+        [<CustomOperation("delay")>]
+        member db.delayQuery f = db.managed.queueQuery f

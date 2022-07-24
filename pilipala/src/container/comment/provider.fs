@@ -21,6 +21,7 @@ type CommentProvider(render: CommentRenderPipeline, modify: CommentModifyPipelin
     *)
     member self.fetch(comment_id: u64) =
         { new IComment with
+            member i.Id = comment_id
 
             member i.Body
                 with get () = snd (render.Body.fill comment_id)

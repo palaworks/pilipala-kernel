@@ -29,12 +29,13 @@ module IPostRenderPipelineBuilder =
             member i.AccessTime = gen ()
             member i.ModifyTime = gen () }
 
-type PostRenderPipeline internal (renderBuilder: IPostRenderPipelineBuilder, db: IDbProvider) =
+type PostRenderPipeline internal (renderBuilder: IPostRenderPipelineBuilder, db: IDbOperationBuilder) =
     let get target (idVal: u64) =
-        db
-            .makeCmd()
-            .getFstVal (db.tables.post, target, "post_id", idVal)
-        |> db.managed.executeQuery
+        db {
+            inPost
+            getFstVal target "post_id" idVal
+            execute
+        }
         |> fmap (fun v -> idVal, coerce v)
 
     let gen (renderBuilderItem: BuilderItem<_, _>) targetKey =

@@ -12,6 +12,7 @@ open fsharper.op.Coerce
 open fsharper.op.Foldable
 open fsharper.typ.Procedure
 open DbManaged
+open DbManaged.PgSql
 open pilipala.container.comment
 open pilipala.data.db
 open pilipala.id
@@ -36,19 +37,12 @@ type CommentInitPipeline
     (
         initBuilder: ICommentInitPipelineBuilder,
         palaflake: IPalaflakeGenerator,
-        db: IDbProvider,
+        db: IDbOperationBuilder,
         bind_to: BindTo,
         user_id: u64
     ) =
 
     let data (comment: IComment) =
-
-        let sql =
-            $"INSERT INTO {db.tables.comment} \
-              ( comment_id , bind_id , user_id , comment_body , comment_create_time , comment_is_reply ) \
-              VALUES \
-              (<comment_id>,<bind_id>,<user_id>,<comment_body>,<comment_create_time>,<comment_is_reply>)"
-            |> db.managed.normalizeSql
 
         let comment_id = palaflake.next ()
 
@@ -57,7 +51,7 @@ type CommentInitPipeline
             | Post post_id -> post_id, false
             | Comment comment_id -> comment_id, true
 
-        let paras: (_ * obj) list =
+        let fields: (_ * obj) list =
             [ ("comment_id", comment_id)
               ("bind_id", bind_id)
               ("user_id", user_id)
@@ -66,7 +60,11 @@ type CommentInitPipeline
               ("comment_is_reply", comment_is_reply) ]
 
         let aff =
-            db.makeCmd().query(sql, paras).whenEq 1
+            db {
+                inComment
+                insert fields
+                whenEq 1
+            }
             |> db.managed.executeQuery
 
         if aff = 1 then

@@ -21,29 +21,23 @@ exception FailedToUpdateTokenAtime
 /// 凭据重复
 exception DuplicateToken
 
-type internal TokenProvider(db: IDbProvider, uuid: IUuidGenerator) =
+type internal TokenProvider(db: IDbOperationBuilder, uuid: IUuidGenerator) =
 
     /// 创建凭据
     /// 返回凭据值
     member self.create() =
-        let table = db.tables.token
-
-        let sql =
-            $"INSERT INTO {table} \
-                    ( tokenHash,  ctime,  atime) \
-                    VALUES \
-                    (<tokenHash>,<ctime>,<atime>)"
-            |> db.managed.normalizeSql
-
-
-        let paras: (string * obj) list =
+        let fields: (_ * obj) list =
             [ ("tokenHash", uuid.next().sha1)
               ("ctime", DateTime.Now)
               ("atime", DateTime.Now) ]
 
         let aff =
-            db.makeCmd().query(sql, paras).whenEq (1)
-            |> db.managed.executeQuery
+            db {
+                inToken
+                insert fields
+                whenEq 1
+                execute
+            }
 
         if aff |> eq 2 then
             Ok uuid
@@ -52,15 +46,15 @@ type internal TokenProvider(db: IDbProvider, uuid: IUuidGenerator) =
 
     /// 抹除凭据
     member self.erase(token: string) =
-        let table = db.tables.token
         let tokenHash = token.sha1
 
         let aff =
-            db
-                .makeCmd()
-                .delete(table, "tokenHash", tokenHash)
-                .whenEq 1
-            |> db.managed.executeQuery
+            db {
+                inToken
+                delete "tokenHash" tokenHash
+                whenEq 1
+                execute
+            }
 
         if aff |> eq 1 then
             Ok()
@@ -90,11 +84,12 @@ type internal TokenProvider(db: IDbProvider, uuid: IUuidGenerator) =
         | Some x when coerce x = 1 ->
             //更新凭据访问记录
             let aff =
-                db
-                    .makeCmd()
-                    .update(table, ("atime", DateTime.Now), ("tokenHash", tokenHash))
-                    .whenEq 1
-                |> db.managed.executeQuery
+                db {
+                    inToken
+                    update "atime" DateTime.Now "tokenHash" tokenHash
+                    whenEq 1
+                    execute
+                }
 
             if aff |> eq 1 then
                 true

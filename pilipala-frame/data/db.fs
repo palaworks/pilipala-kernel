@@ -5,7 +5,7 @@ open fsharper.op.Alias
 open System.Data.Common
 open DbManaged
 
-type DbProviderConsMsg =
+type DbConfig =
     { connection: {| host: string
                      port: u32
                      usr: string
@@ -17,7 +17,7 @@ type DbProviderConsMsg =
               token: string
               user: string |} }
 
-type IDbProvider =
+type IDbOperationBuilder =
 
     /// 管理器
     abstract managed: IDbManaged

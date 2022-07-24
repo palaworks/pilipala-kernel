@@ -18,7 +18,7 @@ type Dictionary<'k, 'v> with
         self
 
 type Config =
-    { database: DbProviderConsMsg
+    { database: DbConfig
       plugin: string list
       serv: string list
       log: Dictionary<string, string>

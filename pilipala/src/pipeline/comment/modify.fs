@@ -25,13 +25,15 @@ module CommentModifyPipelineBuilder =
             member i.Body = gen ()
             member i.CreateTime = gen () }
 
-type CommentModifyPipeline internal (modifyBuilder: ICommentModifyPipelineBuilder, db: IDbProvider) =
+type CommentModifyPipeline internal (modifyBuilder: ICommentModifyPipelineBuilder, db: IDbOperationBuilder) =
     let set targetKey (idVal: u64, targetVal) =
-        match db
-                  .makeCmd()
-                  .update (db.tables.comment, (targetKey, targetVal), ("comment_id", idVal))
-              <| eq 1
-              |> db.managed.executeQuery
+        match
+            db {
+                inComment
+                update targetKey targetVal "comment_id" idVal
+                whenEq 1
+                execute
+            }
             with
         | 1 -> Some(idVal, targetVal)
         | _ -> None

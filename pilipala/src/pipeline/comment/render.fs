@@ -27,12 +27,13 @@ module ICommentRenderPipelineBuilder =
             member i.Body = gen ()
             member i.CreateTime = gen () }
 
-type CommentRenderPipeline internal (renderBuilder: ICommentRenderPipelineBuilder, db: IDbProvider) =
+type CommentRenderPipeline internal (renderBuilder: ICommentRenderPipelineBuilder, db: IDbOperationBuilder) =
     let get targetKey (idVal: u64) =
-        db
-            .makeCmd()
-            .getFstVal (db.tables.comment, targetKey, "comment_id", idVal)
-        |> db.managed.executeQuery
+        db {
+            inComment
+            getFstVal targetKey "comment_id" idVal
+            execute
+        }
         |> fmap (fun v -> idVal, coerce v)
 
     let gen (renderBuilderItem: BuilderItem<_, _>) targetKey =
