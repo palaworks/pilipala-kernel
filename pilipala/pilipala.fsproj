@@ -27,9 +27,10 @@
         <Compile Include="src\log.fs" />
         <Compile Include="src\auth\token.fs" />
         <Compile Include="src\auth\channel.fs" />
-        <Compile Include="src\serv\reg.fs" />
+        <Compile Include="src\serv\serv.fs" />
         <Compile Include="src\serv\host.fs" />
-        <Compile Include="src\plugin.fs" />
+        <Compile Include="src\plugin\plugin.fs" />
+        <Compile Include="src\plugin\config.fs" />
         <Compile Include="src\builder\builder.fs" />
         <Compile Include="src\builder\useDb.fs" />
         <Compile Include="src\builder\usePlugin.fs" />

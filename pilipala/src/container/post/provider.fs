@@ -1,6 +1,9 @@
 ﻿namespace pilipala.container.post
 
+open fsharper.typ
+open fsharper.op
 open fsharper.op.Alias
+open fsharper.typ.Pipe
 open pilipala.pipeline.post
 
 type PostProvider(render: PostRenderPipeline, modify: PostModifyPipeline, init: PostInitPipeline) =
@@ -27,6 +30,12 @@ type PostProvider(render: PostRenderPipeline, modify: PostModifyPipeline, init: 
 
             member i.ModifyTime
                 with get () = snd (render.ModifyTime.fill post_id)
-                and set v = modify.ModifyTime.fill (post_id, v) |> ignore }
+                and set v = modify.ModifyTime.fill (post_id, v) |> ignore
+
+            member i.Item
+                with get name = fmap (fun (p: IGenericPipe<_, _>) -> p.fill post_id |> snd) render.[name]
+                and set name v =
+                    fmap (fun (p: IPipe<_ * obj>) -> p.fill (post_id, v)) modify.[name]
+                    |> ignore }
 
     member self.create(post: IPost) = fst (init.Batch.fill post)

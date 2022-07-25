@@ -21,17 +21,20 @@ type Yaml with
 
     /// 反序列化
     /// 由于YamlDotNet不能构造F#记录，yaml将转为json后由NewtonsoftJson执行反序列化，因而性能可能会受影响
-    member self.deserializeTo<'t>() = self.intoJson.deserializeTo<'t> ()
+    member self.deserializeTo<'t>() = self.intoJson().deserializeTo<'t> ()
 
     /// 将yaml字符串转换为json字符串
-    member self.intoJson: Json =
+    member self.intoJson() : Json =
         { json =
             self.yaml
             |> DeserializerBuilder().Build().Deserialize
             |> SerializerBuilder().JsonCompatible().Build()
                 .Serialize }
 
+    /// 序列化
+    static member serializeFrom(obj) =
+        { yaml = SerializerBuilder().Build().Serialize obj }
+
 type Object with
     /// 序列化到yaml
-    member self.serializeToYaml =
-        { yaml = SerializerBuilder().Build().Serialize self }
+    member self.serializeToYaml() = Yaml.serializeFrom self

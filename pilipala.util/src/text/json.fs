@@ -13,12 +13,15 @@ type Json with
     member self.deserializeTo<'t>() =
         JsonConvert.DeserializeObject<'t> self.json
 
+    /// 序列化
+    static member serializeFrom(obj) =
+        { json =
+            (obj, IsoDateTimeConverter(DateTimeFormat = "yyyy-MM-dd HH:mm:ss"))
+            |> JsonConvert.SerializeObject }
+
 type Object with
     /// 序列化到json
-    member self.serializeToJson =
-        { json =
-            (self, IsoDateTimeConverter(DateTimeFormat = "yyyy-MM-dd HH:mm:ss"))
-            |> JsonConvert.SerializeObject }
+    member self.serializeToJson() = Json.serializeFrom self
 
 (*
 type String with

@@ -8,7 +8,7 @@ type Html = { html: string }
 
 type Html with
     /// 去除html标签
-    member self.withoutTag =
+    member self.withoutTags() =
         match self.html with
         | null
         | "" -> ""

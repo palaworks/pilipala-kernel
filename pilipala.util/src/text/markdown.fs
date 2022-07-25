@@ -9,9 +9,8 @@ open Markdig.Extensions
 type Markdown = { markdown: string }
 
 type Markdown with
-
     /// 将markdown字符串转换为html字符串
-    member self.intoHtml =
+    member self.intoHtml() =
 
         let exts: IMarkdownExtension list =
             [ Tables.PipeTableExtension() //表格解析

@@ -1,6 +1,7 @@
 namespace pilipala.pipeline.post
 
 open System
+open System.Collections
 open System.Collections.Generic
 open fsharper.op
 open fsharper.typ
@@ -16,13 +17,28 @@ module IPostModifyPipelineBuilder =
             { collection = List<PipelineCombineMode<'I, 'O>>()
               beforeFail = List<IGenericPipe<'I, 'I>>() }
 
+        let udf = //user defined field
+            Dictionary<string, BuilderItem<u64 * obj>>()
+
         //cover/summary/view/star 交由插件实现
         { new IPostModifyPipelineBuilder with
             member i.Title = gen ()
             member i.Body = gen ()
             member i.CreateTime = gen ()
             member i.AccessTime = gen ()
-            member i.ModifyTime = gen () }
+            member i.ModifyTime = gen ()
+
+            member i.Item name =
+                if udf.ContainsKey name then
+                    udf.[name]
+                else
+                    let x = gen ()
+                    udf.Add(name, x)
+                    x
+
+            member i.GetEnumerator() : IEnumerator = udf.GetEnumerator()
+
+            member i.GetEnumerator() : IEnumerator<_> = udf.GetEnumerator() }
 
 type PostModifyPipeline internal (modifyBuilder: IPostModifyPipelineBuilder, db: IDbOperationBuilder) =
     let set targetKey (idVal: u64, targetVal) =
@@ -37,7 +53,7 @@ type PostModifyPipeline internal (modifyBuilder: IPostModifyPipelineBuilder, db:
         | 1 -> Some(idVal, targetVal)
         | _ -> None
 
-    let gen (modifyBuilderItem: BuilderItem<_>) targetKey =
+    let gen (modifyBuilderItem: BuilderItem<_>) targetKey : IPipe<_> =
         let beforeFail =
             modifyBuilderItem.beforeFail.foldr (fun p (acc: IPipe<_>) -> acc.export p) (Pipe<_>())
 
@@ -53,6 +69,29 @@ type PostModifyPipeline internal (modifyBuilder: IPostModifyPipelineBuilder, db:
             | After after -> acc.export after
         <| CachePipe<_>(data, fail)
 
+    let udf =
+        Dictionary<string, IPipe<u64 * obj>>()
+
+    do
+        for kv in modifyBuilder do
+            let modifyBuilderItem = kv.Value
+
+            let fail =
+                (modifyBuilderItem.beforeFail.foldr (fun p (acc: IPipe<_>) -> acc.export p) (Pipe<_>(id)))
+                    .fill //before fail
+                .> panicwith
+
+            let pipe =
+                modifyBuilderItem.collection.foldl
+                <| fun acc x ->
+                    match x with
+                    | Before before -> before.export acc
+                    | Replace f -> f acc
+                    | After after -> acc.export after
+                <| CachePipe<_>(always None, fail)
+
+            udf.Add(kv.Key, pipe)
+
     member self.Title =
         gen modifyBuilder.Title "post_title"
 
@@ -67,3 +106,5 @@ type PostModifyPipeline internal (modifyBuilder: IPostModifyPipelineBuilder, db:
 
     member self.ModifyTime =
         gen modifyBuilder.ModifyTime "post_modify_time"
+
+    member self.Item(name: string) = udf.TryGetValue(name).intoOption' ()

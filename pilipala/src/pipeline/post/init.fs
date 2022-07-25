@@ -5,7 +5,7 @@ open System.Collections.Generic
 open fsharper.typ
 open fsharper.typ.Pipe
 open fsharper.op.Alias
-open fsharper.op.Error
+open fsharper.op.Runtime
 open fsharper.op.Foldable
 open pilipala.id
 open pilipala.data.db

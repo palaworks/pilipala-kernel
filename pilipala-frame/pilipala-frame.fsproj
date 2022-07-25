@@ -19,6 +19,7 @@
         <Compile Include="data\kv.fs" />
         <Compile Include="id\uuid.fs" />
         <Compile Include="id\palaflake.fs" />
+        <Compile Include="plugin\config.fs" />
     </ItemGroup>
 
     <ItemGroup>

@@ -30,7 +30,8 @@ type Builder with
     member builder.useConfig(path: string) =
         let config =
             { yaml = readFile path }
-                .intoJson.deserializeTo<Config> ()
+                .intoJson()
+                .deserializeTo<Config> ()
 
         builder.useDb config.database |> ignore
 
