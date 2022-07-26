@@ -51,12 +51,14 @@ type PostRenderPipeline internal (renderBuilder: IPostRenderPipelineBuilder, db:
         |> fmap (fun v -> idVal, coerce v)
 
     let gen (renderBuilderItem: BuilderItem<_, _>) targetKey =
-        let beforeFail =
-            renderBuilderItem.beforeFail.foldr (fun p (acc: IGenericPipe<_, _>) -> acc.export p) (GenericPipe<_, _>(id))
-
         let data = get targetKey
 
-        let fail = beforeFail.fill .> panicwith
+        let fail =
+            (renderBuilderItem.beforeFail.foldr
+                (fun p (acc: IGenericPipe<_, _>) -> acc.export p)
+                (GenericPipe<_, _>(id)))
+                .fill //before fail
+            .> panicwith
 
         renderBuilderItem.collection.foldl
         <| fun acc x ->

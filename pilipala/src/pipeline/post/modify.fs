@@ -54,12 +54,12 @@ type PostModifyPipeline internal (modifyBuilder: IPostModifyPipelineBuilder, db:
         | _ -> None
 
     let gen (modifyBuilderItem: BuilderItem<_>) targetKey : IPipe<_> =
-        let beforeFail =
-            modifyBuilderItem.beforeFail.foldr (fun p (acc: IPipe<_>) -> acc.export p) (Pipe<_>())
-
         let data = set targetKey
 
-        let fail = beforeFail.fill .> panicwith
+        let fail =
+            (modifyBuilderItem.beforeFail.foldr (fun p (acc: IPipe<_>) -> acc.export p) (Pipe<_>()))
+                .fill //before fail
+            .> panicwith
 
         modifyBuilderItem.collection.foldl
         <| fun acc x ->

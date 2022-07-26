@@ -30,6 +30,11 @@ module ext_IDbOperationBuilder =
             (cmd: DbCommand)
                 .getFstVal (table, targetKey, whereKey, whereVal)
 
+        [<CustomOperation("getFstRow")>]
+        member db.getFstRow((cmd, table), whereKey, whereVal) =
+            (cmd: DbCommand)
+                .getFstRow (table, whereKey, whereVal)
+
         [<CustomOperation("update")>]
         member db.update((cmd, table), targetKey, targetVal, whereKey, whereVal) =
             (cmd: DbCommand)

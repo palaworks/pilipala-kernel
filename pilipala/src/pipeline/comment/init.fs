@@ -67,10 +67,10 @@ type CommentInitPipeline
             None
 
     let gen (initBuilderItem: BuilderItem<_, _>) =
-        let beforeFail =
-            initBuilderItem.beforeFail.foldr (fun p (acc: IPipe<_>) -> acc.export p) (Pipe<_>())
-
-        let fail = beforeFail.fill .> panicwith
+        let fail =
+            (initBuilderItem.beforeFail.foldr (fun p (acc: IPipe<_>) -> acc.export p) (Pipe<_>()))
+                .fill //before fail
+            .> panicwith
 
         initBuilderItem.collection.foldl
         <| fun acc x ->

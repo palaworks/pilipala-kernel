@@ -13,12 +13,14 @@
         <Compile Include="src\id\palaflake.fs" />
         <Compile Include="src\data\db.fs" />
         <Compile Include="src\data\kv.fs" />
+        <Compile Include="src\pipeline\post\init.fs" />
         <Compile Include="src\pipeline\post\render.fs" />
         <Compile Include="src\pipeline\post\modify.fs" />
-        <Compile Include="src\pipeline\post\init.fs" />
+        <Compile Include="src\pipeline\post\finalize.fs" />
+        <Compile Include="src\pipeline\comment\init.fs" />
         <Compile Include="src\pipeline\comment\render.fs" />
         <Compile Include="src\pipeline\comment\modify.fs" />
-        <Compile Include="src\pipeline\comment\init.fs" />
+        <Compile Include="src\pipeline\comment\finalize.fs" />
         <Compile Include="src\container\post\provider.fs" />
         <Compile Include="src\container\post\ext.fs" />
         <Compile Include="src\container\comment\provider.fs" />

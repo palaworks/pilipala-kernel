@@ -39,6 +39,7 @@ type ServProvider() =
                               AccessLv: ServAccessLv |}>
             ()
 
+
     /// 注册服务
     member self.regServByType(t: Type) =
         let attr: ServAttribute =
