@@ -30,55 +30,23 @@ type CommentFinalizePipeline
         db: IDbOperationBuilder
     ) =
 
-    let udf_render_no_after = //去除了After部分的udf渲染管道
+    let udf_render_no_after = //去除了After部分的udf渲染管道，因为After可能包含渲染逻辑
         let map =
             Dictionary<string, IGenericPipe<u64, u64 * obj>>()
 
-        for kv in renderBuilder do
-            let renderBuilderItem = kv.Value
-
-            let fail =
-                (renderBuilderItem.beforeFail.foldr
-                    (fun p (acc: IGenericPipe<_, _>) -> acc.export p)
-                    (GenericPipe<_, _>(id)))
-                    .fill //before fail
-                .> panicwith
-
-            let pipe =
-                renderBuilderItem.collection.foldl
-                <| fun acc x ->
-                    match x with
-                    | Before before -> before.export acc
-                    | Replace f -> f acc //视所有Replace组合为数据源
-                    | _ -> acc
-                <| GenericCachePipe<_, _>(always None, fail)
-
-            map.Add(kv.Key, pipe)
+        for kv in renderBuilder do //遍历udf
+            //视所有Replace组合为数据源
+            map.Add(kv.Key, noAfterBuild (always None) kv.Value)
 
         map
 
-    let udf_modify_no_after = //去除了After部分的udf修改管道
+    let udf_modify_no_after = //去除了After部分的udf修改管道，因After可能包含通知逻辑
         let map =
             Dictionary<string, IPipe<u64 * obj>>()
 
-        for kv in modifyBuilder do
-            let modifyBuilderItem = kv.Value
-
-            let fail =
-                (modifyBuilderItem.beforeFail.foldr (fun p (acc: IPipe<_>) -> acc.export p) (Pipe<_>(id)))
-                    .fill //before fail
-                .> panicwith
-
-            let pipe =
-                modifyBuilderItem.collection.foldl
-                <| fun acc x ->
-                    match x with
-                    | Before before -> before.export acc
-                    | Replace f -> f acc
-                    | _ -> acc
-                <| CachePipe<_>(always None, fail)
-
-            map.Add(kv.Key, pipe)
+        for kv in modifyBuilder do //遍历udf
+            //视所有Replace组合为数据源
+            map.Add(kv.Key, noAfterBuild (always None) kv.Value)
 
         map
 
@@ -91,7 +59,7 @@ type CommentFinalizePipeline
             }
             |> unwrap
 
-        let post =
+        let comment = //回送被删除的评论
             { new IComment with
                 member i.Id = comment_id
 
@@ -125,22 +93,9 @@ type CommentFinalizePipeline
             }
 
         if aff = 1 then
-            Some(comment_id, post)
+            Some(comment_id, comment)
         else
             None
 
-    let gen (initBuilderItem: BuilderItem<_, _>) =
-        let beforeFail =
-            initBuilderItem.beforeFail.foldr (fun p (acc: IPipe<_>) -> acc.export p) (Pipe<_>())
-
-        let fail = beforeFail.fill .> panicwith
-
-        initBuilderItem.collection.foldl
-        <| fun acc x ->
-            match x with
-            | Before before -> before.export acc
-            | Replace f -> f acc
-            | After after -> acc.export after
-        <| GenericCachePipe<_, _>(data, fail)
-
-    member self.Batch = gen finalizeBuilder.Batch
+    member self.Batch =
+        fullyBuild data finalizeBuilder.Batch

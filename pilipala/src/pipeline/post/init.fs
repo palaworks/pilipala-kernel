@@ -54,19 +54,5 @@ type PostInitPipeline
         else
             None
 
-    let gen (initBuilderItem: BuilderItem<_, _>) =
-        let fail =
-            (initBuilderItem.beforeFail.foldr (fun p (acc: IPipe<_>) -> acc.export p) (Pipe<_>()))
-                .fill //before fail
-            .> panicwith
-
-        initBuilderItem.collection.foldl
-        <| fun acc x ->
-            match x with
-            | Before before -> before.export acc
-            | Replace f -> f acc
-            | After after -> acc.export after
-        <| GenericCachePipe<_, _>(data, fail)
-
-    //TODO 应视Item为头等公民
-    member self.Batch = gen initBuilder.Batch
+    member self.Batch =
+        fullyBuild data initBuilder.Batch

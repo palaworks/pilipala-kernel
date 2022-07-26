@@ -50,62 +50,26 @@ type PostRenderPipeline internal (renderBuilder: IPostRenderPipelineBuilder, db:
         }
         |> fmap (fun v -> idVal, coerce v)
 
-    let gen (renderBuilderItem: BuilderItem<_, _>) targetKey =
-        let data = get targetKey
-
-        let fail =
-            (renderBuilderItem.beforeFail.foldr
-                (fun p (acc: IGenericPipe<_, _>) -> acc.export p)
-                (GenericPipe<_, _>(id)))
-                .fill //before fail
-            .> panicwith
-
-        renderBuilderItem.collection.foldl
-        <| fun acc x ->
-            match x with
-            | Before before -> before.export acc
-            | Replace f -> f acc
-            | After after -> acc.export after
-        <| GenericCachePipe<_, _>(data, fail)
-
     let udf =
         Dictionary<string, IGenericPipe<u64, u64 * obj>>()
 
     do
         for kv in renderBuilder do
-            let renderBuilderItem = kv.Value
-
-            let fail =
-                (renderBuilderItem.beforeFail.foldr
-                    (fun p (acc: IGenericPipe<_, _>) -> acc.export p)
-                    (GenericPipe<_, _>(id)))
-                    .fill //before fail
-                .> panicwith
-
-            let pipe =
-                renderBuilderItem.collection.foldl
-                <| fun acc x ->
-                    match x with
-                    | Before before -> before.export acc
-                    | Replace f -> f acc
-                    | After after -> acc.export after
-                <| GenericCachePipe<_, _>(always None, fail)
-
-            udf.Add(kv.Key, pipe)
+            udf.Add(kv.Key, fullyBuild (always None) kv.Value)
 
     member self.Title =
-        gen renderBuilder.Title "post_title"
+        fullyBuild (get "post_title") renderBuilder.Title
 
     member self.Body =
-        gen renderBuilder.Body "post_body"
+        fullyBuild (get "post_body") renderBuilder.Body
 
     member self.CreateTime =
-        gen renderBuilder.CreateTime "post_create_time"
+        fullyBuild (get "post_create_time") renderBuilder.CreateTime
 
     member self.AccessTime =
-        gen renderBuilder.AccessTime "post_access_time"
+        fullyBuild (get "post_access_time") renderBuilder.AccessTime
 
     member self.ModifyTime =
-        gen renderBuilder.ModifyTime "post_modify_time"
+        fullyBuild (get "post_modify_time") renderBuilder.ModifyTime
 
     member self.Item(name: string) = udf.TryGetValue(name).intoOption' ()

@@ -50,48 +50,17 @@ type CommentModifyPipeline internal (modifyBuilder: ICommentModifyPipelineBuilde
         | 1 -> Some(idVal, targetVal)
         | _ -> None
 
-    let gen (modifyBuilderItem: BuilderItem<_>) targetKey =
-        let beforeFail =
-            modifyBuilderItem.beforeFail.foldr (fun p (acc: IPipe<_>) -> acc.export p) (Pipe<_>())
-
-        let data = set targetKey
-        let fail = beforeFail.fill .> panicwith
-
-        modifyBuilderItem.collection.foldl
-        <| fun acc x ->
-            match x with
-            | Before before -> before.export acc
-            | Replace f -> f acc
-            | After after -> acc.export after
-        <| CachePipe<_>(data, fail)
-
     let udf =
         Dictionary<string, IPipe<u64 * obj>>()
 
     do
         for kv in modifyBuilder do
-            let modifyBuilderItem = kv.Value
+            udf.Add(kv.Key, fullyBuild (always None) kv.Value)
 
-            let fail =
-                (modifyBuilderItem.beforeFail.foldr (fun p (acc: IPipe<_>) -> acc.export p) (Pipe<_>(id)))
-                    .fill //before fail
-                .> panicwith
+    member self.Body: IPipe<_> =
+        fullyBuild (set "comment_body") modifyBuilder.Body
 
-            let pipe =
-                modifyBuilderItem.collection.foldl
-                <| fun acc x ->
-                    match x with
-                    | Before before -> before.export acc
-                    | Replace f -> f acc
-                    | After after -> acc.export after
-                <| CachePipe<_>(always None, fail)
-
-            udf.Add(kv.Key, pipe)
-
-    member self.Body =
-        gen modifyBuilder.Body "comment_body"
-
-    member self.CreateTime =
-        gen modifyBuilder.CreateTime "comment_create_time"
+    member self.CreateTime: IPipe<_> =
+        fullyBuild (set "comment_create_time") modifyBuilder.CreateTime
 
     member self.Item(name: string) = udf.TryGetValue(name).intoOption' ()

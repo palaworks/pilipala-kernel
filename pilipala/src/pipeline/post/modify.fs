@@ -53,58 +53,26 @@ type PostModifyPipeline internal (modifyBuilder: IPostModifyPipelineBuilder, db:
         | 1 -> Some(idVal, targetVal)
         | _ -> None
 
-    let gen (modifyBuilderItem: BuilderItem<_>) targetKey : IPipe<_> =
-        let data = set targetKey
-
-        let fail =
-            (modifyBuilderItem.beforeFail.foldr (fun p (acc: IPipe<_>) -> acc.export p) (Pipe<_>()))
-                .fill //before fail
-            .> panicwith
-
-        modifyBuilderItem.collection.foldl
-        <| fun acc x ->
-            match x with
-            | Before before -> before.export acc
-            | Replace f -> f acc
-            | After after -> acc.export after
-        <| CachePipe<_>(data, fail)
-
     let udf =
         Dictionary<string, IPipe<u64 * obj>>()
 
     do
         for kv in modifyBuilder do
-            let modifyBuilderItem = kv.Value
+            udf.Add(kv.Key, fullyBuild (always None) kv.Value)
 
-            let fail =
-                (modifyBuilderItem.beforeFail.foldr (fun p (acc: IPipe<_>) -> acc.export p) (Pipe<_>(id)))
-                    .fill //before fail
-                .> panicwith
+    member self.Title: IPipe<_> =
+        fullyBuild (set "post_title") modifyBuilder.Title
 
-            let pipe =
-                modifyBuilderItem.collection.foldl
-                <| fun acc x ->
-                    match x with
-                    | Before before -> before.export acc
-                    | Replace f -> f acc
-                    | After after -> acc.export after
-                <| CachePipe<_>(always None, fail)
+    member self.Body: IPipe<_> =
+        fullyBuild (set "post_body") modifyBuilder.Body
 
-            udf.Add(kv.Key, pipe)
+    member self.CreateTime: IPipe<_> =
+        fullyBuild (set "post_create_time") modifyBuilder.CreateTime
 
-    member self.Title =
-        gen modifyBuilder.Title "post_title"
+    member self.AccessTime: IPipe<_> =
+        fullyBuild (set "post_access_time") modifyBuilder.AccessTime
 
-    member self.Body =
-        gen modifyBuilder.Body "post_body"
-
-    member self.CreateTime =
-        gen modifyBuilder.CreateTime "post_create_time"
-
-    member self.AccessTime =
-        gen modifyBuilder.AccessTime "post_access_time"
-
-    member self.ModifyTime =
-        gen modifyBuilder.ModifyTime "post_modify_time"
+    member self.ModifyTime: IPipe<_> =
+        fullyBuild (set "post_modify_time") modifyBuilder.ModifyTime
 
     member self.Item(name: string) = udf.TryGetValue(name).intoOption' ()
