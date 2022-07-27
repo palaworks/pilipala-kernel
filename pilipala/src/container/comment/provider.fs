@@ -8,7 +8,13 @@ open pilipala.container.comment
 open pilipala.pipeline.comment
 
 
-type CommentProvider(render: CommentRenderPipeline, modify: CommentModifyPipeline, init: CommentInitPipeline) =
+type CommentProvider
+    (
+        init: CommentInitPipeline,
+        render: CommentRenderPipeline,
+        modify: CommentModifyPipeline,
+        finalize: CommentFinalizePipeline
+    ) =
 
     member self.fetch(comment_id: u64) =
         { new IComment with
@@ -28,5 +34,5 @@ type CommentProvider(render: CommentRenderPipeline, modify: CommentModifyPipelin
                     fmap (fun (p: IPipe<_ * obj>) -> p.fill (comment_id, v)) modify.[name]
                     |> ignore }
 
-
     member self.create(comment: IComment) = fst (init.Batch.fill comment)
+    member self.delete comment_id = finalize.Batch.fill comment_id

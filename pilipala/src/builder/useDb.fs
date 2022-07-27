@@ -5,33 +5,6 @@ open fsharper.typ.Pipe
 open Microsoft.Extensions.DependencyInjection
 open pilipala.data.db
 
-(*
-database:
-  connection:
-    host: localhost
-    port: 3306
-
-    usr: root
-    pwd: 65a1561425f744e2b541303f628963f8
-
-    using: pilipala_fs
-
-  map:
-    meta: container.meta
-    record: container.record
-    comment: container.comment
-    token: auth.token
-
-  pooling:
-    size: 32
-    sync: 180
-
-plugin: ["./plugins/mailssage", "./plugins/llink"]
-
-auth:
-  port: 20222
-*)
-
 type Builder with
 
     /// 启用持久化队列

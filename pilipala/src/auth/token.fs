@@ -8,24 +8,20 @@ open pilipala.data.db
 open pilipala.id
 open pilipala.util.hash
 
-/// 无法创建凭据错误
-exception FailedToCreateToken
-/// 无法抹除凭据错误
-exception FailedToEraseToken
-/// 无法更新凭据访问时间错误
-exception FailedToUpdateTokenAtime
-/// 凭据重复
-exception DuplicateToken
-
 type internal TokenProvider(db: IDbOperationBuilder, uuid: IUuidGenerator) =
+
+    let tokenHasher (s: string) = s.bcrypt
 
     /// 创建凭据
     /// 返回凭据值
-    member self.create() =
+    member self.create(expire_time: DateTime) =
+        let token = uuid.next ()
+
         let fields: (_ * obj) list =
-            [ ("tokenHash", uuid.next().sha1)
-              ("ctime", DateTime.Now)
-              ("atime", DateTime.Now) ]
+            [ ("token_hash", tokenHasher token)
+              ("token_create_time", DateTime.Now)
+              ("token_access_time", DateTime.Now)
+              ("token_expire_time", expire_time) ]
 
         let aff =
             db {
@@ -35,19 +31,17 @@ type internal TokenProvider(db: IDbOperationBuilder, uuid: IUuidGenerator) =
                 execute
             }
 
-        if aff |> eq 2 then
-            Ok uuid
+        if aff |> eq 1 then
+            Ok token
         else
-            Err FailedToCreateToken
+            Err $"Failed to create token (aff {aff})"
 
-    /// 抹除凭据
-    member self.erase(token: string) =
-        let tokenHash = token.sha1
-
+    /// 删除凭据
+    member self.delete(token_hash: string) =
         let aff =
             db {
                 inToken
-                delete "tokenHash" tokenHash
+                delete "token_hash" token_hash
                 whenEq 1
                 execute
             }
@@ -55,42 +49,32 @@ type internal TokenProvider(db: IDbOperationBuilder, uuid: IUuidGenerator) =
         if aff |> eq 1 then
             Ok()
         else
-            Err FailedToEraseToken
+            Err $"Failed to delete token (aff {aff})"
 
     /// 检查token是否合法
-    member self.check(token: string) =
-        let table = db.tables.token
-
+    member self.check(token_hash: string) =
+        //TODO 貌似sql也可以采用消除基本类型偏执的规格化思路
         let sql =
-            $"SELECT COUNT(*) FROM {table} WHERE tokenHash = <tokenHash>"
+            $"SELECT COUNT(*) FROM {db.tables.token} WHERE tokenHash = <tokenHash>"
             |> db.managed.normalizeSql
-
-        let tokenHash = token.sha1
-
-        let paras: (_ * obj) list =
-            [ ("tokenHash", tokenHash) ]
 
         let n =
             db {
-                getFstVal sql paras
+                getFstVal sql [ ("tokenHash", token_hash) ]
                 execute
             }
 
         match n with
-        | Some x when x = 0 -> false
         //如果查询到的凭据记录唯一
-        | Some x when coerce x = 1 ->
+        | Some x when x = 1 ->
             //更新凭据访问记录
             let aff =
                 db {
                     inToken
-                    update "atime" DateTime.Now "tokenHash" tokenHash
+                    update "token_access_time" DateTime.Now "token_hash" token_hash
                     whenEq 1
                     execute
                 }
 
-            if aff |> eq 1 then
-                true
-            else
-                raise FailedToUpdateTokenAtime
-        | _ -> raise DuplicateToken
+            eq aff 1 //无法更新访问时间，也视为非法
+        | _ -> false //重复、查不到均视为非法

@@ -6,7 +6,13 @@ open fsharper.op.Alias
 open fsharper.typ.Pipe
 open pilipala.pipeline.post
 
-type PostProvider(render: PostRenderPipeline, modify: PostModifyPipeline, init: PostInitPipeline) =
+type PostProvider
+    (
+        init: PostInitPipeline,
+        render: PostRenderPipeline,
+        modify: PostModifyPipeline,
+        finalize: PostFinalizePipeline
+    ) =
 
     member self.fetch(post_id: u64) =
         { new IPost with
@@ -39,3 +45,4 @@ type PostProvider(render: PostRenderPipeline, modify: PostModifyPipeline, init: 
                     |> ignore }
 
     member self.create(post: IPost) = fst (init.Batch.fill post)
+    member self.delete post_id = finalize.Batch.fill post_id

@@ -26,7 +26,6 @@
         <Compile Include="src\container\post\ext.fs" />
         <Compile Include="src\container\comment\provider.fs" />
         <Compile Include="src\container\comment\ext.fs" />
-        <Compile Include="src\container\op.fs" />
         <Compile Include="src\log.fs" />
         <Compile Include="src\auth\token.fs" />
         <Compile Include="src\auth\channel.fs" />
