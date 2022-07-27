@@ -2,13 +2,13 @@
 
 open Microsoft.Extensions.DependencyInjection
 open fsharper.typ.Pipe
+open pilipala
 open pilipala.log
 open pilipala.serv
 open pilipala.plugin
 
 /// 在指定端口启动认证服务
 /// 认证通过后，会以 SecureChannel 为参数执行闭包 f
-
 /// 构建器
 type Builder() =
     /// 构建函数管道
@@ -43,4 +43,11 @@ type Builder() =
     *)
 
     /// 构建
-    member self.build() = self.buildPipeline.fill ()
+    member self.build() =
+        self.buildPipeline.fill ()
+
+        self
+            .DI
+            .AddSingleton<Pilipala>()
+            .BuildServiceProvider()
+            .GetService<Pilipala>()

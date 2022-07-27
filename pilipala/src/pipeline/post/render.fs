@@ -18,7 +18,7 @@ module IPostRenderPipelineBuilder =
               beforeFail = List<IGenericPipe<'I, 'I>>() }
 
         let udf = //user defined field
-            Dictionary<string, BuilderItem<u64, u64 * obj>>()
+            Dict<string, BuilderItem<u64, u64 * obj>>()
 
         //cover/summary/view/star 交由插件实现
         { new IPostRenderPipelineBuilder with
@@ -51,7 +51,7 @@ type PostRenderPipeline internal (renderBuilder: IPostRenderPipelineBuilder, db:
         |> fmap (fun v -> idVal, coerce v)
 
     let udf =
-        Dictionary<string, IGenericPipe<u64, u64 * obj>>()
+        Dict<string, IGenericPipe<u64, u64 * obj>>()
 
     do
         for kv in renderBuilder do

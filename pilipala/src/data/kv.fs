@@ -4,11 +4,12 @@ open System
 open System.Collections.Concurrent
 open fsharper.op
 open fsharper.typ
+open fsharper.op.Alias
 
 module IKvProvider =
 
     let make () =
-        let map = ConcurrentDictionary<obj, obj>()
+        let map = ConcurrentDict<obj, obj>()
 
         { new IKvProvider with
 

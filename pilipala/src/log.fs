@@ -2,6 +2,7 @@ namespace pilipala.log
 
 open System.Collections.Generic
 open Microsoft.Extensions.Logging
+open fsharper.op.Alias
 
 type internal LogProvider() =
     
@@ -9,7 +10,7 @@ type internal LogProvider() =
     member self.registeredLoggerProvider = List<ILoggerProvider>()
 
     /// 已注册日志过滤器
-    member self.registeredLoggerFilter = Dictionary<string, LogLevel>()
+    member self.registeredLoggerFilter = Dict<string, LogLevel>()
 
     /// 注册日志提供者
     member self.regLogProvider provider = self.registeredLoggerProvider.Add provider

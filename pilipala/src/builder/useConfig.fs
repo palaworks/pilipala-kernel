@@ -9,8 +9,6 @@ open pilipala.data.db
 open pilipala.util.io
 open pilipala.util.text
 
-type private dic<'k, 'v> = Dictionary<'k, 'v>
-
 type Dictionary<'k, 'v> with
     member self.add(k: 'k, v: 'v) =
         self.Add(k, v)
@@ -20,7 +18,7 @@ type Config =
     { database: DbConfig
       plugin: string list
       serv: string list
-      log: Dictionary<string, string>
+      log: Dict<string, string>
       auth: {| port: u16 |} }
 
 type Builder with

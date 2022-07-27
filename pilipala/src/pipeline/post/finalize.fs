@@ -32,7 +32,7 @@ type PostFinalizePipeline
 
     let udf_render_no_after = //去除了After部分的udf渲染管道，因为After可能包含渲染逻辑
         let map =
-            Dictionary<string, IGenericPipe<u64, u64 * obj>>()
+            Dict<string, IGenericPipe<u64, u64 * obj>>()
 
         for kv in renderBuilder do //遍历udf
             //视所有Replace组合为数据源
@@ -42,7 +42,7 @@ type PostFinalizePipeline
 
     let udf_modify_no_after = //去除了After部分的udf修改管道，因After可能包含通知逻辑
         let map =
-            Dictionary<string, IPipe<u64 * obj>>()
+            Dict<string, IPipe<u64 * obj>>()
 
         for kv in modifyBuilder do //遍历udf
             //视所有Replace组合为数据源

@@ -4,7 +4,8 @@ module pilipala.container.post.ext
 open pilipala.container.comment
 
 type IPost with
-    member i.Comments: IComment list =
-        
-        []
-        
+
+    /// 文章的评论
+    /// 此功能需PostComments插件支持
+    member self.Comments: IComment list =
+        downcast self.["Comments"].unwrap ()

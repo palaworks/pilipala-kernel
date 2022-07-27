@@ -18,7 +18,7 @@ module IPostModifyPipelineBuilder =
               beforeFail = List<IGenericPipe<'I, 'I>>() }
 
         let udf = //user defined field
-            Dictionary<string, BuilderItem<u64 * obj>>()
+            Dict<string, BuilderItem<u64 * obj>>()
 
         //cover/summary/view/star 交由插件实现
         { new IPostModifyPipelineBuilder with
@@ -54,7 +54,7 @@ type PostModifyPipeline internal (modifyBuilder: IPostModifyPipelineBuilder, db:
         | _ -> None
 
     let udf =
-        Dictionary<string, IPipe<u64 * obj>>()
+        Dict<string, IPipe<u64 * obj>>()
 
     do
         for kv in modifyBuilder do

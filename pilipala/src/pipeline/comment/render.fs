@@ -18,7 +18,7 @@ module ICommentRenderPipelineBuilder =
               beforeFail = List<IGenericPipe<'I, 'I>>() }
 
         let udf = //user defined field
-            Dictionary<string, BuilderItem<u64, u64 * obj>>()
+            Dict<string, BuilderItem<u64, u64 * obj>>()
 
         //site 交由插件实现
         //user_name交由用户组件实现（user_email）
@@ -51,7 +51,7 @@ type CommentRenderPipeline internal (renderBuilder: ICommentRenderPipelineBuilde
         |> fmap (fun v -> idVal, coerce v)
 
     let udf =
-        Dictionary<string, IGenericPipe<u64, u64 * obj>>()
+        Dict<string, IGenericPipe<u64, u64 * obj>>()
 
     do
         for kv in renderBuilder do

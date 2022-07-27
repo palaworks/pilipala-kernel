@@ -1,4 +1,4 @@
-﻿namespace pilipala.container.Comment
+﻿namespace pilipala.container.comment
 
 open dbm_test.MySql
 open fsharper.op

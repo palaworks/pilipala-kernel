@@ -5,6 +5,7 @@ open System.Collections.Generic
 open System.Text.RegularExpressions
 open fsharper.op
 open fsharper.typ
+open fsharper.op.Alias
 
 (*
 servPath是用于路由服务结构的文本
@@ -34,9 +35,9 @@ type ServProvider() =
 
     /// 已注册服务路径到服务信息的映射
     member self.registeredServInfo =
-        Dictionary<string, {| Type: Type
-                              EntryPoint: string
-                              AccessLv: ServAccessLv |}>
+        Dict<string, {| Type: Type
+                        EntryPoint: string
+                        AccessLv: ServAccessLv |}>
             ()
 
 
