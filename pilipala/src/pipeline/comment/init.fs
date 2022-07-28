@@ -67,4 +67,5 @@ type CommentInitPipeline
             None
 
     member self.Batch =
-        fullyBuild data initBuilder.Batch
+        initBuilder.Batch.fullyBuild
+        <| fun fail -> GenericCachePipe(data, fail)

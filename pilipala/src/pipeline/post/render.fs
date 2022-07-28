@@ -7,6 +7,7 @@ open fsharper.op
 open fsharper.typ
 open fsharper.op.Alias
 open fsharper.typ.Pipe
+open fsharper.op.Pattern
 open fsharper.op.Foldable
 open pilipala.data.db
 open pilipala.pipeline
@@ -40,7 +41,6 @@ module IPostRenderPipelineBuilder =
 
             member i.GetEnumerator() : IEnumerator<_> = udf.GetEnumerator() }
 
-
 type PostRenderPipeline internal (renderBuilder: IPostRenderPipelineBuilder, db: IDbOperationBuilder) =
     let get target (idVal: u64) =
         db {
@@ -54,22 +54,29 @@ type PostRenderPipeline internal (renderBuilder: IPostRenderPipelineBuilder, db:
         Dict<string, IGenericPipe<u64, u64 * obj>>()
 
     do
-        for kv in renderBuilder do
-            udf.Add(kv.Key, fullyBuild (always None) kv.Value)
+        for KV (name, builderItem) in renderBuilder do
+            //udf管道初始为只会panic的GenericPipe，必须Replace后使用
+            let justFail fail : IGenericPipe<_, _> = GenericPipe fail
+            udf.Add(name, builderItem.fullyBuild justFail)
 
     member self.Title =
-        fullyBuild (get "post_title") renderBuilder.Title
+        renderBuilder.Title.fullyBuild
+        <| fun fail -> GenericCachePipe(get "post_title", fail)
 
     member self.Body =
-        fullyBuild (get "post_body") renderBuilder.Body
+        renderBuilder.Body.fullyBuild
+        <| fun fail -> GenericCachePipe(get "post_body", fail)
 
     member self.CreateTime =
-        fullyBuild (get "post_create_time") renderBuilder.CreateTime
+        renderBuilder.CreateTime.fullyBuild
+        <| fun fail -> GenericCachePipe(get "post_create_time", fail)
 
     member self.AccessTime =
-        fullyBuild (get "post_access_time") renderBuilder.AccessTime
+        renderBuilder.AccessTime.fullyBuild
+        <| fun fail -> GenericCachePipe(get "post_access_time", fail)
 
     member self.ModifyTime =
-        fullyBuild (get "post_modify_time") renderBuilder.ModifyTime
+        renderBuilder.ModifyTime.fullyBuild
+        <| fun fail -> GenericCachePipe(get "post_modify_time", fail)
 
     member self.Item(name: string) = udf.TryGetValue(name).intoOption' ()

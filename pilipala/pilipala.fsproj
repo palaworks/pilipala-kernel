@@ -13,7 +13,6 @@
         <Compile Include="src\id\palaflake.fs" />
         <Compile Include="src\data\db.fs" />
         <Compile Include="src\data\kv.fs" />
-        <Compile Include="src\pipeline\pipeline.fs" />
         <Compile Include="src\pipeline\post\init.fs" />
         <Compile Include="src\pipeline\post\render.fs" />
         <Compile Include="src\pipeline\post\modify.fs" />

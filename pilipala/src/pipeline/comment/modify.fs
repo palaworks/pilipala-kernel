@@ -7,6 +7,7 @@ open fsharper.op
 open fsharper.typ
 open fsharper.typ.Pipe
 open fsharper.op.Alias
+open fsharper.op.Pattern
 open fsharper.op.Foldable
 open pilipala.data.db
 open pilipala.pipeline
@@ -36,7 +37,6 @@ module CommentModifyPipelineBuilder =
 
             member i.GetEnumerator() : IEnumerator<_> = udf.GetEnumerator() }
 
-
 type CommentModifyPipeline internal (modifyBuilder: ICommentModifyPipelineBuilder, db: IDbOperationBuilder) =
     let set targetKey (idVal: u64, targetVal) =
         match
@@ -50,17 +50,19 @@ type CommentModifyPipeline internal (modifyBuilder: ICommentModifyPipelineBuilde
         | 1 -> Some(idVal, targetVal)
         | _ -> None
 
-    let udf =
-        Dict<string, IPipe<u64 * obj>>()
+    let udf = Dict<string, IPipe<u64 * obj>>()
 
     do
-        for kv in modifyBuilder do
-            udf.Add(kv.Key, fullyBuild (always None) kv.Value)
+        for KV (name, builderItem) in modifyBuilder do
+            let justFail fail : IGenericPipe<_, _> = GenericPipe fail
+            udf.Add(name, builderItem.fullyBuild justFail)
 
     member self.Body: IPipe<_> =
-        fullyBuild (set "comment_body") modifyBuilder.Body
+        modifyBuilder.Body.fullyBuild
+        <| fun fail -> GenericCachePipe(set "comment_body", fail)
 
     member self.CreateTime: IPipe<_> =
-        fullyBuild (set "comment_create_time") modifyBuilder.CreateTime
+        modifyBuilder.CreateTime.fullyBuild
+        <| fun fail -> GenericCachePipe(set "comment_create_time", fail)
 
     member self.Item(name: string) = udf.TryGetValue(name).intoOption' ()

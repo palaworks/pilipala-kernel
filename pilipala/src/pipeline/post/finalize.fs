@@ -6,6 +6,7 @@ open fsharper.op
 open fsharper.typ
 open fsharper.typ.Pipe
 open fsharper.op.Alias
+open fsharper.op.Pattern
 open fsharper.op.Foldable
 open pilipala.data.db
 open pilipala.pipeline
@@ -34,19 +35,20 @@ type PostFinalizePipeline
         let map =
             Dict<string, IGenericPipe<u64, u64 * obj>>()
 
-        for kv in renderBuilder do //遍历udf
-            //视所有Replace组合为数据源
-            map.Add(kv.Key, noAfterBuild (always None) kv.Value)
+        for KV (name, builderItem) in renderBuilder do //遍历udf
+            //udf管道初始为只会panic的GenericPipe，必须Replace后使用
+            let justFail fail : IGenericPipe<_, _> = GenericPipe fail
+            map.Add(name, builderItem.noneAfterBuild justFail)
 
         map
 
     let udf_modify_no_after = //去除了After部分的udf修改管道，因After可能包含通知逻辑
-        let map =
-            Dict<string, IPipe<u64 * obj>>()
+        let map = Dict<string, IPipe<u64 * obj>>()
 
-        for kv in modifyBuilder do //遍历udf
-            //视所有Replace组合为数据源
-            map.Add(kv.Key, noAfterBuild (always None) kv.Value)
+        for KV (name, builderItem) in modifyBuilder do //遍历udf
+            //udf管道初始为只会panic的GenericPipe，必须Replace后使用
+            let justFail fail : IGenericPipe<_, _> = GenericPipe fail
+            map.Add(name, builderItem.noneAfterBuild justFail)
 
         map
 
@@ -110,4 +112,5 @@ type PostFinalizePipeline
             None
 
     member self.Batch =
-        fullyBuild data finalizeBuilder.Batch
+        finalizeBuilder.Batch.fullyBuild
+        <| fun fail -> GenericCachePipe(data, fail)

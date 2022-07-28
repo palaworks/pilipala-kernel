@@ -2,8 +2,10 @@
 
 open System
 open System.Collections.Generic
-open fsharper.op.Alias
+open fsharper.op
+open fsharper.typ
 open fsharper.typ.Pipe
+open fsharper.op.Foldable
 
 type PipelineCombineMode<'I, 'O> =
     /// 在管道入口插入管道（数据库获取之前）
@@ -18,3 +20,50 @@ type BuilderItem<'I, 'O> =
       beforeFail: IGenericPipe<'I, 'I> List }
 
 type BuilderItem<'T> = BuilderItem<'T, 'T>
+
+
+[<AutoOpen>]
+module ext_BuilderItem =
+
+    type BuilderItem<'I, 'O> with
+        member inline self.fullyBuild basePipe =
+            let fail =
+                (self.beforeFail.foldr (fun p (acc: IPipe<_>) -> acc.export p) (Pipe<_>()))
+                    .fill //before fail
+                .> panicwith
+
+            self.collection.foldl
+            <| fun acc x ->
+                match x with
+                | Before before -> before.export acc
+                | Replace f -> f acc
+                | After after -> acc.export after
+            <| basePipe fail
+
+        member inline self.noneBeforeBuild basePipe =
+            let fail =
+                (self.beforeFail.foldr (fun p (acc: IPipe<_>) -> acc.export p) (Pipe<_>()))
+                    .fill //before fail
+                .> panicwith
+
+            self.collection.foldl
+            <| fun acc x ->
+                match x with
+                | Before _ -> acc
+                | Replace f -> f acc
+                | After after -> acc.export after
+            <| basePipe fail
+
+        member inline self.noneAfterBuild basePipe =
+            let fail =
+                (self.beforeFail.foldr (fun p (acc: IPipe<_>) -> acc.export p) (Pipe<_>()))
+                    .fill //before fail
+                .> panicwith
+
+            self.collection.foldl
+            <| fun acc x ->
+                match x with
+                | Before before -> before.export acc
+                | Replace f -> f acc
+                | After _ -> acc
+            <| basePipe fail
