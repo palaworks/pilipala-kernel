@@ -40,6 +40,7 @@ module ext_IDbOperationBuilder =
         member db.Yield _ = db.makeCmd ()
 
     type IDbOperationBuilder with
+
         [<CustomOperation("inComment")>]
         member db.inComment cmd = cmd, db.tables.comment
 
@@ -53,6 +54,25 @@ module ext_IDbOperationBuilder =
         member db.inUser cmd = cmd, db.tables.user
 
     type IDbOperationBuilder with
+
+        [<CustomOperation("insert")>]
+        member db.insert((cmd, table), fields) = (cmd: DbCommand).insert (table, fields)
+
+        [<CustomOperation("select")>]
+        member db.select(cmd, sql, paras) = (cmd: DbCommand).select (sql, paras)
+
+        [<CustomOperation("update")>]
+        member db.update((cmd, table), targetKey, targetVal, whereKey, whereVal) =
+            (cmd: DbCommand)
+                .update (table, (targetKey, targetVal), (whereKey, whereVal))
+
+        [<CustomOperation("delete")>]
+        member db.delete((cmd, table), whereKey, whereVal) =
+            (cmd: DbCommand)
+                .delete (table, whereKey, whereVal)
+
+    type IDbOperationBuilder with
+
         [<CustomOperation("getFstVal")>]
         member db.getFstVal(cmd, sql, paras) = (cmd: DbCommand).getFstVal (sql, paras)
 
@@ -66,22 +86,8 @@ module ext_IDbOperationBuilder =
             (cmd: DbCommand)
                 .getFstRow (table, whereKey, whereVal)
 
-
-        [<CustomOperation("insert")>]
-        member db.insert((cmd, table), fields) = (cmd: DbCommand).insert (table, fields)
-
-        [<CustomOperation("select")>]
-        member db.select(cmd, sql) = (cmd: DbCommand).select (sql)
-
-        [<CustomOperation("update")>]
-        member db.update((cmd, table), targetKey, targetVal, whereKey, whereVal) =
-            (cmd: DbCommand)
-                .update (table, (targetKey, targetVal), (whereKey, whereVal))
-
-        [<CustomOperation("delete")>]
-        member db.delete((cmd, table), whereKey, whereVal) =
-            (cmd: DbCommand)
-                .delete (table, whereKey, whereVal)
+        [<CustomOperation("getFstCol")>]
+        member db.getFstCol(cmd, sql, paras) = (cmd: DbCommand).getFstCol (sql, paras)
 
     type IDbOperationBuilder with
         [<CustomOperation("whenEq")>]
@@ -91,6 +97,7 @@ module ext_IDbOperationBuilder =
         member db.always f = f (always true)
 
     type IDbOperationBuilder with
+
         [<CustomOperation("execute")>]
         member db.execute f = db.managed.executeQuery f
 

@@ -9,3 +9,8 @@ type IComment =
     abstract Body: string with get, set
     abstract CreateTime: DateTime with get, set
     abstract Item: string -> Option'<obj> with get, set
+
+type ICommentProvider =
+    abstract fetch: u64 -> IComment
+    abstract create: IComment -> u64
+    abstract delete: u64 -> u64 * IComment

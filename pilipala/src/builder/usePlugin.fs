@@ -12,14 +12,15 @@ open pilipala.plugin
 type Builder with
 
     member self.usePlugin t =
-        let func _ =
-            self
-                .DI
+        let f (sc: IServiceCollection) =
+            sc
                 .BuildServiceProvider()
                 .GetService<PluginProvider>()
                 .launchPluginByType t
 
-        self.buildPipeline.export (StatePipe(activate = func))
+            sc
+
+        { pipeline = self.pipeline.export (StatePipe(activate = f)) }
 
     member self.usePlugin<'p when 'p :> PluginAttribute>() = self.usePlugin typeof<'p>
 

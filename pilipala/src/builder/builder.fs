@@ -7,27 +7,9 @@ open pilipala.log
 open pilipala.serv
 open pilipala.plugin
 
-/// 在指定端口启动认证服务
-/// 认证通过后，会以 SecureChannel 为参数执行闭包 f
-/// 构建器
-type Builder() =
-    /// 构建函数管道
-    member val internal buildPipeline = Pipe<unit>() with get, set
+type Builder = { pipeline: IPipe<IServiceCollection> }
 
-    member val DI =
-        ServiceCollection()
-            .AddSingleton<LogProvider>()
-            .AddSingleton<ServProvider>()
-            .AddSingleton<PluginProvider>()
-
-    (*
-    /// 使用页缓存
-    member self.usePageCache() = ()
-    /// 使用内存表
-    member self.useMemoryTable() = ()
-    *)
-
-    (*
+(*
     内核构造序：
     useDb
     usePlugin
@@ -42,12 +24,18 @@ type Builder() =
     useCommentCache
     *)
 
-    /// 构建
-    member self.build() =
-        self.buildPipeline.fill ()
+type Builder with
 
-        self
-            .DI
-            .AddSingleton<Pilipala>()
+    member self.build() =
+        let f (sc: IServiceCollection) =
+            sc
+                .AddSingleton<LogProvider>()
+                .AddSingleton<ServProvider>()
+                .AddSingleton<PluginProvider>()
+
+        StatePipe(activate = f)
+            .export(self.pipeline)
+            .export(StatePipe(activate = fun sc -> sc.AddSingleton<Pilipala>()))
+            .fill(ServiceCollection())
             .BuildServiceProvider()
             .GetService<Pilipala>()

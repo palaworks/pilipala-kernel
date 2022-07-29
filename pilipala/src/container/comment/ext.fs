@@ -10,5 +10,5 @@ type IComment with
 
     /// 评论的回复
     /// 此功能需CommentReplies插件支持
-    member self.Replies: IComment list =
+    member self.Replies: IComment seq =
         downcast self.["Replies"].unwrap ()

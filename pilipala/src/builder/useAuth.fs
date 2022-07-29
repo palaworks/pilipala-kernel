@@ -17,7 +17,7 @@ type Builder with
 
     member self.useAuth(port: u16) =
 
-        let func () =
+        let f sc =
             let server = //用于监听的服务器
                 TcpListener(IPAddress.Parse("localhost"), i32 port)
 
@@ -37,4 +37,6 @@ type Builder with
                 .Build()
                 .Run()
 
-        self.buildPipeline.export (StatePipe(func))
+            sc
+
+        { pipeline = self.pipeline.export (StatePipe(activate = f)) }

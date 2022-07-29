@@ -22,7 +22,6 @@ module assembly =
         getAttribute<AssemblyTitleAttribute>
         >>= fun x -> Some x.Title
 
-
     let description =
         getAttribute<AssemblyDescriptionAttribute>
         >>= fun x -> Some x.Description

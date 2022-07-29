@@ -13,14 +13,15 @@ type Builder with
 
     member self.useServ t =
 
-        let func _ =
-            self
-                .DI
+        let f (sc: IServiceCollection) =
+            sc
                 .BuildServiceProvider()
                 .GetService<ServProvider>()
                 .regServByType t
 
-        self.buildPipeline.export (StatePipe(activate = func))
+            sc
+
+        { pipeline = self.pipeline.export (StatePipe(activate = f)) }
 
     member self.useServ<'s when 's :> ServAttribute>() = self.useServ typeof<'s>
 

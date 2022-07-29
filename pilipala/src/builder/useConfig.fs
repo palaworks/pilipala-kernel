@@ -4,7 +4,10 @@ module pilipala.builder.useConfig
 open System
 open System.Collections.Generic
 open fsharper.op
+open fsharper.typ
 open fsharper.op.Alias
+open fsharper.op.Pattern
+open fsharper.op.Foldable
 open pilipala.data.db
 open pilipala.util.io
 open pilipala.util.text
@@ -25,28 +28,17 @@ type Builder with
 
     /// 启用持久化队列
     /// 启用该选项会延迟数据持久化以缓解数据库压力并提升访问速度
-    member builder.useConfig(path: string) =
+    member self.useConfig(path: string) =
         let config =
-            { yaml = readFile path }
-                .intoJson()
-                .deserializeTo<Config> ()
+            { yaml = readFile path }.deserializeTo<Config> ()
 
-        builder.useDb config.database |> ignore
-
+        self
+        |> fun (acc: Builder) -> acc.useDb config.database
         //日志必须被首先配置，因为插件容器和服务容器都需要日志进行DI
-
         //注册日志过滤器
-        for kv in config.log do
-            let category = kv.Key
-            let lv = coerce kv.Value
-            builder.useLogFilter category lv |> ignore
-
+        |> config.log.foldl (fun acc (KV (category, lv)) -> acc.useLogFilter category (coerce lv))
         //注册服务
-        for dir in config.serv do
-            builder.useServ dir |> ignore
-
+        |> config.serv.foldl (fun acc -> acc.useServ)
         //注册插件
-        for dir in config.plugin do
-            builder.usePlugin dir |> ignore
-
-        builder.useAuth config.auth.port
+        |> config.plugin.foldl (fun acc -> acc.useServ)
+        |> fun acc -> acc.useAuth config.auth.port

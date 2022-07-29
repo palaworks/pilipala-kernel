@@ -12,3 +12,8 @@ type IPost =
     abstract AccessTime: DateTime with get, set
     abstract ModifyTime: DateTime with get, set
     abstract Item: string -> Option'<obj> with get, set
+
+type IPostProvider =
+    abstract fetch: u64 -> IPost
+    abstract create: IPost -> u64
+    abstract delete: u64 -> u64 * IPost

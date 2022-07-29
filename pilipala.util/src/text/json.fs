@@ -22,9 +22,3 @@ type Json with
 type Object with
     /// 序列化到json
     member self.serializeToJson() = Json.serializeFrom self
-
-(*
-type String with
-
-    member self.parseToJObject = JObject.Parse self
-*)
