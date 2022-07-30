@@ -13,13 +13,13 @@ open pilipala.pipeline
 open pilipala.pipeline.comment
 open pilipala.container.comment
 
-module CommentFinalizePipelineBuilder =
+module ICommentFinalizePipelineBuilder =
     let make () =
         let inline gen () =
             { collection = List<PipelineCombineMode<'I, 'O>>()
               beforeFail = List<IGenericPipe<'I, 'I>>() }
 
-        { new ICommentInitPipelineBuilder with
+        { new ICommentFinalizePipelineBuilder with
             member i.Batch = gen () }
 
 type CommentFinalizePipeline

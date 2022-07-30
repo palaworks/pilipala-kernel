@@ -1,9 +1,12 @@
 namespace pilipala.id
 
+open System.Reflection
 open pilipala.util.id
 
-type UuidGenerator() =
-    let g = uuid.Generator(N)
+module IUuidGenerator =
 
-    interface IUuidGenerator with
-        member self.next() = g.next ()
+    let make () =
+        let g = uuid.Generator(N) //全局应始终使用N型ID生成
+
+        { new IUuidGenerator with
+            member self.next() = g.next () }

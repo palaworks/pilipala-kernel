@@ -9,6 +9,7 @@ open fsharper.op.Alias
 open fsharper.typ.Pipe
 open fsharper.op.Pattern
 open fsharper.op.Foldable
+open pilipala.user
 open pilipala.data.db
 open pilipala.pipeline
 
@@ -41,7 +42,7 @@ module IPostRenderPipelineBuilder =
 
             member i.GetEnumerator() : IEnumerator<_> = udf.GetEnumerator() }
 
-type PostRenderPipeline internal (renderBuilder: IPostRenderPipelineBuilder, db: IDbOperationBuilder) =
+type PostRenderPipeline internal (renderBuilder: IPostRenderPipelineBuilder, db: IDbOperationBuilder, ug: UserGroup) =
     let get target (idVal: u64) =
         db {
             inPost

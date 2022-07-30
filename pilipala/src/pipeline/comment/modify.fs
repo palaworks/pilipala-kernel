@@ -12,7 +12,7 @@ open fsharper.op.Foldable
 open pilipala.data.db
 open pilipala.pipeline
 
-module CommentModifyPipelineBuilder =
+module ICommentModifyPipelineBuilder =
     let make () =
         let inline gen () =
             { collection = List<PipelineCombineMode<'I, 'O>>()

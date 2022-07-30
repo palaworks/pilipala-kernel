@@ -11,6 +11,7 @@ open fsharper.op.Pattern
 open fsharper.op.Foldable
 open pilipala.data.db
 open pilipala.pipeline
+open pilipala.user
 
 module IPostModifyPipelineBuilder =
     let make () =
@@ -41,7 +42,7 @@ module IPostModifyPipelineBuilder =
 
             member i.GetEnumerator() : IEnumerator<_> = udf.GetEnumerator() }
 
-type PostModifyPipeline internal (modifyBuilder: IPostModifyPipelineBuilder, db: IDbOperationBuilder) =
+type PostModifyPipeline internal (modifyBuilder: IPostModifyPipelineBuilder, db: IDbOperationBuilder, ug: UserGroup) =
     let set targetKey (idVal: u64, targetVal) =
         match
             db {

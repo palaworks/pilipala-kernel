@@ -13,7 +13,7 @@ open pilipala.pipeline
 open pilipala.pipeline.comment
 open pilipala.container.comment
 
-module CommentInitPipelineBuilder =
+module ICommentInitPipelineBuilder =
     let make () =
         let inline gen () =
             { collection = List<PipelineCombineMode<'I, 'O>>()

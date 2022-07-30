@@ -13,6 +13,7 @@ type Builder with
     member self.useDb(config: DbConfig) =
 
         let f (sc: IServiceCollection) =
+            //全局数据库单例
             sc.AddSingleton<IDbOperationBuilder>(fun _ -> IDbOperationBuilder.make config)
 
         { pipeline = self.pipeline.export (StatePipe(activate = f)) }

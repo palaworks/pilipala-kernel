@@ -11,6 +11,7 @@ open fsharper.op.Foldable
 open pilipala.data.db
 open pilipala.pipeline
 open pilipala.container.post
+open pilipala.user
 
 //TODO 考虑为Builder引入计算表达式
 module IPostFinalizePipelineBuilder =
@@ -19,7 +20,7 @@ module IPostFinalizePipelineBuilder =
             { collection = List<PipelineCombineMode<'I, 'O>>()
               beforeFail = List<IGenericPipe<'I, 'I>>() }
 
-        { new IPostInitPipelineBuilder with
+        { new IPostFinalizePipelineBuilder with
             member i.Batch = gen () }
 
 type PostFinalizePipeline
@@ -28,7 +29,8 @@ type PostFinalizePipeline
         renderBuilder: IPostRenderPipelineBuilder,
         modifyBuilder: IPostModifyPipelineBuilder,
         finalizeBuilder: IPostFinalizePipelineBuilder,
-        db: IDbOperationBuilder
+        db: IDbOperationBuilder,
+        ug: UserGroup
     ) =
 
     let udf_render_no_after = //去除了After部分的udf渲染管道，因为After可能包含渲染逻辑

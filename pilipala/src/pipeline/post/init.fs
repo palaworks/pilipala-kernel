@@ -8,6 +8,7 @@ open fsharper.op.Alias
 open fsharper.op.Runtime
 open fsharper.op.Foldable
 open pilipala.id
+open pilipala.user
 open pilipala.data.db
 open pilipala.pipeline
 open pilipala.container.post
@@ -27,7 +28,7 @@ type PostInitPipeline
         initBuilder: IPostInitPipelineBuilder,
         palaflake: IPalaflakeGenerator,
         db: IDbOperationBuilder,
-        user_group: u8
+        ug: UserGroup
     ) =
     let data (post: IPost) =
         let post_id = palaflake.next ()
@@ -39,7 +40,7 @@ type PostInitPipeline
               ("post_create_time", post.CreateTime)
               ("post_access_time", post.AccessTime)
               ("post_modify_time", post.AccessTime)
-              ("user_group", user_group) ]
+              ("user_group", ug.id) ]
 
         let aff =
             db {
