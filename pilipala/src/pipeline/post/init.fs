@@ -2,6 +2,7 @@ namespace pilipala.pipeline.post
 
 open System
 open System.Collections.Generic
+open fsharper.op
 open fsharper.typ
 open fsharper.typ.Pipe
 open fsharper.op.Alias
@@ -17,7 +18,7 @@ module IPostInitPipelineBuilder =
     let make () =
         let inline gen () =
             { collection = List<PipelineCombineMode<'I, 'O>>()
-              beforeFail = List<IGenericPipe<'I, 'I>>() }
+              beforeFail = List<'I -> 'I>() }
 
         { new IPostInitPipelineBuilder with
             member i.Batch = gen () }
@@ -28,7 +29,7 @@ type PostInitPipeline
         initBuilder: IPostInitPipelineBuilder,
         palaflake: IPalaflakeGenerator,
         db: IDbOperationBuilder,
-        ug: UserGroup
+        ug: IUser
     ) =
     let data (post: IPost) =
         let post_id = palaflake.next ()
@@ -40,7 +41,7 @@ type PostInitPipeline
               ("post_create_time", post.CreateTime)
               ("post_access_time", post.AccessTime)
               ("post_modify_time", post.AccessTime)
-              ("user_group", ug.id) ]
+              ("user_group", ug.Id) ]
 
         let aff =
             db {
@@ -57,4 +58,4 @@ type PostInitPipeline
 
     member self.Batch =
         initBuilder.Batch.fullyBuild
-        <| fun fail -> GenericCachePipe(data, fail)
+        <| fun fail id -> unwrapOr (data id) (fun _ -> fail id)

@@ -16,7 +16,7 @@ module ICommentRenderPipelineBuilder =
     let make () =
         let inline gen () =
             { collection = List<PipelineCombineMode<'I, 'O>>()
-              beforeFail = List<IGenericPipe<'I, 'I>>() }
+              beforeFail = List<'I -> 'I>() }
 
         let udf = //user defined field
             Dict<string, BuilderItem<u64, u64 * obj>>()
@@ -51,21 +51,19 @@ type CommentRenderPipeline internal (renderBuilder: ICommentRenderPipelineBuilde
         }
         |> fmap (fun v -> idVal, coerce v)
 
-    let udf =
-        Dict<string, IGenericPipe<u64, u64 * obj>>()
+    let udf = Dict<string, u64 -> u64 * obj>()
 
     do
         for KV (name, builderItem) in renderBuilder do
             //udf管道初始为只会panic的GenericPipe，必须Replace后使用
-            let justFail fail : IGenericPipe<_, _> = GenericPipe fail
-            udf.Add(name, builderItem.fullyBuild justFail)
+            udf.Add(name, builderItem.fullyBuild id)
 
     member self.Body =
         renderBuilder.Body.fullyBuild
-        <| fun fail -> GenericCachePipe(get "comment_body", fail)
+        <| fun fail id -> unwrapOr (get "comment_body" id) (fun _ -> fail id)
 
     member self.CreateTime =
         renderBuilder.CreateTime.fullyBuild
-        <| fun fail -> GenericCachePipe(get "comment_create_time", fail)
+        <| fun fail id -> unwrapOr (get "comment_create_time" id) (fun _ -> fail id)
 
     member self.Item(name: string) = udf.TryGetValue(name).intoOption' ()

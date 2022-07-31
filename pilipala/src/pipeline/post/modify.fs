@@ -17,7 +17,7 @@ module IPostModifyPipelineBuilder =
     let make () =
         let inline gen () =
             { collection = List<PipelineCombineMode<'I, 'O>>()
-              beforeFail = List<IGenericPipe<'I, 'I>>() }
+              beforeFail = List<'I -> 'I>() }
 
         let udf = //user defined field
             Dict<string, BuilderItem<u64 * obj>>()
@@ -42,7 +42,7 @@ module IPostModifyPipelineBuilder =
 
             member i.GetEnumerator() : IEnumerator<_> = udf.GetEnumerator() }
 
-type PostModifyPipeline internal (modifyBuilder: IPostModifyPipelineBuilder, db: IDbOperationBuilder, ug: UserGroup) =
+type PostModifyPipeline internal (modifyBuilder: IPostModifyPipelineBuilder, db: IDbOperationBuilder, ug: IUser) =
     let set targetKey (idVal: u64, targetVal) =
         match
             db {
@@ -55,31 +55,31 @@ type PostModifyPipeline internal (modifyBuilder: IPostModifyPipelineBuilder, db:
         | 1 -> Some(idVal, targetVal)
         | _ -> None
 
-    let udf = Dict<string, IPipe<u64 * obj>>()
+    let udf =
+        Dict<string, u64 * obj -> u64 * obj>()
 
     do
         for KV (name, builderItem) in modifyBuilder do
-            let justFail fail : IGenericPipe<_, _> = GenericPipe fail
-            udf.Add(name, builderItem.fullyBuild justFail)
+            udf.Add(name, builderItem.fullyBuild id)
 
-    member self.Title: IPipe<_> =
+    member self.Title =
         modifyBuilder.Title.fullyBuild
-        <| fun fail -> GenericCachePipe((set "post_title"), fail)
+        <| fun fail id -> unwrapOr (set "post_title" id) (fun _ -> fail id)
 
-    member self.Body: IPipe<_> =
+    member self.Body =
         modifyBuilder.Body.fullyBuild
-        <| fun fail -> GenericCachePipe(set "post_body", fail)
+        <| fun fail id -> unwrapOr (set "post_body" id) (fun _ -> fail id)
 
-    member self.CreateTime: IPipe<_> =
+    member self.CreateTime =
         modifyBuilder.CreateTime.fullyBuild
-        <| fun fail -> GenericCachePipe(set "post_create_time", fail)
+        <| fun fail id -> unwrapOr (set "post_create_time" id) (fun _ -> fail id)
 
-    member self.AccessTime: IPipe<_> =
+    member self.AccessTime =
         modifyBuilder.AccessTime.fullyBuild
-        <| fun fail -> GenericCachePipe(set "post_access_time", fail)
+        <| fun fail id -> unwrapOr (set "post_access_time" id) (fun _ -> fail id)
 
-    member self.ModifyTime: IPipe<_> =
+    member self.ModifyTime =
         modifyBuilder.ModifyTime.fullyBuild
-        <| fun fail -> GenericCachePipe(set "post_modify_time", fail)
+        <| fun fail id -> unwrapOr (set "post_modify_time" id) (fun _ -> fail id)
 
     member self.Item(name: string) = udf.TryGetValue(name).intoOption' ()

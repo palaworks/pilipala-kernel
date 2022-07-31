@@ -17,7 +17,7 @@ module ICommentFinalizePipelineBuilder =
     let make () =
         let inline gen () =
             { collection = List<PipelineCombineMode<'I, 'O>>()
-              beforeFail = List<IGenericPipe<'I, 'I>>() }
+              beforeFail = List<'I -> 'I>() }
 
         { new ICommentFinalizePipelineBuilder with
             member i.Batch = gen () }
@@ -32,23 +32,21 @@ type CommentFinalizePipeline
     ) =
 
     let udf_render_no_after = //去除了After部分的udf渲染管道，因为After可能包含渲染逻辑
-        let map =
-            Dict<string, IGenericPipe<u64, u64 * obj>>()
+        let map = Dict<string, u64 -> u64 * obj>()
 
         for KV (name, builderItem) in renderBuilder do //遍历udf
             //udf管道初始为只会panic的GenericPipe，必须Replace后使用
-            let justFail fail : IGenericPipe<_, _> = GenericPipe fail
-            map.Add(name, builderItem.noneAfterBuild justFail)
+            map.Add(name, builderItem.noneAfterBuild id)
 
         map
 
     let udf_modify_no_after = //去除了After部分的udf修改管道，因After可能包含通知逻辑
-        let map = Dict<string, IPipe<u64 * obj>>()
+        let map =
+            Dict<string, u64 * obj -> u64 * obj>()
 
         for KV (name, builderItem) in modifyBuilder do //遍历udf
             //udf管道初始为只会panic的GenericPipe，必须Replace后使用
-            let justFail fail : IGenericPipe<_, _> = GenericPipe fail
-            map.Add(name, builderItem.noneAfterBuild justFail)
+            map.Add(name, builderItem.noneAfterBuild id)
 
         map
 
@@ -75,15 +73,13 @@ type CommentFinalizePipeline
 
                 member i.Item
                     with get name =
-                        udf_render_no_after
-                            .TryGetValue(name)
-                            .intoOption'()
-                            .fmap (fun (p: IGenericPipe<_, _>) -> p.fill comment_id)
+                        udf_render_no_after.TryGetValue(name).intoOption'()
+                            .fmap
+                        <| (apply ..> snd) comment_id
                     and set name v =
-                        udf_modify_no_after
-                            .TryGetValue(name)
-                            .intoOption'()
-                            .fmap (fun (p: IPipe<_>) -> p.fill (comment_id, v))
+                        udf_modify_no_after.TryGetValue(name).intoOption'()
+                            .fmap
+                        <| apply (comment_id, v)
                         |> ignore }
 
         let aff =
@@ -101,4 +97,4 @@ type CommentFinalizePipeline
 
     member self.Batch =
         finalizeBuilder.Batch.fullyBuild
-        <| fun fail -> GenericCachePipe(data, fail)
+        <| fun fail id -> unwrapOr (data id) (fun _ -> fail id)

@@ -16,7 +16,7 @@ module ICommentModifyPipelineBuilder =
     let make () =
         let inline gen () =
             { collection = List<PipelineCombineMode<'I, 'O>>()
-              beforeFail = List<IGenericPipe<'I, 'I>>() }
+              beforeFail = List<'I -> 'I>() }
 
         let udf = //user defined field
             Dict<string, BuilderItem<u64 * obj>>()
@@ -50,19 +50,19 @@ type CommentModifyPipeline internal (modifyBuilder: ICommentModifyPipelineBuilde
         | 1 -> Some(idVal, targetVal)
         | _ -> None
 
-    let udf = Dict<string, IPipe<u64 * obj>>()
+    let udf =
+        Dict<string, u64 * obj -> u64 * obj>()
 
     do
         for KV (name, builderItem) in modifyBuilder do
-            let justFail fail : IGenericPipe<_, _> = GenericPipe fail
-            udf.Add(name, builderItem.fullyBuild justFail)
+            udf.Add(name, builderItem.fullyBuild id)
 
-    member self.Body: IPipe<_> =
+    member self.Body =
         modifyBuilder.Body.fullyBuild
-        <| fun fail -> GenericCachePipe(set "comment_body", fail)
+        <| fun fail id -> unwrapOr (set "comment_body" id) (fun _ -> fail id)
 
-    member self.CreateTime: IPipe<_> =
+    member self.CreateTime =
         modifyBuilder.CreateTime.fullyBuild
-        <| fun fail -> GenericCachePipe(set "comment_create_time", fail)
+        <| fun fail id -> unwrapOr (set "comment_create_time" id) (fun _ -> fail id)
 
     member self.Item(name: string) = udf.TryGetValue(name).intoOption' ()

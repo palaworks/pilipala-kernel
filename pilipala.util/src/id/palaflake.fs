@@ -1,4 +1,5 @@
 ﻿[<AutoOpen>]
+[<RequireQualifiedAccess>]
 module pilipala.util.id.palaflake
 
 open System

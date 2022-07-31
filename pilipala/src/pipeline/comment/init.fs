@@ -17,7 +17,7 @@ module ICommentInitPipelineBuilder =
     let make () =
         let inline gen () =
             { collection = List<PipelineCombineMode<'I, 'O>>()
-              beforeFail = List<IGenericPipe<'I, 'I>>() }
+              beforeFail = List<'I -> 'I>() }
 
         { new ICommentInitPipelineBuilder with
             member i.Batch = gen () }
@@ -68,4 +68,4 @@ type CommentInitPipeline
 
     member self.Batch =
         initBuilder.Batch.fullyBuild
-        <| fun fail -> GenericCachePipe(data, fail)
+        <| fun fail id -> unwrapOr (data id) (fun _ -> fail id)
