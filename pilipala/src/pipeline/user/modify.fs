@@ -1,4 +1,4 @@
-namespace pilipala.pipeline.comment
+namespace pilipala.pipeline.user
 
 open System
 open System.Collections
@@ -10,8 +10,10 @@ open fsharper.op.Pattern
 open fsharper.op.Foldable
 open pilipala.data.db
 open pilipala.pipeline
+open pilipala.pipeline.user
+open pilipala.access.user
 
-module ICommentModifyPipelineBuilder =
+module IUserModifyPipelineBuilder =
     let make () =
         let inline gen () =
             { collection = List<PipelineCombineMode<'I, 'O>>()
@@ -20,8 +22,9 @@ module ICommentModifyPipelineBuilder =
         let udf = //user defined field
             Dict<string, BuilderItem<u64 * obj>>()
 
-        { new ICommentModifyPipelineBuilder with
-            member i.Body = gen ()
+        { new IUserModifyPipelineBuilder with
+            member i.Name = gen ()
+            member i.Email = gen ()
             member i.CreateTime = gen ()
 
             member i.Item name =
@@ -36,12 +39,12 @@ module ICommentModifyPipelineBuilder =
 
             member i.GetEnumerator() : IEnumerator<_> = udf.GetEnumerator() }
 
-type CommentModifyPipeline internal (modifyBuilder: ICommentModifyPipelineBuilder, db: IDbOperationBuilder) =
+type UserModifyPipeline internal (modifyBuilder: IUserModifyPipelineBuilder, db: IDbOperationBuilder, ug: IUser) =
     let set targetKey (idVal: u64, targetVal) =
         match
             db {
-                inComment
-                update targetKey targetVal "comment_id" idVal
+                inUser
+                update targetKey targetVal "user_id" idVal
                 whenEq 1
                 execute
             }
@@ -56,12 +59,16 @@ type CommentModifyPipeline internal (modifyBuilder: ICommentModifyPipelineBuilde
         for KV (name, builderItem) in modifyBuilder do
             udf.Add(name, builderItem.fullyBuild id)
 
-    member self.Body =
-        modifyBuilder.Body.fullyBuild
-        <| fun fail id -> unwrapOr (set "comment_body" id) (fun _ -> fail id)
+    member self.Name =
+        modifyBuilder.Name.fullyBuild
+        <| fun fail id -> unwrapOr (set "user_name" id) (fun _ -> fail id)
+
+    member self.Email =
+        modifyBuilder.Email.fullyBuild
+        <| fun fail id -> unwrapOr (set "user_email" id) (fun _ -> fail id)
 
     member self.CreateTime =
         modifyBuilder.CreateTime.fullyBuild
-        <| fun fail id -> unwrapOr (set "comment_create_time" id) (fun _ -> fail id)
+        <| fun fail id -> unwrapOr (set "user_create_time" id) (fun _ -> fail id)
 
     member self.Item(name: string) = udf.TryGetValue(name).intoOption' ()

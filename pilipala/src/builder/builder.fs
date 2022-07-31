@@ -1,7 +1,7 @@
 ﻿namespace pilipala.builder
 
 open Microsoft.Extensions.DependencyInjection
-open fsharper.typ.Pipe
+open fsharper.typ
 open pilipala
 open pilipala.container.comment
 open pilipala.container.post
@@ -12,7 +12,8 @@ open pilipala.plugin
 open pilipala.pipeline.post
 open pilipala.pipeline.comment
 
-type Builder = { pipeline: IPipe<IServiceCollection> }
+type Builder =
+    { pipeline: IServiceCollection -> IServiceCollection }
 
 (*
     内核构造序：
@@ -32,7 +33,7 @@ type Builder = { pipeline: IPipe<IServiceCollection> }
 type Builder with
 
     member self.build(serverId) =
-        let f (sc: IServiceCollection) =
+        fun (sc: IServiceCollection) ->
             sc
                 .AddSingleton<LogProvider>()
                 .AddSingleton<ServProvider>()
@@ -74,10 +75,7 @@ type Builder with
                         sf.GetService<CommentModifyPipeline>(),
                         sf.GetService<CommentFinalizePipeline>()
                     ))
-
-        StatePipe(activate = f)
-            .export(self.pipeline)
-            .export(StatePipe(activate = fun sc -> sc.AddSingleton<Pilipala>()))
-            .fill(ServiceCollection())
-            .BuildServiceProvider()
-            .GetService<Pilipala>()
+        .> self.pipeline
+        .> fun sc -> sc.AddSingleton<Pilipala>()
+        |> apply (ServiceCollection())
+        |> fun sc -> sc.BuildServiceProvider().GetService<Pilipala>()

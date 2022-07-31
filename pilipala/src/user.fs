@@ -1,7 +1,8 @@
-namespace pilipala.user
+namespace pilipala.access.user
 
 open fsharper.op.Alias
 
+(*
 type IUser =
     abstract Id: u8
 
@@ -12,3 +13,4 @@ type IUser =
            WriteComment: u8
            ReadUser: u8
            WriteUser: u8 |}
+*)

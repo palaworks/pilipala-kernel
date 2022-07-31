@@ -1,7 +1,7 @@
 [<AutoOpen>]
 module pilipala.builder.useDb
 
-open fsharper.typ.Pipe
+open fsharper.typ
 open Microsoft.Extensions.DependencyInjection
 open pilipala.builder
 open pilipala.data.db
@@ -16,4 +16,4 @@ type Builder with
             //全局数据库单例
             sc.AddSingleton<IDbOperationBuilder>(fun _ -> IDbOperationBuilder.make config)
 
-        { pipeline = self.pipeline.export (StatePipe(activate = f)) }
+        { pipeline = self.pipeline .> f }

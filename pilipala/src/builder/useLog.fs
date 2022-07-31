@@ -1,7 +1,7 @@
 [<AutoOpen>]
 module pilipala.builder.useLog
 
-open fsharper.typ.Pipe
+open fsharper.typ
 open Microsoft.Extensions.DependencyInjection
 open pilipala.log
 
@@ -17,7 +17,7 @@ type Builder with
 
             sc
 
-        { pipeline = self.pipeline.export (StatePipe(activate = f)) }
+        { pipeline = self.pipeline .> f }
 
     member self.useLogFilter category lv =
 
@@ -29,4 +29,4 @@ type Builder with
 
             sc
 
-        { pipeline = self.pipeline.export (StatePipe(activate = f)) }
+        { pipeline = self.pipeline .> f }

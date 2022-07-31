@@ -5,7 +5,6 @@ open System.IO
 open System.Reflection
 open fsharper.op
 open fsharper.typ
-open fsharper.typ.Pipe
 open Microsoft.Extensions.DependencyInjection
 open pilipala.plugin
 
@@ -20,7 +19,7 @@ type Builder with
 
             sc
 
-        { pipeline = self.pipeline.export (StatePipe(activate = f)) }
+        { pipeline = self.pipeline .> f }
 
     member self.usePlugin<'p when 'p :> PluginAttribute>() = self.usePlugin typeof<'p>
 

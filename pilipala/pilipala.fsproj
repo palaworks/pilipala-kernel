@@ -22,6 +22,10 @@
         <Compile Include="src\pipeline\comment\render.fs" />
         <Compile Include="src\pipeline\comment\modify.fs" />
         <Compile Include="src\pipeline\comment\finalize.fs" />
+        <Compile Include="src\pipeline\user\init.fs" />
+        <Compile Include="src\pipeline\user\render.fs" />
+        <Compile Include="src\pipeline\user\modify.fs" />
+        <Compile Include="src\pipeline\user\finalize.fs" />
         <Compile Include="src\container\post\provider.fs" />
         <Compile Include="src\container\post\ext.fs" />
         <Compile Include="src\container\comment\provider.fs" />

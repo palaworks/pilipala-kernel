@@ -42,7 +42,7 @@ module IPostModifyPipelineBuilder =
 
             member i.GetEnumerator() : IEnumerator<_> = udf.GetEnumerator() }
 
-type PostModifyPipeline internal (modifyBuilder: IPostModifyPipelineBuilder, db: IDbOperationBuilder, ug: IUser) =
+type PostModifyPipeline internal (modifyBuilder: IPostModifyPipelineBuilder, db: IDbOperationBuilder) =
     let set targetKey (idVal: u64, targetVal) =
         match
             db {

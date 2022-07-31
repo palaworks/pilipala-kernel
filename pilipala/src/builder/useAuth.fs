@@ -3,8 +3,8 @@ module pilipala.builder.useAuth
 
 open System.Net
 open System.Net.Sockets
+open fsharper.typ
 open fsharper.op.Alias
-open fsharper.typ.Pipe
 open Microsoft.Extensions.Hosting
 open Microsoft.Extensions.DependencyInjection
 open WebSocketer.typ
@@ -39,4 +39,4 @@ type Builder with
 
             sc
 
-        { pipeline = self.pipeline.export (StatePipe(activate = f)) }
+        { pipeline = self.pipeline .> f }

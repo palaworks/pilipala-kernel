@@ -1,4 +1,4 @@
-namespace pilipala.pipeline.post
+namespace pilipala.pipeline.user
 
 open System
 open System.Collections.Generic
@@ -10,47 +10,46 @@ open fsharper.op.Foldable
 open pilipala.id
 open pilipala.data.db
 open pilipala.pipeline
-open pilipala.container.post
+open pilipala.access.user
 
-module IPostInitPipelineBuilder =
+module IUserInitPipelineBuilder =
     let make () =
         let inline gen () =
             { collection = List<PipelineCombineMode<'I, 'O>>()
               beforeFail = List<'I -> 'I>() }
 
-        { new IPostInitPipelineBuilder with
+        { new IUserInitPipelineBuilder with
             member i.Batch = gen () }
 
-type PostInitPipeline
+type UserInitPipeline
     internal
     (
-        initBuilder: IPostInitPipelineBuilder,
+        initBuilder: IUserInitPipelineBuilder,
         palaflake: IPalaflakeGenerator,
         db: IDbOperationBuilder,
-        userPermission: u16
+        ug: IUser
     ) =
-    let data (post: IPost) =
-        let post_id = palaflake.next ()
+    let data (user: IUser, userPwdHash: string, userPermission: u16) =
+        let user_id = palaflake.next ()
 
         let fields: (_ * obj) list =
-            [ ("post_id", post_id)
-              ("post_title", post.Title)
-              ("post_body", post.Body)
-              ("post_create_time", post.CreateTime)
-              ("post_access_time", post.AccessTime)
-              ("post_modify_time", post.AccessTime)
-              ("user_permission", userPermission) ]
+            [ ("user_id", user_id)
+              ("user_name", user.Name)
+              ("user_email", user.Email)
+              ("user_pwd_hash", userPwdHash)
+              ("user_permission", userPermission)
+              ("user_create_time", user.CreateTime) ]
 
         let aff =
             db {
-                inPost
+                inUser
                 insert fields
                 whenEq 1
                 execute
             }
 
         if aff = 1 then
-            Some(post_id, post)
+            Some(user_id, user)
         else
             None
 

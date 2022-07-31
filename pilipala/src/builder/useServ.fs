@@ -21,7 +21,7 @@ type Builder with
 
             sc
 
-        { pipeline = self.pipeline.export (StatePipe(activate = f)) }
+        { pipeline = self.pipeline .> f }
 
     member self.useServ<'s when 's :> ServAttribute>() = self.useServ typeof<'s>
 
