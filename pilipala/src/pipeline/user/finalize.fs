@@ -75,6 +75,10 @@ type UserFinalizePipeline
                     with get () = coerce db_data.["user_create_time"]
                     and set v = ()
 
+                member i.AccessTime
+                    with get () = coerce db_data.["user_create_time"]
+                    and set v = ()
+
                 member i.Item
                     with get name =
                         udf_render_no_after.TryGetValue(name).intoOption'()
