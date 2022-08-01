@@ -10,6 +10,7 @@ open fsharper.op.Pattern
 open fsharper.op.Foldable
 open pilipala.data.db
 open pilipala.pipeline
+open pilipala.container.comment
 
 module ICommentModifyPipelineBuilder =
     let make () =
@@ -22,6 +23,7 @@ module ICommentModifyPipelineBuilder =
 
         { new ICommentModifyPipelineBuilder with
             member i.Body = gen ()
+            member i.Binding = gen ()
             member i.CreateTime = gen ()
 
             member i.Item name =
@@ -58,10 +60,38 @@ type CommentModifyPipeline internal (modifyBuilder: ICommentModifyPipelineBuilde
 
     member self.Body =
         modifyBuilder.Body.fullyBuild
-        <| fun fail id -> unwrapOr (set "comment_body" id) (fun _ -> fail id)
+        <| fun fail x -> unwrapOr (set "comment_body" x) (fun _ -> fail x)
+
+    member self.Binding =
+        let setBinding v =
+            let (comment_id: u64), comment_binding, comment_is_reply =
+                match v with
+                | x, BindPost y -> x, y, false
+                | x, BindComment y -> x, y, true
+
+            if db {
+                inComment
+                update "comment_binding" comment_binding "comment_id" comment_id
+                whenEq 1
+                execute
+            } = 1 then
+                if db {
+                    inComment
+                    update "comment_is_reply" comment_is_reply "comment_id" comment_id
+                    whenEq 1
+                    execute
+                } = 1 then
+                    Some v
+                else
+                    None
+            else
+                None
+
+        modifyBuilder.Binding.fullyBuild
+        <| fun fail x -> unwrapOr (setBinding x) (fun _ -> fail x)
 
     member self.CreateTime =
         modifyBuilder.CreateTime.fullyBuild
-        <| fun fail id -> unwrapOr (set "comment_create_time" id) (fun _ -> fail id)
+        <| fun fail x -> unwrapOr (set "comment_create_time" x) (fun _ -> fail x)
 
     member self.Item(name: string) = udf.TryGetValue(name).intoOption' ()

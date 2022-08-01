@@ -11,7 +11,6 @@ open fsharper.op.Pattern
 open fsharper.op.Foldable
 open pilipala.data.db
 open pilipala.pipeline
-open pilipala.user
 
 module IPostModifyPipelineBuilder =
     let make () =
@@ -64,22 +63,22 @@ type PostModifyPipeline internal (modifyBuilder: IPostModifyPipelineBuilder, db:
 
     member self.Title =
         modifyBuilder.Title.fullyBuild
-        <| fun fail id -> unwrapOr (set "post_title" id) (fun _ -> fail id)
+        <| fun fail x -> unwrapOr (set "post_title" x) (fun _ -> fail x)
 
     member self.Body =
         modifyBuilder.Body.fullyBuild
-        <| fun fail id -> unwrapOr (set "post_body" id) (fun _ -> fail id)
+        <| fun fail x -> unwrapOr (set "post_body" x) (fun _ -> fail x)
 
     member self.CreateTime =
         modifyBuilder.CreateTime.fullyBuild
-        <| fun fail id -> unwrapOr (set "post_create_time" id) (fun _ -> fail id)
+        <| fun fail x -> unwrapOr (set "post_create_time" x) (fun _ -> fail x)
 
     member self.AccessTime =
         modifyBuilder.AccessTime.fullyBuild
-        <| fun fail id -> unwrapOr (set "post_access_time" id) (fun _ -> fail id)
+        <| fun fail x -> unwrapOr (set "post_access_time" x) (fun _ -> fail x)
 
     member self.ModifyTime =
         modifyBuilder.ModifyTime.fullyBuild
-        <| fun fail id -> unwrapOr (set "post_modify_time" id) (fun _ -> fail id)
+        <| fun fail x -> unwrapOr (set "post_modify_time" x) (fun _ -> fail x)
 
     member self.Item(name: string) = udf.TryGetValue(name).intoOption' ()

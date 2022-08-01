@@ -11,6 +11,7 @@ open fsharper.op.Pattern
 open fsharper.op.Foldable
 open pilipala.data.db
 open pilipala.pipeline
+open pilipala.container.comment
 
 module ICommentRenderPipelineBuilder =
     let make () =
@@ -28,6 +29,7 @@ module ICommentRenderPipelineBuilder =
         //replies由comment_is_reply布尔决定：为true时视bind_id为回复到的comment_id
         { new ICommentRenderPipelineBuilder with
             member i.Body = gen ()
+            member i.Binding = gen ()
             member i.CreateTime = gen ()
 
             member i.Item name =
@@ -61,6 +63,30 @@ type CommentRenderPipeline internal (renderBuilder: ICommentRenderPipelineBuilde
     member self.Body =
         renderBuilder.Body.fullyBuild
         <| fun fail id -> unwrapOr (get "comment_body" id) (fun _ -> fail id)
+
+    member self.Binding =
+        let getBinding id =
+            coerce
+            <%> db {
+                inComment
+                getFstVal "comment_binding" "comment_id" id
+                execute
+            }
+            >>= fun (comment_binding: u64) ->
+                    coerce
+                    <%> db {
+                        inComment
+                        getFstVal "comment_is_reply" "comment_id" id
+                        execute
+                    }
+                    >>= fun (comment_is_reply: bool) ->
+                            if comment_is_reply then
+                                Some(id, BindComment comment_binding)
+                            else
+                                Some(id, BindPost comment_binding)
+
+        renderBuilder.Binding.fullyBuild
+        <| fun fail id -> unwrapOr (getBinding id) (fun _ -> fail id)
 
     member self.CreateTime =
         renderBuilder.CreateTime.fullyBuild

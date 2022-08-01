@@ -62,14 +62,14 @@ type UserModifyPipeline internal (modifyBuilder: IUserModifyPipelineBuilder, db:
 
     member self.Name =
         modifyBuilder.Name.fullyBuild
-        <| fun fail id -> unwrapOr (set "user_name" id) (fun _ -> fail id)
+        <| fun fail x -> unwrapOr (set "user_name" x) (fun _ -> fail x)
 
     member self.Email =
         modifyBuilder.Email.fullyBuild
-        <| fun fail id -> unwrapOr (set "user_email" id) (fun _ -> fail id)
+        <| fun fail x -> unwrapOr (set "user_email" x) (fun _ -> fail x)
 
     member self.CreateTime =
         modifyBuilder.CreateTime.fullyBuild
-        <| fun fail id -> unwrapOr (set "user_create_time" id) (fun _ -> fail id)
+        <| fun fail x -> unwrapOr (set "user_create_time" x) (fun _ -> fail x)
 
     member self.Item(name: string) = udf.TryGetValue(name).intoOption' ()

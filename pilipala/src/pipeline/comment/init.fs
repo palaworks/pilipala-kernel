@@ -6,6 +6,7 @@ open fsharper.op
 open fsharper.typ
 open fsharper.op.Alias
 open fsharper.op.Foldable
+open pilipala.access.user
 open pilipala.id
 open pilipala.data.db
 open pilipala.pipeline
@@ -21,18 +22,13 @@ module ICommentInitPipelineBuilder =
         { new ICommentInitPipelineBuilder with
             member i.Batch = gen () }
 
-type BindTo =
-    | Post of u64
-    | Comment of u64
-
 type CommentInitPipeline
     internal
     (
         initBuilder: ICommentInitPipelineBuilder,
         palaflake: IPalaflakeGenerator,
         db: IDbOperationBuilder,
-        bind_to: BindTo,
-        user_id: u64
+        user: IUser
     ) =
 
     let data (comment: IComment) =
@@ -40,17 +36,18 @@ type CommentInitPipeline
         let comment_id = palaflake.next ()
 
         let bind_id, comment_is_reply =
-            match bind_to with
-            | Post post_id -> post_id, false
-            | Comment comment_id -> comment_id, true
+            match comment.Binding with
+            | BindPost post_id -> post_id, false
+            | BindComment comment_id -> comment_id, true
 
         let fields: (_ * obj) list =
             [ ("comment_id", comment_id)
               ("bind_id", bind_id)
-              ("user_id", user_id)
               ("comment_body", comment.Body)
               ("comment_create_time", comment.CreateTime)
-              ("comment_is_reply", comment_is_reply) ]
+              ("comment_is_reply", comment_is_reply)
+              ("user_id", user.Id)
+              ("user_permission", user.Permission) ]
 
         let aff =
             db {
@@ -67,4 +64,4 @@ type CommentInitPipeline
 
     member self.Batch =
         initBuilder.Batch.fullyBuild
-        <| fun fail id -> unwrapOr (data id) (fun _ -> fail id)
+        <| fun fail x -> unwrapOr (data x) (fun _ -> fail x)

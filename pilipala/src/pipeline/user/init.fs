@@ -29,7 +29,7 @@ type UserInitPipeline
         db: IDbOperationBuilder,
         ug: IUser
     ) =
-    let data (user: IUser, userPwdHash: string, userPermission: u16) =
+    let data (user: IUser, userPwdHash: string) =
         let user_id = palaflake.next ()
 
         let fields: (_ * obj) list =
@@ -55,4 +55,4 @@ type UserInitPipeline
 
     member self.Batch =
         initBuilder.Batch.fullyBuild
-        <| fun fail id -> unwrapOr (data id) (fun _ -> fail id)
+        <| fun fail x -> unwrapOr (data x) (fun _ -> fail x)
