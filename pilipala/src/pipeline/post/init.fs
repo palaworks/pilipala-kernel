@@ -7,6 +7,7 @@ open fsharper.typ
 open fsharper.op.Alias
 open fsharper.op.Runtime
 open fsharper.op.Foldable
+open pilipala.access.user
 open pilipala.id
 open pilipala.data.db
 open pilipala.pipeline
@@ -27,7 +28,7 @@ type PostInitPipeline
         initBuilder: IPostInitPipelineBuilder,
         palaflake: IPalaflakeGenerator,
         db: IDbOperationBuilder,
-        userPermission: u16
+        user: IUser
     ) =
     let data (post: IPost) =
         let post_id = palaflake.next ()
@@ -39,7 +40,8 @@ type PostInitPipeline
               ("post_create_time", post.CreateTime)
               ("post_access_time", post.AccessTime)
               ("post_modify_time", post.AccessTime)
-              ("user_permission", userPermission) ]
+              ("user_id", user.Id)
+              ("user_permission", user.Permission) ]
 
         let aff =
             db {
@@ -56,4 +58,4 @@ type PostInitPipeline
 
     member self.Batch =
         initBuilder.Batch.fullyBuild
-        <| fun fail id -> unwrapOr (data id) (fun _ -> fail id)
+        <| fun fail x -> unwrapOr (data x) (fun _ -> fail x)

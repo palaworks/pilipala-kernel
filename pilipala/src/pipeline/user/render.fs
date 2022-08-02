@@ -27,6 +27,7 @@ module IUserRenderPipelineBuilder =
             member i.Name = gen ()
             member i.Email = gen ()
             member i.CreateTime = gen ()
+            member i.AccessTime = gen ()
 
             member i.Item name =
                 if udf.ContainsKey name then

@@ -26,10 +26,9 @@ type UserInitPipeline
     (
         initBuilder: IUserInitPipelineBuilder,
         palaflake: IPalaflakeGenerator,
-        db: IDbOperationBuilder,
-        ug: IUser
+        db: IDbOperationBuilder
     ) =
-    let data (user: IUser, userPwdHash: string, userPermission: u16) =
+    let data (user: IUser, userPwdHash: string) =
         let user_id = palaflake.next ()
 
         let fields: (_ * obj) list =
@@ -37,7 +36,7 @@ type UserInitPipeline
               ("user_name", user.Name)
               ("user_email", user.Email)
               ("user_pwd_hash", userPwdHash)
-              ("user_permission", userPermission)
+              ("user_permission", user.Permission)
               ("user_create_time", user.CreateTime) ]
 
         let aff =
@@ -55,4 +54,4 @@ type UserInitPipeline
 
     member self.Batch =
         initBuilder.Batch.fullyBuild
-        <| fun fail id -> unwrapOr (data id) (fun _ -> fail id)
+        <| fun fail x -> unwrapOr (data x) (fun _ -> fail x)

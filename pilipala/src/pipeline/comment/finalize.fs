@@ -67,6 +67,15 @@ type CommentFinalizePipeline
                     with get () = coerce db_data.["comment_body"]
                     and set v = ()
 
+                member i.Binding
+                    with get () =
+                        if coerce db_data.["comment_is_reply"] then
+                            BindComment(coerce db_data.["comment_binding"])
+                        else
+                            BindPost(coerce db_data.["comment_binding"])
+
+                    and set v = ()
+
                 member i.CreateTime
                     with get () = coerce db_data.["comment_create_time"]
                     and set v = ()

@@ -30,6 +30,10 @@ module ICommentProvider =
                         with get () = snd (render.CreateTime comment_id)
                         and set v = modify.CreateTime(comment_id, v) |> ignore
 
+                    member i.Binding
+                        with get () = snd (render.Binding comment_id)
+                        and set v = modify.Binding(comment_id, v) |> ignore
+
                     member i.Item
                         with get name = fmap ((apply ..> snd) comment_id) render.[name]
                         and set name v =
@@ -38,5 +42,5 @@ module ICommentProvider =
                             <| fun v -> fmap (apply (comment_id, v)) modify.[name]
                             |> ignore }
 
-            member self.create comment = fst (init.Batch comment)
+            member self.create comment = init.Batch comment
             member self.delete comment_id = finalize.Batch comment_id }

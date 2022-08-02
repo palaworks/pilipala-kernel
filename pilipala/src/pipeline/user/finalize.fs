@@ -71,7 +71,15 @@ type UserFinalizePipeline
                     with get () = coerce db_data.["user_email"]
                     and set v = ()
 
+                member i.Permission
+                    with get () = coerce db_data.["user_permission"]
+                    and set v = ()
+
                 member i.CreateTime
+                    with get () = coerce db_data.["user_create_time"]
+                    and set v = ()
+
+                member i.AccessTime
                     with get () = coerce db_data.["user_create_time"]
                     and set v = ()
 
