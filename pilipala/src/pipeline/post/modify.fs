@@ -21,7 +21,6 @@ module IPostModifyPipelineBuilder =
         let udf = //user defined field
             Dict<string, BuilderItem<u64 * obj>>()
 
-        //cover/summary/view/star 交由插件实现
         { new IPostModifyPipelineBuilder with
             member i.Title = gen ()
             member i.Body = gen ()

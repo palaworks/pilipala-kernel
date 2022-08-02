@@ -26,8 +26,7 @@ type UserInitPipeline
     (
         initBuilder: IUserInitPipelineBuilder,
         palaflake: IPalaflakeGenerator,
-        db: IDbOperationBuilder,
-        ug: IUser
+        db: IDbOperationBuilder
     ) =
     let data (user: IUser, userPwdHash: string) =
         let user_id = palaflake.next ()
@@ -37,7 +36,7 @@ type UserInitPipeline
               ("user_name", user.Name)
               ("user_email", user.Email)
               ("user_pwd_hash", userPwdHash)
-              ("user_permission", userPermission)
+              ("user_permission", user.Permission)
               ("user_create_time", user.CreateTime) ]
 
         let aff =

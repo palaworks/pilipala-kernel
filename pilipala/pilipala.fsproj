@@ -37,7 +37,7 @@
         <Compile Include="src\serv\host.fs" />
         <Compile Include="src\plugin\plugin.fs" />
         <Compile Include="src\plugin\config.fs" />
-        <Compile Include="src\pilipala.fs" />
+        <Compile Include="src\pilipala\pilipala.fs" />
         <Compile Include="src\builder\builder.fs" />
         <Compile Include="src\builder\useDb.fs" />
         <Compile Include="src\builder\usePlugin.fs" />
@@ -69,11 +69,10 @@
             <Private>False</Private>
         </Reference>
         <Reference Include="pilipala-frame">
-            <HintPath>..\pilipala-frame\bin\Debug\net6.0\pilipala-frame.dll</HintPath>
+          <HintPath>..\..\pilipala-sdk\pilipala-frame\bin\Debug\net6.0\pilipala-frame.dll</HintPath>
         </Reference>
-        <Reference Include="pilipala.util, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null">
-            <HintPath>..\pilipala.util\bin\Debug\net6.0\pilipala.util.dll</HintPath>
-            <Private>False</Private>
+        <Reference Include="pilipala.util">
+          <HintPath>..\..\pilipala-sdk\pilipala.util\bin\Debug\net6.0\pilipala.util.dll</HintPath>
         </Reference>
         <Reference Include="WebSocketer, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null">
             <HintPath>..\..\WebsSocketer\bin\Debug\net6.0\WebSocketer.dll</HintPath>

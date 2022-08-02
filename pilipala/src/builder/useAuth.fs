@@ -17,7 +17,7 @@ type Builder with
 
     member self.useAuth(port: u16) =
 
-        let f sc =
+        let f _ =
             let server = //用于监听的服务器
                 TcpListener(IPAddress.Parse("localhost"), i32 port)
 
@@ -37,6 +37,4 @@ type Builder with
                 .Build()
                 .Run()
 
-            sc
-
-        { pipeline = self.pipeline .> f }
+        { pipeline = self.pipeline .> effect f }
