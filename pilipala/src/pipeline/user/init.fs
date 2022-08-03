@@ -10,6 +10,7 @@ open fsharper.op.Foldable
 open pilipala.id
 open pilipala.data.db
 open pilipala.pipeline
+open pilipala.util.hash
 open pilipala.access.user
 
 module IUserInitPipelineBuilder =
@@ -26,17 +27,18 @@ type UserInitPipeline
     (
         initBuilder: IUserInitPipelineBuilder,
         palaflake: IPalaflakeGenerator,
+        uuid: IUuidGenerator,
         db: IDbOperationBuilder
     ) =
-    let data (user: IUser, userPwdHash: string) =
+    let data (user: IUser) =
         let user_id = palaflake.next ()
 
         let fields: (_ * obj) list =
             [ ("user_id", user_id)
               ("user_name", user.Name)
               ("user_email", user.Email)
-              ("user_pwd_hash", userPwdHash)
-              ("user_permission", user.Permission)
+              ("user_pwd_hash", uuid.next().bcrypt) //默认随机密码
+              ("user_permission", 0u) //默认无权限
               ("user_create_time", user.CreateTime) ]
 
         let aff =

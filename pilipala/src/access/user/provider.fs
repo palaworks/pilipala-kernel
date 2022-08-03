@@ -29,6 +29,9 @@ module IUserProvider =
                         with get () = snd (render.Email user_id)
                         and set v = modify.Email(user_id, v) |> ignore
 
+                    member i.Permission =
+                        snd (render.Permission user_id)
+
                     member i.CreateTime
                         with get () = snd (render.CreateTime user_id)
                         and set v = modify.CreateTime(user_id, v) |> ignore

@@ -65,23 +65,22 @@ type UserFinalizePipeline
 
                 member i.Name
                     with get () = coerce db_data.["user_name"]
-                    and set v = ()
+                    and set _ = failwith "User was deleted"
 
                 member i.Email
                     with get () = coerce db_data.["user_email"]
-                    and set v = ()
+                    and set _ = failwith "User was deleted"
 
-                member i.Permission
-                    with get () = coerce db_data.["user_permission"]
-                    and set v = ()
+                member i.Permission =
+                    coerce db_data.["user_permission"]
 
                 member i.CreateTime
                     with get () = coerce db_data.["user_create_time"]
-                    and set v = ()
+                    and set _ = failwith "User was deleted"
 
                 member i.AccessTime
                     with get () = coerce db_data.["user_create_time"]
-                    and set v = ()
+                    and set _ = failwith "User was deleted"
 
                 member i.Item
                     with get name =

@@ -65,23 +65,23 @@ type PostFinalizePipeline
 
                 member i.Title
                     with get () = coerce db_data.["post_title"]
-                    and set v = ()
+                    and set _ = failwith "Post was deleted"
 
                 member i.Body
                     with get () = coerce db_data.["post_body"]
-                    and set v = ()
+                    and set _ = failwith "Post was deleted"
 
                 member i.CreateTime
                     with get () = coerce db_data.["post_create_time"]
-                    and set v = ()
+                    and set _ = failwith "Post was deleted"
 
                 member i.AccessTime
                     with get () = coerce db_data.["post_access_time"]
-                    and set v = ()
+                    and set _ = failwith "Post was deleted"
 
                 member i.ModifyTime
                     with get () = coerce db_data.["post_modify_time"]
-                    and set v = ()
+                    and set _ = failwith "Post was deleted"
 
                 member i.Item
                     with get name =

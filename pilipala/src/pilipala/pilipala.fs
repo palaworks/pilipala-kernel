@@ -199,9 +199,8 @@ type Pilipala
                     with get () = genGetter (fun _ -> targetUser.Email)
                     and set v = genSetter (fun v -> targetUser.Email <- v)
 
-                member i.Permission
-                    with get () = genGetter (fun _ -> targetUser.Permission)
-                    and set v = genSetter (fun v -> targetUser.Permission <- v)
+                member i.Permission =
+                    genGetter (fun _ -> targetUser.Permission)
 
                 member i.CreateTime
                     with get () = genGetter (fun _ -> targetUser.CreateTime)

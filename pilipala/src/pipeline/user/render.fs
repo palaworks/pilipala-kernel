@@ -26,6 +26,7 @@ module IUserRenderPipelineBuilder =
         { new IUserRenderPipelineBuilder with
             member i.Name = gen ()
             member i.Email = gen ()
+            member i.Permission = gen ()
             member i.CreateTime = gen ()
             member i.AccessTime = gen ()
 
@@ -64,6 +65,10 @@ type UserRenderPipeline internal (renderBuilder: IUserRenderPipelineBuilder, db:
     member self.Email =
         renderBuilder.Email.fullyBuild
         <| fun fail id -> unwrapOr (get "user_email" id) (fun _ -> fail id)
+
+    member self.Permission =
+        renderBuilder.Permission.fullyBuild
+        <| fun fail id -> unwrapOr (get "user_permission" id) (fun _ -> fail id)
 
     member self.CreateTime =
         renderBuilder.CreateTime.fullyBuild

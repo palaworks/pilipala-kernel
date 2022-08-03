@@ -65,7 +65,7 @@ type CommentFinalizePipeline
 
                 member i.Body
                     with get () = coerce db_data.["comment_body"]
-                    and set v = ()
+                    and set _ = failwith "Comment was deleted"
 
                 member i.Binding
                     with get () =
@@ -74,11 +74,11 @@ type CommentFinalizePipeline
                         else
                             BindPost(coerce db_data.["comment_binding"])
 
-                    and set v = ()
+                    and set _ = failwith "Comment was deleted"
 
                 member i.CreateTime
                     with get () = coerce db_data.["comment_create_time"]
-                    and set v = ()
+                    and set _ = failwith "Comment was deleted"
 
                 member i.Item
                     with get name =
