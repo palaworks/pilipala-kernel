@@ -99,10 +99,7 @@ type CommentFinalizePipeline
                 execute
             }
 
-        if aff = 1 then
-            Some(comment_id, comment)
-        else
-            None
+        if aff = 1 then Some comment else None
 
     member self.Batch =
         finalizeBuilder.Batch.fullyBuild

@@ -85,9 +85,7 @@ type Pilipala
                     with get name = genGetter (fun _ -> targetPost.[name])
                     and set name v = genSetter (fun v -> targetPost.[name] <- v) }
 
-    member self.NewPost post =
-        let _, post = postProvider.create post
-        post
+    member self.NewPost post = postProvider.create post
 
     member self.GetComment id =
         if db {
@@ -148,9 +146,7 @@ type Pilipala
                     with get name = genGetter (fun _ -> targetComment.[name])
                     and set name v = genSetter (fun v -> targetComment.[name] <- v) }
 
-    member self.NewComment post =
-        let _, comment = commentProvider.create post
-        comment
+    member self.NewComment post = commentProvider.create post
 
     member self.GetUser id =
         if db {
@@ -219,6 +215,4 @@ type Pilipala
                     with get name = genGetter (fun _ -> targetUser.[name])
                     and set name v = genSetter (fun v -> targetUser.[name] <- v) }
 
-    member self.NewUser user =
-        let _, user = userProvider.create user
-        user
+    member self.NewUser user = userProvider.create user

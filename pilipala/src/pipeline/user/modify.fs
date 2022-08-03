@@ -72,4 +72,8 @@ type UserModifyPipeline internal (modifyBuilder: IUserModifyPipelineBuilder, db:
         modifyBuilder.CreateTime.fullyBuild
         <| fun fail x -> unwrapOr (set "user_create_time" x) (fun _ -> fail x)
 
+    member self.AccessTime =
+        modifyBuilder.AccessTime.fullyBuild
+        <| fun fail x -> unwrapOr (set "user_access_time" x) (fun _ -> fail x)
+
     member self.Item(name: string) = udf.TryGetValue(name).intoOption' ()

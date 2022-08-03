@@ -51,10 +51,7 @@ type PostInitPipeline
                 execute
             }
 
-        if aff = 1 then
-            Some(post_id, post)
-        else
-            None
+        if aff = 1 then Some post_id else None
 
     member self.Batch =
         initBuilder.Batch.fullyBuild

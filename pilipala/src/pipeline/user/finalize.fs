@@ -102,10 +102,7 @@ type UserFinalizePipeline
                 execute
             }
 
-        if aff = 1 then
-            Some(user_id, user)
-        else
-            None
+        if aff = 1 then Some user else None
 
     member self.Batch =
         finalizeBuilder.Batch.fullyBuild

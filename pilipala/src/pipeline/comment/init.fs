@@ -58,7 +58,7 @@ type CommentInitPipeline
             }
 
         if aff = 1 then
-            Some(comment_id, comment)
+            Some comment_id
         else
             None
 

@@ -1,4 +1,4 @@
-﻿namespace pilipala.auth.token
+﻿namespace pilipala.access.auth.token
 
 open System
 open fsharper.op

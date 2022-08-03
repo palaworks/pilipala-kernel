@@ -48,5 +48,5 @@ module IPostProvider =
                             <| fun v -> fmap (apply (post_id, v)) modify.[name]
                             |> ignore }
 
-            member self.create post = init.Batch post
+            member self.create post = self.fetch (init.Batch post)
             member self.delete post_id = finalize.Batch post_id }

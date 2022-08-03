@@ -42,5 +42,5 @@ module ICommentProvider =
                             <| fun v -> fmap (apply (comment_id, v)) modify.[name]
                             |> ignore }
 
-            member self.create comment = init.Batch comment
+            member self.create comment = self.fetch (init.Batch comment)
             member self.delete comment_id = finalize.Batch comment_id }

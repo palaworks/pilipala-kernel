@@ -13,7 +13,6 @@
         <Compile Include="src\id\palaflake.fs" />
         <Compile Include="src\data\db.fs" />
         <Compile Include="src\data\kv.fs" />
-        <Compile Include="src\user.fs" />
         <Compile Include="src\pipeline\post\init.fs" />
         <Compile Include="src\pipeline\post\render.fs" />
         <Compile Include="src\pipeline\post\modify.fs" />
@@ -26,13 +25,15 @@
         <Compile Include="src\pipeline\user\render.fs" />
         <Compile Include="src\pipeline\user\modify.fs" />
         <Compile Include="src\pipeline\user\finalize.fs" />
+        <Compile Include="src\access\auth\token.fs" />
+        <Compile Include="src\access\auth\channel.fs" />
+        <Compile Include="src\access\user\provider.fs" />
+        <Compile Include="src\access\user\ext.fs" />
         <Compile Include="src\container\post\provider.fs" />
         <Compile Include="src\container\post\ext.fs" />
         <Compile Include="src\container\comment\provider.fs" />
         <Compile Include="src\container\comment\ext.fs" />
         <Compile Include="src\log.fs" />
-        <Compile Include="src\auth\token.fs" />
-        <Compile Include="src\auth\channel.fs" />
         <Compile Include="src\serv\serv.fs" />
         <Compile Include="src\serv\host.fs" />
         <Compile Include="src\plugin\plugin.fs" />

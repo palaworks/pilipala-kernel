@@ -47,10 +47,7 @@ type UserInitPipeline
                 execute
             }
 
-        if aff = 1 then
-            Some(user_id, user)
-        else
-            None
+        if aff = 1 then Some user_id else None
 
     member self.Batch =
         initBuilder.Batch.fullyBuild

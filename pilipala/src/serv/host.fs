@@ -13,10 +13,10 @@ open Microsoft.Extensions.Logging
 open Microsoft.Extensions.DependencyInjection
 open pilipala.id
 open pilipala.log
-open pilipala.auth.token
 open pilipala.util.crypto
-open pilipala.auth.channel
 open pilipala.util.encoding
+open pilipala.access.auth.token
+open pilipala.access.auth.channel
 
 /// 服务执行主机
 type internal ServHost

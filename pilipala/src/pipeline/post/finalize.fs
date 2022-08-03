@@ -102,10 +102,7 @@ type PostFinalizePipeline
                 execute
             }
 
-        if aff = 1 then
-            Some(post_id, post)
-        else
-            None
+        if aff = 1 then Some post else None
 
     member self.Batch =
         finalizeBuilder.Batch.fullyBuild

@@ -1,4 +1,4 @@
-﻿namespace pilipala.auth.channel
+﻿namespace pilipala.access.auth.channel
 
 open System.Security.Cryptography
 open WebSocketer.typ

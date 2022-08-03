@@ -69,4 +69,8 @@ type UserRenderPipeline internal (renderBuilder: IUserRenderPipelineBuilder, db:
         renderBuilder.CreateTime.fullyBuild
         <| fun fail id -> unwrapOr (get "user_create_time" id) (fun _ -> fail id)
 
+    member self.AccessTime =
+        renderBuilder.AccessTime.fullyBuild
+        <| fun fail id -> unwrapOr (get "user_access_time" id) (fun _ -> fail id)
+
     member self.Item(name: string) = udf.TryGetValue(name).intoOption' ()
