@@ -7,7 +7,7 @@ open pilipala.container.comment
 open pilipala.container.post
 open pilipala.id
 open pilipala.log
-open pilipala.serv
+open pilipala.service
 open pilipala.plugin
 open pilipala.pipeline.post
 open pilipala.pipeline.comment
@@ -36,7 +36,7 @@ type Builder with
         fun (sc: IServiceCollection) ->
             sc
                 .AddSingleton<LogProvider>()
-                .AddSingleton<ServProvider>()
+                .AddSingleton<ServiceProvider>()
                 .AddSingleton<PluginProvider>()
                 //ID生成服务
                 .AddSingleton<IPalaflakeGenerator>(fun _ -> IPalaflakeGenerator.make serverId)
@@ -51,8 +51,8 @@ type Builder with
                 .AddTransient<PostModifyPipeline>()
                 .AddTransient<PostFinalizePipeline>()
                 //文章提供器
-                .AddTransient<IPostProvider>(fun sf ->
-                    IPostProvider.make (
+                .AddTransient<IMappedPostProvider>(fun sf ->
+                    IMappedPostProvider.make (
                         sf.GetService<PostInitPipeline>(),
                         sf.GetService<PostRenderPipeline>(),
                         sf.GetService<PostModifyPipeline>(),
@@ -68,7 +68,7 @@ type Builder with
                 .AddTransient<CommentModifyPipeline>()
                 .AddTransient<CommentFinalizePipeline>()
                 //评论提供器
-                .AddTransient<ICommentProvider>(fun sf ->
+                .AddTransient<IMappedCommentProvider>(fun sf ->
                     ICommentProvider.make (
                         sf.GetService<CommentInitPipeline>(),
                         sf.GetService<CommentRenderPipeline>(),

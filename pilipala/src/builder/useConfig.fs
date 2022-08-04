@@ -38,7 +38,7 @@ type Builder with
         //注册日志过滤器
         |> config.log.foldl (fun acc (KV (category, lv)) -> acc.useLogFilter category (coerce lv))
         //注册服务
-        |> config.serv.foldl (fun acc -> acc.useServ)
+        |> config.serv.foldl (fun acc -> acc.useService)
         //注册插件
-        |> config.plugin.foldl (fun acc -> acc.useServ)
+        |> config.plugin.foldl (fun acc -> acc.useService)
         |> fun acc -> acc.useAuth config.auth.port
