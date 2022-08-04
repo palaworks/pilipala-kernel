@@ -27,6 +27,8 @@ module IPostRenderPipelineBuilder =
             member i.CreateTime = gen ()
             member i.AccessTime = gen ()
             member i.ModifyTime = gen ()
+            member i.UserId = gen ()
+            member i.Permission = gen ()
 
             member i.Item name =
                 if udf.ContainsKey name then
@@ -75,5 +77,13 @@ type PostRenderPipeline internal (renderBuilder: IPostRenderPipelineBuilder, db:
     member self.ModifyTime =
         renderBuilder.ModifyTime.fullyBuild
         <| fun fail id -> unwrapOr (get "post_modify_time" id) (fun _ -> fail id)
+
+    member self.UserId =
+        renderBuilder.UserId.fullyBuild
+        <| fun fail id -> unwrapOr (get "user_id" id) (fun _ -> fail id)
+
+    member self.Permission =
+        renderBuilder.Permission.fullyBuild
+        <| fun fail id -> unwrapOr (get "post_permission" id) (fun _ -> fail id)
 
     member self.Item(name: string) = udf.TryGetValue(name).intoOption' ()

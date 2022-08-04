@@ -10,6 +10,7 @@ open fsharper.op.Foldable
 open pilipala.id
 open pilipala.data.db
 open pilipala.pipeline
+open pilipala.util.hash
 open pilipala.access.user
 
 module IUserInitPipelineBuilder =
@@ -21,21 +22,13 @@ module IUserInitPipelineBuilder =
         { new IUserInitPipelineBuilder with
             member i.Batch = gen () }
 
-type UserInitPipeline
-    internal
-    (
-        initBuilder: IUserInitPipelineBuilder,
-        palaflake: IPalaflakeGenerator,
-        db: IDbOperationBuilder
-    ) =
-    let data (user: IUser, userPwdHash: string) =
-        let user_id = palaflake.next ()
-
+type UserInitPipeline internal (initBuilder: IUserInitPipelineBuilder, uuid: IUuidGenerator, db: IDbOperationBuilder) =
+    let data (user: UserData) =
         let fields: (_ * obj) list =
-            [ ("user_id", user_id)
+            [ ("user_id", user.Id)
               ("user_name", user.Name)
               ("user_email", user.Email)
-              ("user_pwd_hash", userPwdHash)
+              ("user_pwd_hash", uuid.next().bcrypt) //默认随机密码
               ("user_permission", user.Permission)
               ("user_create_time", user.CreateTime) ]
 
@@ -47,10 +40,7 @@ type UserInitPipeline
                 execute
             }
 
-        if aff = 1 then
-            Some(user_id, user)
-        else
-            None
+        if aff = 1 then Some user.Id else None
 
     member self.Batch =
         initBuilder.Batch.fullyBuild

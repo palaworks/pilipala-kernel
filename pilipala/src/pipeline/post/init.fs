@@ -26,22 +26,18 @@ type PostInitPipeline
     internal
     (
         initBuilder: IPostInitPipelineBuilder,
-        palaflake: IPalaflakeGenerator,
-        db: IDbOperationBuilder,
-        user: IUser
+        db: IDbOperationBuilder
     ) =
-    let data (post: IPost) =
-        let post_id = palaflake.next ()
-
+    let data (post: PostData) =
         let fields: (_ * obj) list =
-            [ ("post_id", post_id)
+            [ ("post_id", post.Id)
               ("post_title", post.Title)
               ("post_body", post.Body)
               ("post_create_time", post.CreateTime)
               ("post_access_time", post.AccessTime)
               ("post_modify_time", post.AccessTime)
-              ("user_id", user.Id)
-              ("user_permission", user.Permission) ]
+              ("user_id", post.UserId)
+              ("user_permission", post.Permission) ]
 
         let aff =
             db {
@@ -51,10 +47,7 @@ type PostInitPipeline
                 execute
             }
 
-        if aff = 1 then
-            Some(post_id, post)
-        else
-            None
+        if aff = 1 then Some post.Id else None
 
     member self.Batch =
         initBuilder.Batch.fullyBuild

@@ -5,6 +5,7 @@ open System.Collections.Generic
 open fsharper.op
 open fsharper.typ
 open fsharper.op.Alias
+open fsharper.op.Pattern
 open fsharper.op.Foldable
 open pilipala.access.user
 open pilipala.id
@@ -22,32 +23,22 @@ module ICommentInitPipelineBuilder =
         { new ICommentInitPipelineBuilder with
             member i.Batch = gen () }
 
-type CommentInitPipeline
-    internal
-    (
-        initBuilder: ICommentInitPipelineBuilder,
-        palaflake: IPalaflakeGenerator,
-        db: IDbOperationBuilder,
-        user: IUser
-    ) =
+type CommentInitPipeline internal (initBuilder: ICommentInitPipelineBuilder, db: IDbOperationBuilder) =
 
-    let data (comment: IComment) =
-
-        let comment_id = palaflake.next ()
-
+    let data (comment: CommentData) =
         let bind_id, comment_is_reply =
             match comment.Binding with
             | BindPost post_id -> post_id, false
             | BindComment comment_id -> comment_id, true
 
         let fields: (_ * obj) list =
-            [ ("comment_id", comment_id)
+            [ ("comment_id", comment.Id)
               ("bind_id", bind_id)
               ("comment_body", comment.Body)
               ("comment_create_time", comment.CreateTime)
               ("comment_is_reply", comment_is_reply)
-              ("user_id", user.Id)
-              ("user_permission", user.Permission) ]
+              ("user_id", comment.UserId)
+              ("user_permission", comment.Permission) ]
 
         let aff =
             db {
@@ -58,7 +49,11 @@ type CommentInitPipeline
             }
 
         if aff = 1 then
-            Some(comment_id, comment)
+            //TODO 可以添加Item迭代器，以实现在Init管道的udf初始化
+            (*            for KV (name, v) in comment do
+                ()
+*)
+            Some comment.Id
         else
             None
 

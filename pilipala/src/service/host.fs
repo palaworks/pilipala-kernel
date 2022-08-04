@@ -1,4 +1,4 @@
-namespace pilipala.serv
+namespace pilipala.service
 
 open System
 open System.Net.Sockets
@@ -13,16 +13,16 @@ open Microsoft.Extensions.Logging
 open Microsoft.Extensions.DependencyInjection
 open pilipala.id
 open pilipala.log
-open pilipala.auth.token
 open pilipala.util.crypto
-open pilipala.auth.channel
 open pilipala.util.encoding
+open pilipala.access.auth.token
+open pilipala.access.auth.channel
 
 /// 服务执行主机
-type internal ServHost
+type internal ServiceHost
     (
         scopeFac: IServiceScopeFactory,
-        sp: ServProvider,
+        sp: pilipala.service.ServiceProvider,
         lp: LogProvider,
         tp: TokenProvider,
         uuid: IUuidGenerator
@@ -41,7 +41,7 @@ type internal ServHost
         let servPath = ws.recv().Split(' ').[1] //服务路径
 
         let servInfo =
-            sp.getServInfo servPath |> unwrap
+            sp.getServiceInfo servPath |> unwrap
 
         let servALv = servInfo.AccessLv //服务访问级别
         let servType = servInfo.Type

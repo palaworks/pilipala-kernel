@@ -60,36 +60,23 @@ type CommentFinalizePipeline
             |> unwrap
 
         let comment = //回送被删除的评论
-            { new IComment with
-                member i.Id = comment_id
+            { Id = comment_id
+              Body = coerce db_data.["comment_body"]
 
-                member i.Body
-                    with get () = coerce db_data.["comment_body"]
-                    and set v = ()
+              Binding =
+                  if coerce db_data.["comment_is_reply"] then
+                      BindComment(coerce db_data.["comment_binding"])
+                  else
+                      BindPost(coerce db_data.["comment_binding"])
 
-                member i.Binding
-                    with get () =
-                        if coerce db_data.["comment_is_reply"] then
-                            BindComment(coerce db_data.["comment_binding"])
-                        else
-                            BindPost(coerce db_data.["comment_binding"])
-
-                    and set v = ()
-
-                member i.CreateTime
-                    with get () = coerce db_data.["comment_create_time"]
-                    and set v = ()
-
-                member i.Item
-                    with get name =
-                        udf_render_no_after.TryGetValue(name).intoOption'()
-                            .fmap
-                        <| (apply ..> snd) comment_id
-                    and set name v =
-                        udf_modify_no_after.TryGetValue(name).intoOption'()
-                            .fmap
-                        <| apply (comment_id, v)
-                        |> ignore }
+              CreateTime = coerce db_data.["comment_create_time"]
+              UserId = coerce db_data.["user_id"]
+              Permission = coerce db_data.["comment_permission"]
+              Item =
+                fun name -> //只读
+                    udf_render_no_after.TryGetValue(name).intoOption'()
+                        .fmap
+                    <| (apply ..> snd) comment_id }
 
         let aff =
             db {
@@ -99,10 +86,7 @@ type CommentFinalizePipeline
                 execute
             }
 
-        if aff = 1 then
-            Some(comment_id, comment)
-        else
-            None
+        if aff = 1 then Some comment else None
 
     member self.Batch =
         finalizeBuilder.Batch.fullyBuild

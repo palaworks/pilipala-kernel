@@ -1,9 +1,21 @@
 [<AutoOpen>]
 module pilipala.container.post.ext
 
+open System
+open fsharper.op
+open fsharper.typ
+open pilipala.access.user
 open pilipala.container.comment
 
-type IPost with
+type Post with
+
+    /// 文章的用户名
+    /// 此功能需UserName插件支持
+    member self.UserName: Result'<string, _> =
+        if self.CanRead then
+            Ok(self.["UserName"].unwrap().coerce ())
+        else
+            Err "Permission denied"
 
     /// 文章的用户名
     /// 此功能需UserName插件支持
@@ -12,5 +24,8 @@ type IPost with
 
     /// 文章的评论
     /// 此功能需PostComments插件支持
-    member self.Comments: IComment seq =
-        downcast self.["Comments"].unwrap ()
+    member self.Comments: Result'<IMappedComment seq, _> =
+        if self.CanRead then
+            Ok(self.["Comments"].unwrap().coerce ())
+        else
+            Err "Permission denied"
