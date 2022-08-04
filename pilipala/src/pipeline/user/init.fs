@@ -30,7 +30,7 @@ type UserInitPipeline
         uuid: IUuidGenerator,
         db: IDbOperationBuilder
     ) =
-    let data (user: IUser) =
+    let data (user: UserData) =
         let user_id = palaflake.next ()
 
         let fields: (_ * obj) list =
@@ -38,7 +38,7 @@ type UserInitPipeline
               ("user_name", user.Name)
               ("user_email", user.Email)
               ("user_pwd_hash", uuid.next().bcrypt) //默认随机密码
-              ("user_permission", 0u) //默认无权限
+              ("user_permission", user.Permission)
               ("user_create_time", user.CreateTime) ]
 
         let aff =

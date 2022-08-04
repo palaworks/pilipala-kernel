@@ -24,7 +24,7 @@ type Pilipala
             getFstVal "post_id" "post_id" id
             execute
         } = None then
-            failwith "Invalid post id"
+            Err "Invalid post id"
         else
             let postUserPermission =
                 db {
@@ -58,32 +58,36 @@ type Pilipala
                 else
                     failwith "Permission denied"
 
-            { new IPost with
-                member i.Id = id
+            Ok
+            <| { new IPost with
+                     member i.Id = id
 
-                member i.Title
-                    with get () = genGetter (fun _ -> targetPost.Title)
-                    and set v = genSetter (fun v -> targetPost.Title <- v)
+                     member i.Title
+                         with get () = genGetter (fun _ -> targetPost.Title)
+                         and set v = genSetter (fun v -> targetPost.Title <- v)
 
-                member i.Body
-                    with get () = genGetter (fun _ -> targetPost.Body)
-                    and set v = genSetter (fun v -> targetPost.Body <- v)
+                     member i.Body
+                         with get () = genGetter (fun _ -> targetPost.Body)
+                         and set v = genSetter (fun v -> targetPost.Body <- v)
 
-                member i.CreateTime
-                    with get () = genGetter (fun _ -> targetPost.CreateTime)
-                    and set v = genSetter (fun v -> targetPost.CreateTime <- v)
+                     member i.CreateTime
+                         with get () = genGetter (fun _ -> targetPost.CreateTime)
+                         and set v = genSetter (fun v -> targetPost.CreateTime <- v)
 
-                member i.AccessTime
-                    with get () = genGetter (fun _ -> targetPost.AccessTime)
-                    and set v = genSetter (fun v -> targetPost.AccessTime <- v)
+                     member i.AccessTime
+                         with get () = genGetter (fun _ -> targetPost.AccessTime)
+                         and set v = genSetter (fun v -> targetPost.AccessTime <- v)
 
-                member i.ModifyTime
-                    with get () = genGetter (fun _ -> targetPost.ModifyTime)
-                    and set v = genSetter (fun v -> targetPost.ModifyTime <- v)
+                     member i.ModifyTime
+                         with get () = genGetter (fun _ -> targetPost.ModifyTime)
+                         and set v = genSetter (fun v -> targetPost.ModifyTime <- v)
 
-                member i.Item
-                    with get name = genGetter (fun _ -> targetPost.[name])
-                    and set name v = genSetter (fun v -> targetPost.[name] <- v) }
+                     member i.Permission =
+                         genGetter (fun _ -> targetPost.Permission)
+
+                     member i.Item
+                         with get name = genGetter (fun _ -> targetPost.[name])
+                         and set name v = genSetter (fun v -> targetPost.[name] <- v) }
 
     member self.NewPost post = postProvider.create post
 
@@ -93,7 +97,7 @@ type Pilipala
             getFstVal "comment_id" "comment_id" id
             execute
         } = None then
-            failwith "Invalid comment id"
+            Err "Invalid comment id"
         else
             let commentUserPermission =
                 db {
@@ -127,28 +131,30 @@ type Pilipala
                 else
                     failwith "Permission denied"
 
-            { new IComment with
-                member i.Id = id
+            Ok
+            <| { new IComment with
+                     member i.Id = id
 
-                member i.Body
-                    with get () = genGetter (fun _ -> targetComment.Body)
-                    and set v = genSetter (fun v -> targetComment.Body <- v)
+                     member i.Body
+                         with get () = genGetter (fun _ -> targetComment.Body)
+                         and set v = genSetter (fun v -> targetComment.Body <- v)
 
-                member i.Binding
-                    with get () = genGetter (fun _ -> targetComment.Binding)
-                    and set v = genSetter (fun v -> targetComment.Binding <- v)
+                     member i.Binding
+                         with get () = genGetter (fun _ -> targetComment.Binding)
+                         and set v = genSetter (fun v -> targetComment.Binding <- v)
 
-                member i.CreateTime
-                    with get () = genGetter (fun _ -> targetComment.CreateTime)
-                    and set v = genSetter (fun v -> targetComment.CreateTime <- v)
+                     member i.CreateTime
+                         with get () = genGetter (fun _ -> targetComment.CreateTime)
+                         and set v = genSetter (fun v -> targetComment.CreateTime <- v)
 
-                member i.Item
-                    with get name = genGetter (fun _ -> targetComment.[name])
-                    and set name v = genSetter (fun v -> targetComment.[name] <- v) }
+                     member i.Permission =
+                         genGetter (fun _ -> targetComment.Permission)
 
-    member self.NewComment post = commentProvider.create post
+                     member i.Item
+                         with get name = genGetter (fun _ -> targetComment.[name])
+                         and set name v = genSetter (fun v -> targetComment.[name] <- v) }
 
-    member self.GetUser id =
+    member self.AccessUser id =
         if db {
             inPost
             getFstVal "user_id" "user_id" id
@@ -214,4 +220,4 @@ type Pilipala
                     with get name = genGetter (fun _ -> targetUser.[name])
                     and set name v = genSetter (fun v -> targetUser.[name] <- v) }
 
-    member self.NewUser user = userProvider.create user
+    //member self.NewUser user = userProvider.create user

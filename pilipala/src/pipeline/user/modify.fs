@@ -27,6 +27,7 @@ module IUserModifyPipelineBuilder =
             member i.Email = gen ()
             member i.CreateTime = gen ()
             member i.AccessTime = gen ()
+            member i.Permission = gen ()
 
             member i.Item name =
                 if udf.ContainsKey name then
@@ -40,7 +41,7 @@ module IUserModifyPipelineBuilder =
 
             member i.GetEnumerator() : IEnumerator<_> = udf.GetEnumerator() }
 
-type UserModifyPipeline internal (modifyBuilder: IUserModifyPipelineBuilder, db: IDbOperationBuilder, ug: IUser) =
+type UserModifyPipeline internal (modifyBuilder: IUserModifyPipelineBuilder, db: IDbOperationBuilder) =
     let set targetKey (idVal: u64, targetVal) =
         match
             db {
@@ -75,5 +76,9 @@ type UserModifyPipeline internal (modifyBuilder: IUserModifyPipelineBuilder, db:
     member self.AccessTime =
         modifyBuilder.AccessTime.fullyBuild
         <| fun fail x -> unwrapOr (set "user_access_time" x) (fun _ -> fail x)
+
+    member self.Permission =
+        modifyBuilder.AccessTime.fullyBuild
+        <| fun fail x -> unwrapOr (set "user_permission" x) (fun _ -> fail x)
 
     member self.Item(name: string) = udf.TryGetValue(name).intoOption' ()

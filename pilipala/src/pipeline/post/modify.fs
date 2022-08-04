@@ -27,6 +27,8 @@ module IPostModifyPipelineBuilder =
             member i.CreateTime = gen ()
             member i.AccessTime = gen ()
             member i.ModifyTime = gen ()
+            member i.UserId = gen ()
+            member i.Permission = gen ()
 
             member i.Item name =
                 if udf.ContainsKey name then
@@ -79,5 +81,13 @@ type PostModifyPipeline internal (modifyBuilder: IPostModifyPipelineBuilder, db:
     member self.ModifyTime =
         modifyBuilder.ModifyTime.fullyBuild
         <| fun fail x -> unwrapOr (set "post_modify_time" x) (fun _ -> fail x)
+
+    member self.UserId =
+        modifyBuilder.UserId.fullyBuild
+        <| fun fail x -> unwrapOr (set "user_id" x) (fun _ -> fail x)
+
+    member self.Permission =
+        modifyBuilder.Permission.fullyBuild
+        <| fun fail x -> unwrapOr (set "post_permission" x) (fun _ -> fail x)
 
     member self.Item(name: string) = udf.TryGetValue(name).intoOption' ()

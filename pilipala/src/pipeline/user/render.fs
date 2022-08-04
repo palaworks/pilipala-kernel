@@ -42,7 +42,7 @@ module IUserRenderPipelineBuilder =
 
             member i.GetEnumerator() : IEnumerator<_> = udf.GetEnumerator() }
 
-type UserRenderPipeline internal (renderBuilder: IUserRenderPipelineBuilder, db: IDbOperationBuilder, user: IUser) =
+type UserRenderPipeline internal (renderBuilder: IUserRenderPipelineBuilder, db: IDbOperationBuilder) =
     let get target (idVal: u64) =
         db {
             inUser
@@ -66,10 +66,6 @@ type UserRenderPipeline internal (renderBuilder: IUserRenderPipelineBuilder, db:
         renderBuilder.Email.fullyBuild
         <| fun fail id -> unwrapOr (get "user_email" id) (fun _ -> fail id)
 
-    member self.Permission =
-        renderBuilder.Permission.fullyBuild
-        <| fun fail id -> unwrapOr (get "user_permission" id) (fun _ -> fail id)
-
     member self.CreateTime =
         renderBuilder.CreateTime.fullyBuild
         <| fun fail id -> unwrapOr (get "user_create_time" id) (fun _ -> fail id)
@@ -77,5 +73,9 @@ type UserRenderPipeline internal (renderBuilder: IUserRenderPipelineBuilder, db:
     member self.AccessTime =
         renderBuilder.AccessTime.fullyBuild
         <| fun fail id -> unwrapOr (get "user_access_time" id) (fun _ -> fail id)
+
+    member self.Permission =
+        renderBuilder.Permission.fullyBuild
+        <| fun fail id -> unwrapOr (get "user_permission" id) (fun _ -> fail id)
 
     member self.Item(name: string) = udf.TryGetValue(name).intoOption' ()

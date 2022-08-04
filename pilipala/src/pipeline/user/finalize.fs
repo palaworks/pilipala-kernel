@@ -27,24 +27,13 @@ type UserFinalizePipeline
         renderBuilder: IUserRenderPipelineBuilder,
         modifyBuilder: IUserModifyPipelineBuilder,
         finalizeBuilder: IUserFinalizePipelineBuilder,
-        db: IDbOperationBuilder,
-        ug: IUser
+        db: IDbOperationBuilder
     ) =
 
     let udf_render_no_after = //去除了After部分的udf渲染管道，因为After可能包含渲染逻辑
         let map = Dict<string, u64 -> u64 * obj>()
 
         for KV (name, builderItem) in renderBuilder do //遍历udf
-            //udf管道初始为只会panic的GenericPipe，必须Replace后使用
-            map.Add(name, builderItem.noneAfterBuild id)
-
-        map
-
-    let udf_modify_no_after = //去除了After部分的udf修改管道，因After可能包含通知逻辑
-        let map =
-            Dict<string, u64 * obj -> u64 * obj>()
-
-        for KV (name, builderItem) in modifyBuilder do //遍历udf
             //udf管道初始为只会panic的GenericPipe，必须Replace后使用
             map.Add(name, builderItem.noneAfterBuild id)
 
@@ -59,39 +48,18 @@ type UserFinalizePipeline
             }
             |> unwrap
 
-        let user = //回送被删除的文章
-            { new IUser with
-                member i.Id = user_id
-
-                member i.Name
-                    with get () = coerce db_data.["user_name"]
-                    and set _ = failwith "User was deleted"
-
-                member i.Email
-                    with get () = coerce db_data.["user_email"]
-                    and set _ = failwith "User was deleted"
-
-                member i.Permission =
-                    coerce db_data.["user_permission"]
-
-                member i.CreateTime
-                    with get () = coerce db_data.["user_create_time"]
-                    and set _ = failwith "User was deleted"
-
-                member i.AccessTime
-                    with get () = coerce db_data.["user_create_time"]
-                    and set _ = failwith "User was deleted"
-
-                member i.Item
-                    with get name =
-                        udf_render_no_after.TryGetValue(name).intoOption'()
-                            .fmap
-                        <| (apply ..> snd) user_id
-                    and set name v =
-                        udf_modify_no_after.TryGetValue(name).intoOption'()
-                            .fmap
-                        <| apply (user_id, v)
-                        |> ignore }
+        let user = //回送被删除的用户
+            { Id = user_id
+              Name = coerce db_data.["user_name"]
+              Email = coerce db_data.["user_email"]
+              CreateTime = coerce db_data.["user_create_time"]
+              AccessTime = coerce db_data.["user_create_time"]
+              Permission = coerce db_data.["user_permission"]
+              Item = //只读
+                fun name ->
+                    udf_render_no_after.TryGetValue(name).intoOption'()
+                        .fmap
+                    <| (apply ..> snd) user_id }
 
         let aff =
             db {

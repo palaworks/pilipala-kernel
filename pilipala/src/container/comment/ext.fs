@@ -1,7 +1,7 @@
 [<AutoOpen>]
 module pilipala.container.comment.ext
 
-type IComment with
+type IMappedComment with
 
     /// 评论的用户名
     /// 此功能需UserName插件支持
@@ -10,5 +10,5 @@ type IComment with
 
     /// 评论的回复
     /// 此功能需CommentReplies插件支持
-    member self.Replies: IComment seq =
+    member self.Replies: IMappedComment seq =
         downcast self.["Replies"].unwrap ()

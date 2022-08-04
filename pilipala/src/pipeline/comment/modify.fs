@@ -25,6 +25,8 @@ module ICommentModifyPipelineBuilder =
             member i.Body = gen ()
             member i.Binding = gen ()
             member i.CreateTime = gen ()
+            member i.UserId = gen ()
+            member i.Permission = gen ()
 
             member i.Item name =
                 if udf.ContainsKey name then
@@ -93,5 +95,13 @@ type CommentModifyPipeline internal (modifyBuilder: ICommentModifyPipelineBuilde
     member self.CreateTime =
         modifyBuilder.CreateTime.fullyBuild
         <| fun fail x -> unwrapOr (set "comment_create_time" x) (fun _ -> fail x)
+
+    member self.UserId =
+        modifyBuilder.UserId.fullyBuild
+        <| fun fail x -> unwrapOr (set "user_id" x) (fun _ -> fail x)
+
+    member self.Permission =
+        modifyBuilder.Permission.fullyBuild
+        <| fun fail x -> unwrapOr (set "comment_permission" x) (fun _ -> fail x)
 
     member self.Item(name: string) = udf.TryGetValue(name).intoOption' ()

@@ -31,6 +31,8 @@ module ICommentRenderPipelineBuilder =
             member i.Body = gen ()
             member i.Binding = gen ()
             member i.CreateTime = gen ()
+            member i.UserId = gen ()
+            member i.Permission = gen ()
 
             member i.Item name =
                 if udf.ContainsKey name then
@@ -91,5 +93,13 @@ type CommentRenderPipeline internal (renderBuilder: ICommentRenderPipelineBuilde
     member self.CreateTime =
         renderBuilder.CreateTime.fullyBuild
         <| fun fail id -> unwrapOr (get "comment_create_time" id) (fun _ -> fail id)
+
+    member self.UserId =
+        renderBuilder.UserId.fullyBuild
+        <| fun fail id -> unwrapOr (get "user_id" id) (fun _ -> fail id)
+
+    member self.Permission =
+        renderBuilder.Permission.fullyBuild
+        <| fun fail id -> unwrapOr (get "comment_permission" id) (fun _ -> fail id)
 
     member self.Item(name: string) = udf.TryGetValue(name).intoOption' ()

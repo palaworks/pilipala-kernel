@@ -27,10 +27,9 @@ type PostInitPipeline
     (
         initBuilder: IPostInitPipelineBuilder,
         palaflake: IPalaflakeGenerator,
-        db: IDbOperationBuilder,
-        user: IUser
+        db: IDbOperationBuilder
     ) =
-    let data (post: IPost) =
+    let data (post: PostData) =
         let post_id = palaflake.next ()
 
         let fields: (_ * obj) list =
@@ -40,8 +39,8 @@ type PostInitPipeline
               ("post_create_time", post.CreateTime)
               ("post_access_time", post.AccessTime)
               ("post_modify_time", post.AccessTime)
-              ("user_id", user.Id)
-              ("user_permission", user.Permission) ]
+              ("user_id", post.UserId)
+              ("user_permission", post.Permission) ]
 
         let aff =
             db {
