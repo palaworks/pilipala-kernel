@@ -55,54 +55,5 @@ let make
 
 //member i.GetPost()=
 (*
-                    member i.NewPost(title, body) =
-                        if i.Permission &&& 300us <> 0us then
-                            let newPost =
-                                { Id = 0UL
-                                  Title = title
-                                  Body = body
-                                  CreateTime = DateTime.Now
-                                  AccessTime = DateTime.Now
-                                  ModifyTime = DateTime.Now
-                                  Permission = i.Permission
-                                  Item = always None }
 
-                            //应有验证
-                            Ok(postProvider.create newPost)
-                        else
-                            Err "Permission denied"
-
-                    member i.NewCommentOn(post: IPost, body: string) =
-                        if (i.Id = post.UserId)
-                           || ((i.Permission &&& 48us) > (post.Permission &&& 48us)) then
-                            let newComment =
-                                { Id = 0UL
-                                  Body = body
-                                  CreateTime = DateTime.Now
-                                  Binding = BindPost post.Id
-                                  Permission = i.Permission
-                                  Item = always None }
-
-                            //应有验证
-                            Ok(commentProvider.create newComment)
-                        else
-                            Err "Permission denied"
-
-                    member i.NewCommentOn(comment: IComment, body: string) =
-                        if (i.Id = comment.UserId)
-                           || ((i.Permission &&& 48us) > (comment.Permission &&& 48us)) then
-                            let newComment =
-                                { Id = 0UL
-                                  Body = body
-                                  CreateTime = DateTime.Now
-                                  Binding = BindComment comment.Id
-                                  Permission = i.Permission
-                                  Item = always None }
-
-                            //应有验证
-                            Ok(commentProvider.create newComment)
-                        else
-                            Err "Permission denied" }
-
-            member self.create user = self.fetch (init.Batch user)
-            member self.delete user_id = finalize.Batch user_id *)
+            *)
