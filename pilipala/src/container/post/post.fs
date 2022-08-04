@@ -1,41 +1,118 @@
 namespace pilipala.container.post
 
+open System
+open fsharper.op
+open fsharper.typ
 open fsharper.op.Alias
 open pilipala.access.user
+open pilipala.container.comment
+open pilipala.id
 
-type Post(post_id: u64, provider: IMappedPostProvider, user: IMappedUser) =
+type Post
+    internal
+    (
+        palaflake: IPalaflakeGenerator,
+        mapped: IMappedPost,
+        mappedCommentProvider: IMappedCommentProvider,
+        user: IMappedUser
+    ) =
 
-    let mapped = provider.fetch post_id
-    member i.Id = post_id
+    member self.CanRead =
+        user.Id = mapped.UserId
+        || (user.Permission &&& 3072us) > (mapped.Permission &&& 3072us)
 
-    member i.Title
-        with get () = mapped.Title
-        and set v = mapped.Title <- v
+    member self.CanWrite =
+        user.Id = mapped.UserId
+        || (user.Permission &&& 300us) > (mapped.Permission &&& 300us)
 
-    member i.Body
-        with get () = mapped.Body
-        and set v = mapped.Body <- v
+    member self.CanReadComment =
+        user.Id = mapped.UserId
+        || (user.Permission &&& 192us) > (mapped.Permission &&& 192us)
 
-    member i.CreateTime
-        with get () = mapped.CreateTime
-        and set v = mapped.CreateTime <- v
+    member self.CanWriteComment =
+        user.Id = mapped.UserId
+        || (user.Permission &&& 48us) > (mapped.Permission &&& 48us)
 
-    member i.AccessTime
-        with get () = mapped.AccessTime
-        and set v = mapped.AccessTime <- v
+    member self.Id = mapped.Id
 
-    member i.ModifyTime
-        with get () = mapped.ModifyTime
-        and set v = mapped.ModifyTime <- v
+    member self.Title =
+        if self.CanRead then
+            Ok(mapped.Title)
+        else
+            Err "Permission denied"
 
-    member i.UserId
-        with get () = mapped.UserId
-        and set v = mapped.UserId <- v
+    member self.Body =
+        if self.CanRead then
+            Ok(mapped.Body)
+        else
+            Err "Permission denied"
 
-    member i.Permission
-        with get () = mapped.Permission
-        and set v = mapped.Permission <- v
+    member self.CreateTime =
+        if self.CanRead then
+            Ok(mapped.CreateTime)
+        else
+            Err "Permission denied"
 
-    member i.Item
-        with get name = mapped.[name]
-        and set name v = mapped.[name] <- v
+    member self.AccessTime =
+        if self.CanRead then
+            Ok(mapped.AccessTime)
+        else
+            Err "Permission denied"
+
+    member self.ModifyTime =
+        if self.CanRead then
+            Ok(mapped.ModifyTime)
+        else
+            Err "Permission denied"
+
+    member self.UserId =
+        if self.CanRead then
+            Ok(mapped.UserId)
+        else
+            Err "Permission denied"
+
+    member self.Permission =
+        if self.CanRead then
+            Ok(mapped.Permission)
+        else
+            Err "Permission denied"
+
+    member self.Item
+        with get name =
+            if self.CanRead then
+                Ok(mapped.[name])
+            else
+                Err "Permission denied"
+
+    member self.UpdateTitle newTitle =
+        if self.CanWrite then
+            Ok(mapped.Title <- newTitle)
+        else
+            Err "Permission denied"
+
+    member self.UpdateBody newBody =
+        if self.CanWrite then
+            Ok(mapped.Body <- newBody)
+        else
+            Err "Permission denied"
+
+    member self.UpdateItem name v =
+        if self.CanRead then
+            Ok(mapped.[name] <- v)
+        else
+            Err "Permission denied"
+
+    member self.NewComment(body: string) =
+        if self.CanWriteComment then
+            { Id = palaflake.next ()
+              Body = body
+              CreateTime = DateTime.Now
+              Binding = BindPost mapped.Id
+              UserId = user.Id
+              Permission = user.Permission
+              Item = always None }
+            |> mappedCommentProvider.create
+            |> fun x -> Comment(palaflake, x, mappedCommentProvider, user)
+            |> Ok
+        else
+            Err "Permission denied"

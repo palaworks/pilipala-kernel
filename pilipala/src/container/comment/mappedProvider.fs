@@ -33,7 +33,7 @@ let make
 
                 member i.UserId
                     with get () = snd (render.UserId comment_id)
-                    and set v = modify.Binding(comment_id, v) |> ignore
+                    and set v = modify.UserId(comment_id, v) |> ignore
 
                 member i.Permission
                     with get () = snd (render.Permission comment_id)

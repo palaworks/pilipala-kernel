@@ -22,19 +22,10 @@ module IUserInitPipelineBuilder =
         { new IUserInitPipelineBuilder with
             member i.Batch = gen () }
 
-type UserInitPipeline
-    internal
-    (
-        initBuilder: IUserInitPipelineBuilder,
-        palaflake: IPalaflakeGenerator,
-        uuid: IUuidGenerator,
-        db: IDbOperationBuilder
-    ) =
+type UserInitPipeline internal (initBuilder: IUserInitPipelineBuilder, uuid: IUuidGenerator, db: IDbOperationBuilder) =
     let data (user: UserData) =
-        let user_id = palaflake.next ()
-
         let fields: (_ * obj) list =
-            [ ("user_id", user_id)
+            [ ("user_id", user.Id)
               ("user_name", user.Name)
               ("user_email", user.Email)
               ("user_pwd_hash", uuid.next().bcrypt) //默认随机密码
@@ -49,7 +40,7 @@ type UserInitPipeline
                 execute
             }
 
-        if aff = 1 then Some user_id else None
+        if aff = 1 then Some user.Id else None
 
     member self.Batch =
         initBuilder.Batch.fullyBuild

@@ -78,7 +78,7 @@ type UserModifyPipeline internal (modifyBuilder: IUserModifyPipelineBuilder, db:
         <| fun fail x -> unwrapOr (set "user_access_time" x) (fun _ -> fail x)
 
     member self.Permission =
-        modifyBuilder.AccessTime.fullyBuild
+        modifyBuilder.Permission.fullyBuild
         <| fun fail x -> unwrapOr (set "user_permission" x) (fun _ -> fail x)
 
     member self.Item(name: string) = udf.TryGetValue(name).intoOption' ()

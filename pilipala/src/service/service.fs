@@ -1,4 +1,4 @@
-namespace pilipala.serv
+namespace pilipala.service
 
 open System
 open System.Collections.Generic
@@ -15,36 +15,36 @@ servPath是用于路由服务结构的文本
 /serv/some_plugin/1a2b...
 *)
 
-exception UnknownServAccessLevelException //未知服务访问级别异常
-exception InvalidServConstructorException //非法服务构造异常
+//exception UnknownServiceAccessLevelException //未知服务访问级别异常
+//exception InvalidServiceConstructorException //非法服务构造异常
 
 /// 服务访问级别
-type ServAccessLv =
+type ServiceAccessLv =
     | Everyone //无需认证
     | NeedAuth //需要认证
 
 /// 服务属性，仅限于修饰类
 [<AttributeUsage(AttributeTargets.Class)>]
-type ServAttribute(Path: string, EntryPoint: string, AccessLv: ServAccessLv) =
+type ServiceAttribute(Path: string, EntryPoint: string, AccessLv: ServiceAccessLv) =
     inherit Attribute()
     member val Path = Path
     member val EntryPoint = EntryPoint
     member val AccessLv = AccessLv
 
-type ServProvider() =
+type ServiceProvider() =
 
     /// 已注册服务路径到服务信息的映射
     member self.registeredServInfo =
         Dict<string, {| Type: Type
                         EntryPoint: string
-                        AccessLv: ServAccessLv |}>
+                        AccessLv: ServiceAccessLv |}>
             ()
 
 
     /// 注册服务
-    member self.regServByType(t: Type) =
-        let attr: ServAttribute =
-            downcast t.GetCustomAttributes(typeof<ServAttribute>, false).[0]
+    member self.regServiceByType(t: Type) =
+        let attr: ServiceAttribute =
+            downcast t.GetCustomAttributes(typeof<ServiceAttribute>, false).[0]
 
         (attr.Path,
          {| Type = t
@@ -54,17 +54,17 @@ type ServProvider() =
         |> mustTrue
 
     /// 注册服务
-    member self.regServ<'s when 's :> ServAttribute>() =
+    member self.regService<'s when 's :> ServiceAttribute>() =
         //when 's :> ServAttribute, 's obviously not struct
-        self.regServByType typeof<'s>
+        self.regServiceByType typeof<'s>
 
     /// 获取服务信息
-    member self.getServInfo path =
+    member self.getServiceInfo path =
         self.registeredServInfo.TryGetValue path
         |> Option'.fromOkComma
 
     /// 匹配获取服务信息
-    member self.matchServInfo pathRegexp =
+    member self.matchServiceInfo pathRegexp =
         [ for path in self.registeredServInfo.Keys do
               if Regex.IsMatch(path, pathRegexp) then
                   self.registeredServInfo.[path] ]

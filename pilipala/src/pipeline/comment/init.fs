@@ -23,25 +23,16 @@ module ICommentInitPipelineBuilder =
         { new ICommentInitPipelineBuilder with
             member i.Batch = gen () }
 
-type CommentInitPipeline
-    internal
-    (
-        initBuilder: ICommentInitPipelineBuilder,
-        palaflake: IPalaflakeGenerator,
-        db: IDbOperationBuilder
-    ) =
+type CommentInitPipeline internal (initBuilder: ICommentInitPipelineBuilder, db: IDbOperationBuilder) =
 
     let data (comment: CommentData) =
-
-        let comment_id = palaflake.next ()
-
         let bind_id, comment_is_reply =
             match comment.Binding with
             | BindPost post_id -> post_id, false
             | BindComment comment_id -> comment_id, true
 
         let fields: (_ * obj) list =
-            [ ("comment_id", comment_id)
+            [ ("comment_id", comment.Id)
               ("bind_id", bind_id)
               ("comment_body", comment.Body)
               ("comment_create_time", comment.CreateTime)
@@ -62,7 +53,7 @@ type CommentInitPipeline
             (*            for KV (name, v) in comment do
                 ()
 *)
-            Some comment_id
+            Some comment.Id
         else
             None
 
