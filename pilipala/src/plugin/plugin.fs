@@ -40,6 +40,7 @@ type internal PluginDispatcher(sc: IServiceCollection, lp: LogRegister) =
             scopedSC.Add sd
 
         scopedSC
+            .AddSingleton(t, IPluginCfgProvider.make t)
             .AddLogging(fun builder ->
                 for KV (k, v) in lp.registeredLoggerFilter do
                     builder.AddFilter(k, v) |> ignore

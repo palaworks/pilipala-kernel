@@ -1,17 +1,15 @@
 namespace pilipala
 
 open System
-open System.Data
 open fsharper.op
 open fsharper.typ
-open fsharper.typ.Ord
 open fsharper.op.Alias
-open pilipala.access.user
-open pilipala.container.post
-open pilipala.container.comment
 open pilipala.id
 open pilipala.data.db
 open pilipala.util.hash
+open pilipala.access.user
+open pilipala.container.post
+open pilipala.container.comment
 
 type Pilipala
     internal
@@ -39,7 +37,7 @@ type Pilipala
                else
                    None
            |> eq None then
-            Err $"Invalid user id({id}) or user password({pwd})"
+            Err $"Invalid user id({id}) or password({pwd})"
         else
             User(
                 palaflake,
@@ -66,7 +64,7 @@ type Pilipala
                       else
                           None
             with
-        | None -> Err $"Invalid user id({id}) or user password({pwd})"
+        | None -> Err $"Invalid user name({name}) or password({pwd})"
         | Some id ->
             User(
                 palaflake,

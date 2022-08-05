@@ -39,8 +39,8 @@
         <Compile Include="src\log.fs" />
         <Compile Include="src\service\service.fs" />
         <Compile Include="src\service\host.fs" />
-        <Compile Include="src\plugin\plugin.fs" />
         <Compile Include="src\plugin\config.fs" />
+        <Compile Include="src\plugin\plugin.fs" />
         <Compile Include="src\pilipala\pilipala.fs" />
         <Compile Include="src\builder\builder.fs" />
         <Compile Include="src\builder\useDb.fs" />
