@@ -1,4 +1,4 @@
-﻿module pilipala.container.comment.ICommentProvider
+﻿module pilipala.container.comment.IMappedCommentProvider
 
 open fsharper.op
 open fsharper.typ
@@ -9,10 +9,10 @@ open pilipala.pipeline.comment
 
 let make
     (
-        init: CommentInitPipeline,
-        render: CommentRenderPipeline,
-        modify: CommentModifyPipeline,
-        finalize: CommentFinalizePipeline
+        init: ICommentInitPipeline,
+        render: ICommentRenderPipeline,
+        modify: ICommentModifyPipeline,
+        finalize: ICommentFinalizePipeline
     ) =
     { new IMappedCommentProvider with
         member self.fetch comment_id =

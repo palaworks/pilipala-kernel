@@ -42,40 +42,40 @@ module IUserRenderPipelineBuilder =
 
             member i.GetEnumerator() : IEnumerator<_> = udf.GetEnumerator() }
 
-type UserRenderPipeline internal (renderBuilder: IUserRenderPipelineBuilder, db: IDbOperationBuilder) =
-    let get target (idVal: u64) =
-        db {
-            inUser
-            getFstVal target "user_id" idVal
-            execute
-        }
-        |> fmap (fun v -> idVal, coerce v)
+module IUserRenderPipeline =
+    let make (renderBuilder: IUserRenderPipelineBuilder, db: IDbOperationBuilder) =
+        let get target (idVal: u64) =
+            db {
+                inUser
+                getFstVal target "user_id" idVal
+                execute
+            }
+            |> fmap (fun v -> idVal, coerce v)
 
-    let udf = Dict<string, u64 -> u64 * obj>()
+        let udf = Dict<string, u64 -> u64 * obj>()
 
-    do
-        for KV (name, builderItem) in renderBuilder do
-            //udf管道初始为只会panic的GenericPipe，必须Replace后使用
-            udf.Add(name, builderItem.fullyBuild id)
+        do
+            for KV (name, builderItem) in renderBuilder do
+                //udf管道初始为只会panic的GenericPipe，必须Replace后使用
+                udf.Add(name, builderItem.fullyBuild id)
 
-    member self.Name =
-        renderBuilder.Name.fullyBuild
-        <| fun fail id -> unwrapOr (get "user_name" id) (fun _ -> fail id)
+        let inline gen (builder: BuilderItem<_, _>) field a =
+            builder.fullyBuild
+            <| fun fail id -> unwrapOr (get field id) (fun _ -> fail id)
+            |> apply a
 
-    member self.Email =
-        renderBuilder.Email.fullyBuild
-        <| fun fail id -> unwrapOr (get "user_email" id) (fun _ -> fail id)
+        { new IUserRenderPipeline with
+            member self.Name a = gen renderBuilder.Name "user_name" a
 
-    member self.CreateTime =
-        renderBuilder.CreateTime.fullyBuild
-        <| fun fail id -> unwrapOr (get "user_create_time" id) (fun _ -> fail id)
+            member self.Email a = gen renderBuilder.Email "user_email" a
 
-    member self.AccessTime =
-        renderBuilder.AccessTime.fullyBuild
-        <| fun fail id -> unwrapOr (get "user_access_time" id) (fun _ -> fail id)
+            member self.CreateTime a =
+                gen renderBuilder.CreateTime "user_create_time" a
 
-    member self.Permission =
-        renderBuilder.Permission.fullyBuild
-        <| fun fail id -> unwrapOr (get "user_permission" id) (fun _ -> fail id)
+            member self.AccessTime a =
+                gen renderBuilder.AccessTime "user_access_time" a
 
-    member self.Item(name: string) = udf.TryGetValue(name).intoOption' ()
+            member self.Permission a =
+                gen renderBuilder.Permission "user_permission" a
+
+            member self.Item(name: string) = udf.TryGetValue(name).intoOption' () }

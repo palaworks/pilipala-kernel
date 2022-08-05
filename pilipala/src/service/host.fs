@@ -22,8 +22,8 @@ open pilipala.access.auth.channel
 type internal ServiceHost
     (
         scopeFac: IServiceScopeFactory,
-        sp: pilipala.service.ServiceProvider,
-        lp: LogProvider,
+        sp: ServiceRegister,
+        lp: LogRegister,
         tp: TokenProvider,
         uuid: IUuidGenerator
     ) =

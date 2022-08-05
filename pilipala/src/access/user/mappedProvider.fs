@@ -12,10 +12,10 @@ open pilipala.pipeline.user
 
 let make
     (
-        init: UserInitPipeline,
-        render: UserRenderPipeline,
-        modify: UserModifyPipeline,
-        finalize: UserFinalizePipeline
+        init: IUserInitPipeline,
+        render: IUserRenderPipeline,
+        modify: IUserModifyPipeline,
+        finalize: IUserFinalizePipeline
     ) =
     { new IMappedUserProvider with
         member self.fetch user_id =

@@ -31,7 +31,7 @@ type ServiceAttribute(Path: string, EntryPoint: string, AccessLv: ServiceAccessL
     member val EntryPoint = EntryPoint
     member val AccessLv = AccessLv
 
-type ServiceProvider() =
+type ServiceRegister() =
 
     /// 已注册服务路径到服务信息的映射
     member self.registeredServInfo =

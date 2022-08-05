@@ -41,44 +41,44 @@ module IUserModifyPipelineBuilder =
 
             member i.GetEnumerator() : IEnumerator<_> = udf.GetEnumerator() }
 
-type UserModifyPipeline internal (modifyBuilder: IUserModifyPipelineBuilder, db: IDbOperationBuilder) =
-    let set targetKey (idVal: u64, targetVal) =
-        match
-            db {
-                inUser
-                update targetKey targetVal "user_id" idVal
-                whenEq 1
-                execute
-            }
-            with
-        | 1 -> Some(idVal, targetVal)
-        | _ -> None
+module IUserModifyPipeline =
+    let make (modifyBuilder: IUserModifyPipelineBuilder, db: IDbOperationBuilder) =
+        let set targetKey (idVal: u64, targetVal) =
+            match
+                db {
+                    inUser
+                    update targetKey targetVal "user_id" idVal
+                    whenEq 1
+                    execute
+                }
+                with
+            | 1 -> Some(idVal, targetVal)
+            | _ -> None
 
-    let udf =
-        Dict<string, u64 * obj -> u64 * obj>()
+        let udf =
+            Dict<string, u64 * obj -> u64 * obj>()
 
-    do
-        for KV (name, builderItem) in modifyBuilder do
-            udf.Add(name, builderItem.fullyBuild id)
+        do
+            for KV (name, builderItem) in modifyBuilder do
+                udf.Add(name, builderItem.fullyBuild id)
 
-    member self.Name =
-        modifyBuilder.Name.fullyBuild
-        <| fun fail x -> unwrapOr (set "user_name" x) (fun _ -> fail x)
+        let inline gen (builder: BuilderItem<_>) field a =
+            builder.fullyBuild
+            <| fun fail x -> unwrapOr (set field x) (fun _ -> fail x)
+            |> apply a
 
-    member self.Email =
-        modifyBuilder.Email.fullyBuild
-        <| fun fail x -> unwrapOr (set "user_email" x) (fun _ -> fail x)
+        { new IUserModifyPipeline with
+            member self.Name a = gen modifyBuilder.Name "user_name" a
 
-    member self.CreateTime =
-        modifyBuilder.CreateTime.fullyBuild
-        <| fun fail x -> unwrapOr (set "user_create_time" x) (fun _ -> fail x)
+            member self.Email a = gen modifyBuilder.Email "user_email" a
 
-    member self.AccessTime =
-        modifyBuilder.AccessTime.fullyBuild
-        <| fun fail x -> unwrapOr (set "user_access_time" x) (fun _ -> fail x)
+            member self.CreateTime a =
+                gen modifyBuilder.CreateTime "user_create_time" a
 
-    member self.Permission =
-        modifyBuilder.Permission.fullyBuild
-        <| fun fail x -> unwrapOr (set "user_permission" x) (fun _ -> fail x)
+            member self.AccessTime a =
+                gen modifyBuilder.AccessTime "user_access_time" a
 
-    member self.Item(name: string) = udf.TryGetValue(name).intoOption' ()
+            member self.Permission a =
+                gen modifyBuilder.Permission "user_permission" a
+
+            member self.Item(name: string) = udf.TryGetValue(name).intoOption' () }

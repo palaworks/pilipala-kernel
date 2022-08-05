@@ -16,7 +16,7 @@ type Builder with
         let f (sc: IServiceCollection) =
             sc
                 .BuildServiceProvider()
-                .GetService<ServiceProvider>()
+                .GetService<ServiceRegister>()
                 .regServiceByType t
 
             sc

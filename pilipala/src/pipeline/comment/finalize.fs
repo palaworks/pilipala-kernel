@@ -22,72 +22,63 @@ module ICommentFinalizePipelineBuilder =
         { new ICommentFinalizePipelineBuilder with
             member i.Batch = gen () }
 
-type CommentFinalizePipeline
-    internal
-    (
-        renderBuilder: ICommentRenderPipelineBuilder,
-        modifyBuilder: ICommentModifyPipelineBuilder,
-        finalizeBuilder: ICommentFinalizePipelineBuilder,
-        db: IDbOperationBuilder
-    ) =
+module ICommentFinalizePipeline =
+    let make
+        (
+            renderBuilder: ICommentRenderPipelineBuilder,
+            finalizeBuilder: ICommentFinalizePipelineBuilder,
+            db: IDbOperationBuilder
+        ) =
 
-    let udf_render_no_after = //去除了After部分的udf渲染管道，因为After可能包含渲染逻辑
-        let map = Dict<string, u64 -> u64 * obj>()
+        let udf_render_no_after = //去除了After部分的udf渲染管道，因为After可能包含渲染逻辑
+            let map = Dict<string, u64 -> u64 * obj>()
 
-        for KV (name, builderItem) in renderBuilder do //遍历udf
-            //udf管道初始为只会panic的GenericPipe，必须Replace后使用
-            map.Add(name, builderItem.noneAfterBuild id)
+            for KV (name, builderItem) in renderBuilder do //遍历udf
+                //udf管道初始为只会panic的GenericPipe，必须Replace后使用
+                map.Add(name, builderItem.noneAfterBuild id)
 
-        map
+            map
 
-    let udf_modify_no_after = //去除了After部分的udf修改管道，因After可能包含通知逻辑
-        let map =
-            Dict<string, u64 * obj -> u64 * obj>()
+        let data (comment_id: u64) =
+            let db_data =
+                db {
+                    inComment
+                    getFstRow "comment_id" comment_id
+                    execute
+                }
+                |> unwrap
 
-        for KV (name, builderItem) in modifyBuilder do //遍历udf
-            //udf管道初始为只会panic的GenericPipe，必须Replace后使用
-            map.Add(name, builderItem.noneAfterBuild id)
+            let comment = //回送被删除的评论
+                { Id = comment_id
+                  Body = coerce db_data.["comment_body"]
 
-        map
+                  Binding =
+                      if coerce db_data.["comment_is_reply"] then
+                          BindComment(coerce db_data.["comment_binding"])
+                      else
+                          BindPost(coerce db_data.["comment_binding"])
 
-    let data (comment_id: u64) =
-        let db_data =
-            db {
-                inComment
-                getFstRow "comment_id" comment_id
-                execute
-            }
-            |> unwrap
+                  CreateTime = coerce db_data.["comment_create_time"]
+                  UserId = coerce db_data.["user_id"]
+                  Permission = coerce db_data.["comment_permission"]
+                  Item =
+                    fun name -> //只读
+                        udf_render_no_after.TryGetValue(name).intoOption'()
+                            .fmap
+                        <| (apply ..> snd) comment_id }
 
-        let comment = //回送被删除的评论
-            { Id = comment_id
-              Body = coerce db_data.["comment_body"]
+            let aff =
+                db {
+                    inComment
+                    delete "comment_id" comment_id
+                    whenEq 1
+                    execute
+                }
 
-              Binding =
-                  if coerce db_data.["comment_is_reply"] then
-                      BindComment(coerce db_data.["comment_binding"])
-                  else
-                      BindPost(coerce db_data.["comment_binding"])
+            if aff = 1 then Some comment else None
 
-              CreateTime = coerce db_data.["comment_create_time"]
-              UserId = coerce db_data.["user_id"]
-              Permission = coerce db_data.["comment_permission"]
-              Item =
-                fun name -> //只读
-                    udf_render_no_after.TryGetValue(name).intoOption'()
-                        .fmap
-                    <| (apply ..> snd) comment_id }
-
-        let aff =
-            db {
-                inComment
-                delete "comment_id" comment_id
-                whenEq 1
-                execute
-            }
-
-        if aff = 1 then Some comment else None
-
-    member self.Batch =
-        finalizeBuilder.Batch.fullyBuild
-        <| fun fail id -> unwrapOr (data id) (fun _ -> fail id)
+        { new ICommentFinalizePipeline with
+            member self.Batch a =
+                finalizeBuilder.Batch.fullyBuild
+                <| fun fail id -> unwrapOr (data id) (fun _ -> fail id)
+                |> apply a }

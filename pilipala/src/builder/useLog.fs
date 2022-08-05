@@ -12,8 +12,8 @@ type Builder with
         let f (sc: IServiceCollection) =
             sc
                 .BuildServiceProvider()
-                .GetService<LogProvider>()
-                .regLogProvider provider
+                .GetService<LogRegister>()
+                .regLoggerProvider provider
 
             sc
 
@@ -22,7 +22,7 @@ type Builder with
     member self.useLogFilter category lv =
 
         let f (sc: IServiceCollection) =
-            sc.BuildServiceProvider().GetService<LogProvider>()
+            sc.BuildServiceProvider().GetService<LogRegister>()
                 .regLogFilter
                 category
                 lv
