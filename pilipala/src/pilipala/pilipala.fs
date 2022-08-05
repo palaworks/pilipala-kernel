@@ -1,13 +1,17 @@
 namespace pilipala
 
+open System
+open System.Data
 open fsharper.op
 open fsharper.typ
+open fsharper.typ.Ord
 open fsharper.op.Alias
 open pilipala.access.user
 open pilipala.container.post
 open pilipala.container.comment
-open pilipala.data.db
 open pilipala.id
+open pilipala.data.db
+open pilipala.util.hash
 
 type Pilipala
     internal
@@ -19,14 +23,23 @@ type Pilipala
         db: IDbOperationBuilder
     ) =
 
+    member self.UserLogin(id: u64, pwd: string) =
+        let sql =
+            $"SELECT user_pwd_hash FROM {db.tables.user} WHERE user_id = <user_id>"
+            |> db.managed.normalizeSql
 
-    member self.UserLogin id pwd =
         if db {
-            inPost
-            getFstVal "user_id" "user_id" id
+            select sql [ ("user_id", id) ]
             execute
-        } = None then
-            failwith "Invalid user id"
+           }
+           |> bind
+           <| fun x ->
+               if pwd.bcrypt.Verify(coerce x) then
+                   Some()
+               else
+                   None
+           |> eq None then
+            Err $"Invalid user id({id}) or user password({pwd})"
         else
             User(
                 palaflake,
@@ -36,3 +49,31 @@ type Pilipala
                 mappedUserProvider.fetch id,
                 db
             )
+            |> Ok
+
+    member self.UserLogin(name, pwd: string) =
+        let sql =
+            $"SELECT user_id, user_pwd_hash FROM {db.tables.user} WHERE user_name = <user_name>"
+            |> db.managed.normalizeSql
+
+        match db {
+                  getFstRow sql [ ("user_name", name) ]
+                  execute
+              }
+              >>= fun x ->
+                      if pwd.bcrypt.Verify(coerce x.["user_pwd_hash"]) then
+                          Some(coerce x.["user_id"])
+                      else
+                          None
+            with
+        | None -> Err $"Invalid user id({id}) or user password({pwd})"
+        | Some id ->
+            User(
+                palaflake,
+                mappedPostProvider,
+                mappedCommentProvider,
+                mappedUserProvider,
+                mappedUserProvider.fetch id,
+                db
+            )
+            |> Ok
