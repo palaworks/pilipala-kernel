@@ -1,8 +1,8 @@
 namespace pilipala.log
 
 open System.Collections.Generic
+open fsharper.alias
 open Microsoft.Extensions.Logging
-open fsharper.op.Alias
 
 type internal LogRegister() =
     

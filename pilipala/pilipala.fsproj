@@ -63,24 +63,21 @@
     </ItemGroup>
 
     <ItemGroup>
-        <Reference Include="DbManaged, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null">
-            <HintPath>..\..\DbManaged\bin\Debug\net6.0\DbManaged.dll</HintPath>
-            <Private>False</Private>
-        </Reference>
-        <Reference Include="fsharper, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null">
-            <HintPath>..\..\fsharper\bin\Debug\net6.0\fsharper.dll</HintPath>
-            <Private>False</Private>
-        </Reference>
-        <Reference Include="pilipala-frame">
-          <HintPath>..\..\pilipala-sdk\pilipala-frame\bin\Debug\net6.0\pilipala-frame.dll</HintPath>
-        </Reference>
-        <Reference Include="pilipala.util">
-          <HintPath>..\..\pilipala-sdk\pilipala.util\bin\Debug\net6.0\pilipala.util.dll</HintPath>
-        </Reference>
-        <Reference Include="WebSocketer, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null">
-            <HintPath>..\..\WebsSocketer\bin\Debug\net6.0\WebSocketer.dll</HintPath>
-            <Private>False</Private>
-        </Reference>
+      <Reference Include="DbManaged">
+        <HintPath>..\..\DbManaged\bin\Debug\net6.0\DbManaged.dll</HintPath>
+      </Reference>
+      <Reference Include="fsharper">
+        <HintPath>..\..\fsharper\bin\Debug\net6.0\fsharper.dll</HintPath>
+      </Reference>
+      <Reference Include="pilipala-frame">
+        <HintPath>..\..\pilipala-sdk\pilipala-frame\bin\Debug\net6.0\pilipala-frame.dll</HintPath>
+      </Reference>
+      <Reference Include="pilipala.util">
+        <HintPath>..\..\pilipala-sdk\pilipala.util\bin\Debug\net6.0\pilipala.util.dll</HintPath>
+      </Reference>
+      <Reference Include="WebSocketer">
+        <HintPath>..\..\WebsSocketer\bin\Debug\net6.0\WebSocketer.dll</HintPath>
+      </Reference>
     </ItemGroup>
 
 </Project>

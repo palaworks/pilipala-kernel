@@ -1,13 +1,12 @@
 namespace pilipala.access.user
 
 open System
-open fsharper.op
 open fsharper.typ
-open pilipala.container.comment
-open pilipala.container.post
-open pilipala.data.db
 open pilipala.id
+open pilipala.data.db
 open pilipala.util.hash
+open pilipala.container.post
+open pilipala.container.comment
 
 type User
     (

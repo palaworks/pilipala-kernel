@@ -4,7 +4,7 @@ module pilipala.builder.useAuth
 open System.Net
 open System.Net.Sockets
 open fsharper.typ
-open fsharper.op.Alias
+open fsharper.alias
 open Microsoft.Extensions.Hosting
 open Microsoft.Extensions.DependencyInjection
 open WebSocketer.typ

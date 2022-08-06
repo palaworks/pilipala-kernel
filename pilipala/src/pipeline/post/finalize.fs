@@ -1,13 +1,10 @@
 namespace pilipala.pipeline.post
 
-open System
 open System.Collections.Generic
 open fsharper.op
 open fsharper.typ
-open fsharper.typ.Pipe
-open fsharper.op.Alias
+open fsharper.alias
 open fsharper.op.Pattern
-open fsharper.op.Foldable
 open pilipala.data.db
 open pilipala.pipeline
 open pilipala.container.post

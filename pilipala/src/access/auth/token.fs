@@ -1,9 +1,7 @@
 ﻿namespace pilipala.access.auth.token
 
 open System
-open fsharper.op
 open fsharper.typ
-open fsharper.typ.Ord
 open pilipala.data.db
 open pilipala.id
 open pilipala.util.hash

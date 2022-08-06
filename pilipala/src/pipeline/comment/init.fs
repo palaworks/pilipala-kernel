@@ -1,14 +1,8 @@
 namespace pilipala.pipeline.comment
 
-open System
 open System.Collections.Generic
 open fsharper.op
 open fsharper.typ
-open fsharper.op.Alias
-open fsharper.op.Pattern
-open fsharper.op.Foldable
-open pilipala.access.user
-open pilipala.id
 open pilipala.data.db
 open pilipala.pipeline
 open pilipala.pipeline.comment

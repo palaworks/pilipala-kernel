@@ -1,6 +1,5 @@
 namespace pilipala.service
 
-open System
 open System.Net.Sockets
 open System.Threading.Tasks
 open System.Security.Cryptography

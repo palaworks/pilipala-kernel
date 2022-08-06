@@ -1,6 +1,5 @@
 namespace pilipala.id
 
-open System.Reflection
 open pilipala.util.id
 
 module IUuidGenerator =

@@ -1,10 +1,8 @@
 namespace pilipala.data.kv
 
-open System
-open System.Collections.Concurrent
 open fsharper.op
 open fsharper.typ
-open fsharper.op.Alias
+open fsharper.alias
 
 module IKvProvider =
 

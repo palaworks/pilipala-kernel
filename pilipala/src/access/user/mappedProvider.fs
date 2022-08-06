@@ -1,13 +1,8 @@
 module pilipala.access.user.IMappedUserProvider
 
-open System
 open fsharper.op
 open fsharper.typ
-open fsharper.op.Alias
-open fsharper.typ.Pipe
 open pilipala.access.user
-open pilipala.container.comment
-open pilipala.container.post
 open pilipala.pipeline.user
 
 let make

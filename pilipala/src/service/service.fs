@@ -1,11 +1,10 @@
 namespace pilipala.service
 
 open System
-open System.Collections.Generic
 open System.Text.RegularExpressions
 open fsharper.op
 open fsharper.typ
-open fsharper.op.Alias
+open fsharper.alias
 
 (*
 servPath是用于路由服务结构的文本

@@ -1,10 +1,7 @@
 namespace pilipala.data.db
 
-open System.Data.Common
 open DbManaged
 open DbManaged.PgSql
-open fsharper.typ
-open fsharper.typ.Ord
 
 module IDbOperationBuilder =
     let make (config: DbConfig) =

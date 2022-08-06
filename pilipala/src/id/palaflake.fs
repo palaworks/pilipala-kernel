@@ -1,7 +1,7 @@
 namespace pilipala.id
 
+open fsharper.alias
 open pilipala.util.id
-open fsharper.op.Alias
 
 module IPalaflakeGenerator =
 

@@ -1,12 +1,10 @@
 namespace pilipala.container.post
 
 open System
-open fsharper.op
 open fsharper.typ
-open fsharper.op.Alias
+open pilipala.id
 open pilipala.access.user
 open pilipala.container.comment
-open pilipala.id
 
 type Post
     internal

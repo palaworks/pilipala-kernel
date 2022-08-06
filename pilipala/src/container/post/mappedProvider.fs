@@ -2,8 +2,6 @@
 
 open fsharper.op
 open fsharper.typ
-open fsharper.op.Alias
-open fsharper.typ.Pipe
 open pilipala.pipeline.post
 
 let make

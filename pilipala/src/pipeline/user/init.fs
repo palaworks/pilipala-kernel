@@ -1,12 +1,8 @@
 namespace pilipala.pipeline.user
 
-open System
 open System.Collections.Generic
 open fsharper.op
 open fsharper.typ
-open fsharper.op.Alias
-open fsharper.op.Runtime
-open fsharper.op.Foldable
 open pilipala.id
 open pilipala.data.db
 open pilipala.pipeline

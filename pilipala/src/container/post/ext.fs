@@ -1,10 +1,8 @@
 [<AutoOpen>]
 module pilipala.container.post.ext
 
-open System
 open fsharper.op
 open fsharper.typ
-open pilipala.access.user
 open pilipala.container.comment
 
 type Post with

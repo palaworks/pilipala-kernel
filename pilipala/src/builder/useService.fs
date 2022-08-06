@@ -5,7 +5,6 @@ open System.IO
 open System.Reflection
 open fsharper.op
 open fsharper.typ
-open fsharper.typ.Pipe
 open Microsoft.Extensions.DependencyInjection
 open pilipala.service
 

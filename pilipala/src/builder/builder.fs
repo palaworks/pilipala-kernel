@@ -1,17 +1,16 @@
 ﻿namespace pilipala.builder
 
-open Microsoft.Extensions.DependencyInjection
 open fsharper.typ
+open Microsoft.Extensions.DependencyInjection
 open pilipala
-open pilipala.container.comment
-open pilipala.container.post
-open pilipala.data.db
 open pilipala.id
 open pilipala.log
 open pilipala.service
-open pilipala.plugin
+open pilipala.data.db
 open pilipala.pipeline.post
+open pilipala.container.post
 open pilipala.pipeline.comment
+open pilipala.container.comment
 
 type Builder =
     { pipeline: IServiceCollection -> IServiceCollection }
