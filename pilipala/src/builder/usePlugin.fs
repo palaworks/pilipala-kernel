@@ -6,20 +6,17 @@ open System.Reflection
 open fsharper.op
 open fsharper.typ
 open Microsoft.Extensions.DependencyInjection
+open pilipala.log
 open pilipala.plugin
+open pilipala.util.di
 
 type Builder with
 
     member self.usePlugin t =
         let f (sc: IServiceCollection) =
-            sc
-                .BuildServiceProvider()
-                .GetService<PluginProvider>()
-                .launchPluginByType t
+            sc.UpdateSingleton<PluginRegister>(fun old -> old.registerPlugin t)
 
-            sc
-
-        { pipeline = self.pipeline .> f }
+        { pipeline = self.pipeline .> effect f }
 
     member self.usePlugin<'p when 'p :> PluginAttribute>() = self.usePlugin typeof<'p>
 

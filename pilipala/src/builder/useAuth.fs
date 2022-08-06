@@ -4,12 +4,12 @@ module pilipala.builder.useAuth
 open System.Net
 open System.Net.Sockets
 open fsharper.typ
-open fsharper.op.Alias
+open fsharper.alias
 open Microsoft.Extensions.Hosting
 open Microsoft.Extensions.DependencyInjection
 open WebSocketer.typ
 open pilipala.builder
-open pilipala.serv
+open pilipala.service
 
 //TODO：应使用随机化IV+CBC以代替ECB模式以获得最佳安全性
 
@@ -32,7 +32,7 @@ type Builder with
                             server.AcceptTcpClient()
                             |> fun c -> new WebSocket(c))
                         //添加服务主机
-                        .AddHostedService<ServHost>()
+                        .AddHostedService<ServiceHost>()
                     |> ignore)
                 .Build()
                 .Run()

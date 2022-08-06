@@ -4,29 +4,22 @@ module pilipala.builder.useLog
 open fsharper.typ
 open Microsoft.Extensions.DependencyInjection
 open pilipala.log
+open pilipala.util.di
 
 type Builder with
 
-    member self.useLogProvider provider =
+    member self.useLoggerProvider provider =
 
         let f (sc: IServiceCollection) =
-            sc
-                .BuildServiceProvider()
-                .GetService<LogProvider>()
-                .regLogProvider provider
+            sc.UpdateSingleton<LoggerRegister>
+            <| fun old -> old.registerLoggerProvider provider
 
-            sc
+        { pipeline = self.pipeline .> effect f }
 
-        { pipeline = self.pipeline .> f }
-
-    member self.useLogFilter category lv =
+    member self.useLoggerFilter category lv =
 
         let f (sc: IServiceCollection) =
-            sc.BuildServiceProvider().GetService<LogProvider>()
-                .regLogFilter
-                category
-                lv
+            sc.UpdateSingleton<LoggerRegister>
+            <| fun old -> old.registerLoggerFilter (category, lv)
 
-            sc
-
-        { pipeline = self.pipeline .> f }
+        { pipeline = self.pipeline .> effect f }

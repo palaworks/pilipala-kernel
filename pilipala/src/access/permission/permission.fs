@@ -2,7 +2,7 @@ namespace pilipala.access.permission
 
 open fsharper.op
 open fsharper.typ
-open fsharper.op.Alias
+open fsharper.alias
 open pilipala.access.user
 open pilipala.container.post
 open pilipala.container.comment

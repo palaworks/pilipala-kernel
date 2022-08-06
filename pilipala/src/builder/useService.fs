@@ -5,23 +5,18 @@ open System.IO
 open System.Reflection
 open fsharper.op
 open fsharper.typ
-open fsharper.typ.Pipe
 open Microsoft.Extensions.DependencyInjection
 open pilipala.service
+open pilipala.util.di
 
 type Builder with
 
     member self.useService t =
 
         let f (sc: IServiceCollection) =
-            sc
-                .BuildServiceProvider()
-                .GetService<ServiceProvider>()
-                .regServiceByType t
+            sc.UpdateSingleton<ServiceRegister>(fun old -> old.registerServiceByType t)
 
-            sc
-
-        { pipeline = self.pipeline .> f }
+        { pipeline = self.pipeline .> effect f }
 
     member self.useService<'s when 's :> ServiceAttribute>() = self.useService typeof<'s>
 

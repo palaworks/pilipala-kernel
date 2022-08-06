@@ -1,13 +1,14 @@
 namespace pilipala.plugin
 
+open System
 open pilipala.util.io
 
 module IPluginCfgProvider =
 
-    let make<'t> () =
+    let make (t: Type) =
 
         let configPath =
-            $"./plugin/{typeof<'t>.Name}/config.json"
+            $"./plugin/{t.Name}/config.json"
 
         { new IPluginCfgProvider with
             member i.config

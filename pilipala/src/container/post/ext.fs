@@ -1,10 +1,8 @@
 [<AutoOpen>]
 module pilipala.container.post.ext
 
-open System
 open fsharper.op
 open fsharper.typ
-open pilipala.access.user
 open pilipala.container.comment
 
 type Post with
@@ -16,11 +14,6 @@ type Post with
             Ok(self.["UserName"].unwrap().coerce ())
         else
             Err "Permission denied"
-
-    /// 文章的用户名
-    /// 此功能需UserName插件支持
-    member self.UserName: string =
-        downcast self.["UserName"].unwrap ()
 
     /// 文章的评论
     /// 此功能需PostComments插件支持

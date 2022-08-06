@@ -1,11 +1,9 @@
 namespace pilipala.container.comment
 
 open System
-open fsharper.op
 open fsharper.typ
-open fsharper.op.Alias
-open pilipala.access.user
 open pilipala.id
+open pilipala.access.user
 
 type Comment
     internal

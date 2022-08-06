@@ -1,14 +1,11 @@
 namespace pilipala.pipeline.post
 
-open System
 open System.Collections
 open System.Collections.Generic
 open fsharper.op
 open fsharper.typ
-open fsharper.typ.Pipe
-open fsharper.op.Alias
+open fsharper.alias
 open fsharper.op.Pattern
-open fsharper.op.Foldable
 open pilipala.data.db
 open pilipala.pipeline
 
@@ -42,52 +39,49 @@ module IPostModifyPipelineBuilder =
 
             member i.GetEnumerator() : IEnumerator<_> = udf.GetEnumerator() }
 
-type PostModifyPipeline internal (modifyBuilder: IPostModifyPipelineBuilder, db: IDbOperationBuilder) =
-    let set targetKey (idVal: u64, targetVal) =
-        match
-            db {
-                inPost
-                update targetKey targetVal "post_id" idVal
-                whenEq 1
-                execute
-            }
-            with
-        | 1 -> Some(idVal, targetVal)
-        | _ -> None
+module IPostModifyPipeline =
+    let make (modifyBuilder: IPostModifyPipelineBuilder, db: IDbOperationBuilder) =
+        let set targetKey (idVal: u64, targetVal) =
+            match
+                db {
+                    inPost
+                    update targetKey targetVal "post_id" idVal
+                    whenEq 1
+                    execute
+                }
+                with
+            | 1 -> Some(idVal, targetVal)
+            | _ -> None
 
-    let udf =
-        Dict<string, u64 * obj -> u64 * obj>()
+        let udf =
+            Dict<string, u64 * obj -> u64 * obj>()
 
-    do
-        for KV (name, builderItem) in modifyBuilder do
-            udf.Add(name, builderItem.fullyBuild id)
+        do
+            for KV (name, builderItem) in modifyBuilder do
+                udf.Add(name, builderItem.fullyBuild id)
 
-    member self.Title =
-        modifyBuilder.Title.fullyBuild
-        <| fun fail x -> unwrapOr (set "post_title" x) (fun _ -> fail x)
+        let inline gen (builder: BuilderItem<_>) field a =
+            builder.fullyBuild
+            <| fun fail x -> unwrapOr (set field x) (fun _ -> fail x)
+            |> apply a
 
-    member self.Body =
-        modifyBuilder.Body.fullyBuild
-        <| fun fail x -> unwrapOr (set "post_body" x) (fun _ -> fail x)
+        { new IPostModifyPipeline with
+            member i.Title a = gen modifyBuilder.Title "post_title" a
 
-    member self.CreateTime =
-        modifyBuilder.CreateTime.fullyBuild
-        <| fun fail x -> unwrapOr (set "post_create_time" x) (fun _ -> fail x)
+            member i.Body a = gen modifyBuilder.Body "post_body" a
 
-    member self.AccessTime =
-        modifyBuilder.AccessTime.fullyBuild
-        <| fun fail x -> unwrapOr (set "post_access_time" x) (fun _ -> fail x)
+            member i.CreateTime a =
+                gen modifyBuilder.CreateTime "post_create_time" a
 
-    member self.ModifyTime =
-        modifyBuilder.ModifyTime.fullyBuild
-        <| fun fail x -> unwrapOr (set "post_modify_time" x) (fun _ -> fail x)
+            member i.AccessTime a =
+                gen modifyBuilder.AccessTime "post_access_time" a
 
-    member self.UserId =
-        modifyBuilder.UserId.fullyBuild
-        <| fun fail x -> unwrapOr (set "user_id" x) (fun _ -> fail x)
+            member i.ModifyTime a =
+                gen modifyBuilder.ModifyTime "post_modify_time" a
 
-    member self.Permission =
-        modifyBuilder.Permission.fullyBuild
-        <| fun fail x -> unwrapOr (set "post_permission" x) (fun _ -> fail x)
+            member i.UserId a = gen modifyBuilder.UserId "user_id" a
 
-    member self.Item(name: string) = udf.TryGetValue(name).intoOption' ()
+            member i.Permission a =
+                gen modifyBuilder.Permission "post_permission" a
+
+            member i.Item(name: string) = udf.TryGetValue(name).intoOption' () }

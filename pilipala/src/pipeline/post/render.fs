@@ -1,14 +1,11 @@
 namespace pilipala.pipeline.post
 
-open System
 open System.Collections
 open System.Collections.Generic
 open fsharper.op
 open fsharper.typ
-open fsharper.op.Alias
-open fsharper.typ.Pipe
+open fsharper.alias
 open fsharper.op.Pattern
-open fsharper.op.Foldable
 open pilipala.data.db
 open pilipala.pipeline
 
@@ -42,48 +39,45 @@ module IPostRenderPipelineBuilder =
 
             member i.GetEnumerator() : IEnumerator<_> = udf.GetEnumerator() }
 
-type PostRenderPipeline internal (renderBuilder: IPostRenderPipelineBuilder, db: IDbOperationBuilder) =
-    let get target (idVal: u64) =
-        db {
-            inPost
-            getFstVal target "post_id" idVal
-            execute
-        }
-        |> fmap (fun v -> idVal, coerce v)
+module IPostRenderPipeline =
+    let make (renderBuilder: IPostRenderPipelineBuilder, db: IDbOperationBuilder) =
+        let get target (idVal: u64) =
+            db {
+                inPost
+                getFstVal target "post_id" idVal
+                execute
+            }
+            |> fmap (fun v -> idVal, coerce v)
 
-    let udf = Dict<string, u64 -> u64 * obj>()
+        let udf = Dict<string, u64 -> u64 * obj>()
 
-    do
-        for KV (name, builderItem) in renderBuilder do
-            //udf管道初始为只会panic的GenericPipe，必须Replace后使用
-            udf.Add(name, builderItem.fullyBuild id)
+        do
+            for KV (name, builderItem) in renderBuilder do
+                //udf管道初始为只会panic的GenericPipe，必须Replace后使用
+                udf.Add(name, builderItem.fullyBuild id)
 
-    member self.Title =
-        renderBuilder.Title.fullyBuild
-        <| fun fail id -> unwrapOr (get "post_title" id) (fun _ -> fail id)
+        let inline gen (builder: BuilderItem<_, _>) field a =
+            builder.fullyBuild
+            <| fun fail id -> unwrapOr (get field id) (fun _ -> fail id)
+            |> apply a
 
-    member self.Body =
-        renderBuilder.Body.fullyBuild
-        <| fun fail id -> unwrapOr (get "post_body" id) (fun _ -> fail id)
+        { new IPostRenderPipeline with
+            member i.Title a = gen renderBuilder.Title "post_title" a
 
-    member self.CreateTime =
-        renderBuilder.CreateTime.fullyBuild
-        <| fun fail id -> unwrapOr (get "post_create_time" id) (fun _ -> fail id)
+            member i.Body a = gen renderBuilder.Body "post_body" a
 
-    member self.AccessTime =
-        renderBuilder.AccessTime.fullyBuild
-        <| fun fail id -> unwrapOr (get "post_access_time" id) (fun _ -> fail id)
+            member i.CreateTime a =
+                gen renderBuilder.CreateTime "post_create_time" a
 
-    member self.ModifyTime =
-        renderBuilder.ModifyTime.fullyBuild
-        <| fun fail id -> unwrapOr (get "post_modify_time" id) (fun _ -> fail id)
+            member i.AccessTime a =
+                gen renderBuilder.AccessTime "post_access_time" a
 
-    member self.UserId =
-        renderBuilder.UserId.fullyBuild
-        <| fun fail id -> unwrapOr (get "user_id" id) (fun _ -> fail id)
+            member i.ModifyTime a =
+                gen renderBuilder.ModifyTime "post_modify_time" a
 
-    member self.Permission =
-        renderBuilder.Permission.fullyBuild
-        <| fun fail id -> unwrapOr (get "post_permission" id) (fun _ -> fail id)
+            member i.UserId a = gen renderBuilder.UserId "user_id" a
 
-    member self.Item(name: string) = udf.TryGetValue(name).intoOption' ()
+            member i.Permission a =
+                gen renderBuilder.Permission "post_permission" a
+
+            member i.Item(name: string) = udf.TryGetValue(name).intoOption' () }

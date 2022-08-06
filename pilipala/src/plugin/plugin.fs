@@ -1,9 +1,11 @@
 namespace pilipala.plugin
 
 open System
+open fsharper.op.Pattern
 open Microsoft.Extensions.Logging
 open Microsoft.Extensions.DependencyInjection
 open pilipala.log
+open pilipala.plugin
 
 (*
 插件需要遵循下列规范：
@@ -27,18 +29,32 @@ type PluginAttribute() =
 //./pilipala/plugin/Palang
 //./pilipala/plugin/Mailssage
 
-type internal PluginProvider(lp: LogProvider) =
+type PluginRegister = { PluginTypes: Type list }
+
+
+//最终整合时应使用foldr以保证顺序
+type PluginRegister with
+    member self.registerPlugin t = { PluginTypes = t :: self.PluginTypes }
+
+type internal PluginDispatcher(sc: IServiceCollection, lp: LoggerRegister) =
 
     /// 启动插件
     member self.launchPluginByType t =
         //每次都需要重新构建DI容器，因为每次插件的执行都可能带来新的依赖
-        ServiceCollection()
-            .AddLogging(fun builder ->
-                for kv in lp.registeredLoggerFilter do
-                    (kv.Key, kv.Value) |> builder.AddFilter |> ignore
+        let scopedSC: IServiceCollection =
+            ServiceCollection()
 
-                for p in lp.registeredLoggerProvider do
-                    p |> builder.AddProvider |> ignore)
+        for sd in sc do
+            scopedSC.Add sd
+
+        scopedSC
+            .AddSingleton(t, IPluginCfgProvider.make t)
+            .AddLogging(fun builder ->
+                for k, v in lp.LoggerFilters do
+                    builder.AddFilter(k, v) |> ignore
+
+                for p in lp.LoggerProviders do
+                    builder.AddProvider p |> ignore)
             .AddTransient(t)
             .BuildServiceProvider()
             .GetService(t)

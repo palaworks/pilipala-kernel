@@ -3,7 +3,6 @@ module pilipala.container.comment.ext
 
 open fsharper.op
 open fsharper.typ
-open fsharper.typ.Result'
 
 type Comment with
 

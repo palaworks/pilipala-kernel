@@ -2,16 +2,14 @@
 
 open fsharper.op
 open fsharper.typ
-open fsharper.op.Alias
-open fsharper.typ.Pipe
 open pilipala.pipeline.post
 
 let make
     (
-        init: PostInitPipeline,
-        render: PostRenderPipeline,
-        modify: PostModifyPipeline,
-        finalize: PostFinalizePipeline
+        init: IPostInitPipeline,
+        render: IPostRenderPipeline,
+        modify: IPostModifyPipeline,
+        finalize: IPostFinalizePipeline
     ) =
     { new IMappedPostProvider with
         member self.fetch post_id =

@@ -28,7 +28,6 @@
         <Compile Include="src\access\auth\token.fs" />
         <Compile Include="src\access\auth\channel.fs" />
         <Compile Include="src\access\user\mappedProvider.fs" />
-        <Compile Include="src\access\user\user.fs" />
         <Compile Include="src\access\permission\permission.fs" />
         <Compile Include="src\container\comment\mappedProvider.fs" />
         <Compile Include="src\container\comment\comment.fs" />
@@ -36,19 +35,19 @@
         <Compile Include="src\container\post\mappedProvider.fs" />
         <Compile Include="src\container\post\post.fs" />
         <Compile Include="src\container\post\ext.fs" />
+        <Compile Include="src\access\user\user.fs" />
         <Compile Include="src\log.fs" />
         <Compile Include="src\service\service.fs" />
         <Compile Include="src\service\host.fs" />
-        <Compile Include="src\plugin\plugin.fs" />
         <Compile Include="src\plugin\config.fs" />
+        <Compile Include="src\plugin\plugin.fs" />
         <Compile Include="src\pilipala\pilipala.fs" />
         <Compile Include="src\builder\builder.fs" />
         <Compile Include="src\builder\useDb.fs" />
         <Compile Include="src\builder\usePlugin.fs" />
         <Compile Include="src\builder\useLog.fs" />
-        <Compile Include="src\builder\useServ.fs" />
+        <Compile Include="src\builder\useService.fs" />
         <Compile Include="src\builder\useAuth.fs" />
-        <Compile Include="src\builder\useUser.fs" />
         <Compile Include="src\builder\useConfig.fs" />
         <Compile Include="src\assembly.fs" />
     </ItemGroup>
@@ -57,31 +56,28 @@
         <PackageReference Include="Markdig" Version="0.30.2" />
         <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="6.0.0" />
         <PackageReference Include="Microsoft.Extensions.Hosting" Version="6.0.1" />
-        <PackageReference Include="Microsoft.IdentityModel.Tokens" Version="6.21.0" />
+        <PackageReference Include="Microsoft.IdentityModel.Tokens" Version="6.22.0" />
         <PackageReference Include="Newtonsoft.Json" Version="13.0.1" />
-        <PackageReference Include="YamlDotNet" Version="11.2.1" />
+        <PackageReference Include="YamlDotNet" Version="12.0.0" />
         <PackageReference Update="FSharp.Core" Version="6.0.5" />
     </ItemGroup>
 
     <ItemGroup>
-        <Reference Include="DbManaged, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null">
-            <HintPath>..\..\DbManaged\bin\Debug\net6.0\DbManaged.dll</HintPath>
-            <Private>False</Private>
-        </Reference>
-        <Reference Include="fsharper, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null">
-            <HintPath>..\..\fsharper\bin\Debug\net6.0\fsharper.dll</HintPath>
-            <Private>False</Private>
-        </Reference>
-        <Reference Include="pilipala-frame">
-          <HintPath>..\..\pilipala-sdk\pilipala-frame\bin\Debug\net6.0\pilipala-frame.dll</HintPath>
-        </Reference>
-        <Reference Include="pilipala.util">
-          <HintPath>..\..\pilipala-sdk\pilipala.util\bin\Debug\net6.0\pilipala.util.dll</HintPath>
-        </Reference>
-        <Reference Include="WebSocketer, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null">
-            <HintPath>..\..\WebsSocketer\bin\Debug\net6.0\WebSocketer.dll</HintPath>
-            <Private>False</Private>
-        </Reference>
+      <Reference Include="DbManaged">
+        <HintPath>..\..\DbManaged\bin\Debug\net6.0\DbManaged.dll</HintPath>
+      </Reference>
+      <Reference Include="fsharper">
+        <HintPath>..\..\fsharper\bin\Debug\net6.0\fsharper.dll</HintPath>
+      </Reference>
+      <Reference Include="pilipala-frame">
+        <HintPath>..\..\pilipala-sdk\pilipala-frame\bin\Debug\net6.0\pilipala-frame.dll</HintPath>
+      </Reference>
+      <Reference Include="pilipala.util">
+        <HintPath>..\..\pilipala-sdk\pilipala.util\bin\Debug\net6.0\pilipala.util.dll</HintPath>
+      </Reference>
+      <Reference Include="WebSocketer">
+        <HintPath>..\..\WebsSocketer\bin\Debug\net6.0\WebSocketer.dll</HintPath>
+      </Reference>
     </ItemGroup>
 
 </Project>

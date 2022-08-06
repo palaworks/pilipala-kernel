@@ -1,14 +1,11 @@
 namespace pilipala.pipeline.comment
 
-open System
 open System.Collections
 open System.Collections.Generic
 open fsharper.op
 open fsharper.typ
-open fsharper.op.Alias
-open fsharper.typ.Pipe
+open fsharper.alias
 open fsharper.op.Pattern
-open fsharper.op.Foldable
 open pilipala.data.db
 open pilipala.pipeline
 open pilipala.container.comment
@@ -46,60 +43,62 @@ module ICommentRenderPipelineBuilder =
 
             member i.GetEnumerator() : IEnumerator<_> = udf.GetEnumerator() }
 
-type CommentRenderPipeline internal (renderBuilder: ICommentRenderPipelineBuilder, db: IDbOperationBuilder) =
-    let get targetKey (idVal: u64) =
-        db {
-            inComment
-            getFstVal targetKey "comment_id" idVal
-            execute
-        }
-        |> fmap (fun v -> idVal, coerce v)
-
-    let udf = Dict<string, u64 -> u64 * obj>()
-
-    do
-        for KV (name, builderItem) in renderBuilder do
-            //udf管道初始为只会panic的GenericPipe，必须Replace后使用
-            udf.Add(name, builderItem.fullyBuild id)
-
-    member self.Body =
-        renderBuilder.Body.fullyBuild
-        <| fun fail id -> unwrapOr (get "comment_body" id) (fun _ -> fail id)
-
-    member self.Binding =
-        let getBinding id =
-            coerce
-            <%> db {
+module ICommentRenderPipeline =
+    let make (renderBuilder: ICommentRenderPipelineBuilder, db: IDbOperationBuilder) =
+        let get targetKey (idVal: u64) =
+            db {
                 inComment
-                getFstVal "comment_binding" "comment_id" id
+                getFstVal targetKey "comment_id" idVal
                 execute
             }
-            >>= fun (comment_binding: u64) ->
+            |> fmap (fun v -> idVal, coerce v)
+
+        let udf = Dict<string, u64 -> u64 * obj>()
+
+        do
+            for KV (name, builderItem) in renderBuilder do
+                //udf管道初始为只会panic的GenericPipe，必须Replace后使用
+                udf.Add(name, builderItem.fullyBuild id)
+
+        let inline gen (builder: BuilderItem<_, _>) field a =
+            builder.fullyBuild
+            <| fun fail id -> unwrapOr (get field id) (fun _ -> fail id)
+            |> apply a
+
+        { new ICommentRenderPipeline with
+            member self.Body a = gen renderBuilder.Body "comment_body" a
+
+            member self.Binding a =
+                let getBinding id =
                     coerce
                     <%> db {
                         inComment
-                        getFstVal "comment_is_reply" "comment_id" id
+                        getFstVal "comment_binding" "comment_id" id
                         execute
                     }
-                    >>= fun (comment_is_reply: bool) ->
-                            if comment_is_reply then
-                                Some(id, BindComment comment_binding)
-                            else
-                                Some(id, BindPost comment_binding)
+                    >>= fun (comment_binding: u64) ->
+                            coerce
+                            <%> db {
+                                inComment
+                                getFstVal "comment_is_reply" "comment_id" id
+                                execute
+                            }
+                            >>= fun (comment_is_reply: bool) ->
+                                    if comment_is_reply then
+                                        Some(id, BindComment comment_binding)
+                                    else
+                                        Some(id, BindPost comment_binding)
 
-        renderBuilder.Binding.fullyBuild
-        <| fun fail id -> unwrapOr (getBinding id) (fun _ -> fail id)
+                renderBuilder.Binding.fullyBuild
+                <| fun fail id -> unwrapOr (getBinding id) (fun _ -> fail id)
+                |> apply a
 
-    member self.CreateTime =
-        renderBuilder.CreateTime.fullyBuild
-        <| fun fail id -> unwrapOr (get "comment_create_time" id) (fun _ -> fail id)
+            member self.CreateTime a =
+                gen renderBuilder.CreateTime "comment_create_time" a
 
-    member self.UserId =
-        renderBuilder.UserId.fullyBuild
-        <| fun fail id -> unwrapOr (get "user_id" id) (fun _ -> fail id)
+            member self.UserId a = gen renderBuilder.UserId "user_id" a
 
-    member self.Permission =
-        renderBuilder.Permission.fullyBuild
-        <| fun fail id -> unwrapOr (get "comment_permission" id) (fun _ -> fail id)
+            member self.Permission a =
+                gen renderBuilder.Permission "comment_permission" a
 
-    member self.Item(name: string) = udf.TryGetValue(name).intoOption' ()
+            member self.Item(name: string) = udf.TryGetValue(name).intoOption' () }

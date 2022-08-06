@@ -1,11 +1,9 @@
 [<AutoOpen>]
 module pilipala.builder.useConfig
 
-open System
 open System.Collections.Generic
 open fsharper.op
-open fsharper.typ
-open fsharper.op.Alias
+open fsharper.alias
 open fsharper.op.Pattern
 open fsharper.op.Foldable
 open pilipala.data.db
@@ -36,9 +34,9 @@ type Builder with
         |> fun (acc: Builder) -> acc.useDb config.database
         //日志必须被首先配置，因为插件容器和服务容器都需要日志进行DI
         //注册日志过滤器
-        |> config.log.foldl (fun acc (KV (category, lv)) -> acc.useLogFilter category (coerce lv))
+        |> config.log.foldl (fun acc (KV (category, lv)) -> acc.useLoggerFilter category (coerce lv))
         //注册服务
-        |> config.serv.foldl (fun acc -> acc.useServ)
+        |> config.serv.foldl (fun acc -> acc.useService)
         //注册插件
-        |> config.plugin.foldl (fun acc -> acc.useServ)
+        |> config.plugin.foldl (fun acc -> acc.useService)
         |> fun acc -> acc.useAuth config.auth.port
