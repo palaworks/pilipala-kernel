@@ -8,17 +8,13 @@ open fsharper.typ
 open Microsoft.Extensions.DependencyInjection
 open pilipala.log
 open pilipala.plugin
+open pilipala.util.di
 
 type Builder with
 
     member self.usePlugin t =
         let f (sc: IServiceCollection) =
-            let lr =
-                sc
-                    .BuildServiceProvider()
-                    .GetService<LogRegister>()
-
-            PluginDispatcher(sc, lr).launchPluginByType t
+            sc.UpdateSingleton<PluginRegister>(fun old -> old.registerPlugin t)
 
         { pipeline = self.pipeline .> effect f }
 

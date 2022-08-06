@@ -5,6 +5,7 @@ open Microsoft.Extensions.DependencyInjection
 open pilipala
 open pilipala.id
 open pilipala.log
+open pilipala.plugin
 open pilipala.service
 open pilipala.data.db
 open pilipala.pipeline.post
@@ -16,7 +17,7 @@ type Builder =
     { pipeline: IServiceCollection -> IServiceCollection }
 
 (*
-    内核构造序：
+    构造顺序：
     useDb
     usePlugin
     useAuth
@@ -35,8 +36,13 @@ type Builder with
     member self.build() =
         fun (sc: IServiceCollection) ->
             sc
-                .AddSingleton<LogRegister>()
-                .AddSingleton<ServiceRegister>()
+                .AddSingleton<LoggerRegister>(
+                    { LoggerProviders = []
+                      LoggerFilters = [] }
+                )
+                .AddSingleton<PluginRegister>({ PluginTypes = [] })
+                .AddSingleton<ServiceRegister>({ ServiceInfos = [] })
+                .AddSingleton<LoggerRegister>()
                 //ID生成器
                 .AddSingleton<IPalaflakeGenerator>(fun _ -> IPalaflakeGenerator.make 01uy)
                 .AddSingleton<IUuidGenerator>(fun _ -> IUuidGenerator.make ())

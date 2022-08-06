@@ -22,7 +22,7 @@ type internal ServiceHost
     (
         scopeFac: IServiceScopeFactory,
         sp: ServiceRegister,
-        lp: LogRegister,
+        lp: LoggerRegister,
         tp: TokenProvider,
         uuid: IUuidGenerator
     ) =
@@ -42,17 +42,17 @@ type internal ServiceHost
         let servInfo =
             sp.getServiceInfo servPath |> unwrap
 
-        let servALv = servInfo.AccessLv //服务访问级别
-        let servType = servInfo.Type
+        let servALv = (snd servInfo).AccessLv //服务访问级别
+        let servType = (snd servInfo).Type
 
         let sc =
             ServiceCollection()
                 .AddTransient(servType)
                 .AddLogging(fun builder ->
-                    for kv in lp.registeredLoggerFilter do
-                        (kv.Key, kv.Value) |> builder.AddFilter |> ignore
+                    for k, v in lp.LoggerFilters do
+                        builder.AddFilter(k, v) |> ignore
 
-                    for p in lp.registeredLoggerProvider do
+                    for p in lp.LoggerProviders do
                         p |> builder.AddProvider |> ignore)
 
         match servALv with
@@ -62,7 +62,7 @@ type internal ServiceHost
             let serv =
                 sc.BuildServiceProvider().GetService servType
 
-            serv.tryInvoke servInfo.EntryPoint //从服务入口点启动服务
+            serv.tryInvoke (snd servInfo).EntryPoint //从服务入口点启动服务
 
         | NeedAuth ->
             ws.send "need auth" //服务端问候
@@ -89,7 +89,7 @@ type internal ServiceHost
                 let serv =
                     sc.BuildServiceProvider().GetService servType
 
-                serv.tryInvoke servInfo.EntryPoint //从服务入口点启动服务
+                serv.tryInvoke (snd servInfo).EntryPoint //从服务入口点启动服务
 
             let whenCheckFailed () = ws.send "auth failed"
 
