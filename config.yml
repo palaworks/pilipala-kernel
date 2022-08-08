@@ -20,10 +20,9 @@ plugin:
   - ./plugin/Mailssage
   - ./plugin/Llink
 
-serv:
-  - ./serv/Palang
-  - ./serv/Version
-  - ./serv/Shutdown
+service:
+  - ./service/Palang
+  - ./service/Version
 
 log:
   pilipala.serv.Auth: Information

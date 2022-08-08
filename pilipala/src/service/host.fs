@@ -4,22 +4,19 @@ open System
 open System.Net.Sockets
 open System.Threading.Tasks
 open System.Security.Cryptography
-open YamlDotNet.Core.Tokens
 open fsharper.op
 open fsharper.typ
-open fsharper.op.Boxing
-open fsharper.op.Reflect
-open WebSocketer.typ
 open Microsoft.Extensions.Hosting
-open Microsoft.Extensions.Logging
 open Microsoft.Extensions.DependencyInjection
+open WebSocketer.typ
 open pilipala.id
-open pilipala.log
 open pilipala.service
 open pilipala.util.crypto
 open pilipala.util.encoding
 open pilipala.access.auth.token
 open pilipala.access.auth.channel
+
+type RunServiceHost = { runAsync: IServiceProvider -> Task }
 
 /// 构造服务主机
 let make (sp: IServiceProvider) =
@@ -50,13 +47,21 @@ let make (sp: IServiceProvider) =
 
         match serviceALv with
         | Everyone ->
-            sc.AddScoped<_>(fun _ -> NetChannel(ws)) |> ignore
-
             let service =
                 scopedServiceProvider.GetService serviceType
 
-            service.tryInvoke (snd serviceInfo).EntryPoint //从服务入口点启动服务
+            //添加非加密网络信道
+            let chan = NetChannel(ws)
 
+            for response in
+                Seq.unfold
+                <| fun request ->
+                    //从服务入口点调用服务
+                    match service.tryInvoke ((snd serviceInfo).EntryPoint, [| request () |]) with
+                    | None -> Option.None
+                    | Some response -> Option.Some(response, chan.Read)
+                <| chan.Read do
+                chan.Write response //回送服务结果
         | NeedAuth ->
             ws.send "need auth" //服务端问候
             let clientPubKey = ws.recv () //接收客户公钥
@@ -75,14 +80,21 @@ let make (sp: IServiceProvider) =
             let whenCheckPass () =
                 ws.send "auth pass" //受信通告
 
-                //添加安全网络信道
-                sc.AddScoped<_>(fun _ -> NetChannel(ws, sessionKey))
-                |> ignore
-
                 let service =
                     scopedServiceProvider.GetService serviceType
 
-                service.tryInvoke (snd serviceInfo).EntryPoint //从服务入口点启动服务
+                //添加加密网络信道
+                let chan = NetChannel(ws, sessionKey)
+
+                for response in
+                    Seq.unfold
+                    <| fun request ->
+                        //从服务入口点调用服务
+                        match service.tryInvoke ((snd serviceInfo).EntryPoint, [| request () |]) with
+                        | None -> Option.None
+                        | Some response -> Option.Some(response, chan.Read)
+                    <| chan.Read do
+                    chan.Write response //回送服务结果
 
             let whenCheckFailed () = ws.send "auth failed"
 

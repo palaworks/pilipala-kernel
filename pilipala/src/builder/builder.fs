@@ -1,18 +1,17 @@
 ﻿namespace pilipala.builder
 
 open System
-open Microsoft.Extensions.Hosting
+open System.Threading.Tasks
 open fsharper.typ
 open fsharper.op.Foldable
 open Microsoft.Extensions.Logging
 open Microsoft.Extensions.DependencyInjection
 open pilipala
-open pilipala.access.user
 open pilipala.id
 open pilipala.log
 open pilipala.plugin
 open pilipala.service
-open pilipala.data.db
+open pilipala.service.host
 open pilipala.pipeline.post
 open pilipala.container.post
 open pilipala.pipeline.comment
@@ -28,6 +27,7 @@ db
 logging
 plugin
 service
+serveOn
 *)
 
 type Builder with
@@ -41,6 +41,7 @@ type Builder with
                 )
                 .AddSingleton<_>({ PluginTypes = [] }) //插件注册器
                 .AddSingleton<_>({ ServiceInfos = [] }) //服务注册器
+                .AddSingleton<_>({ runAsync = always Task.CompletedTask }) //空的服务主机启动器
                 //ID生成器
                 .AddSingleton<IPalaflakeGenerator>(fun _ -> IPalaflakeGenerator.make 01uy)
                 .AddSingleton<IUuidGenerator>(fun _ -> IUuidGenerator.make ())
@@ -98,10 +99,8 @@ type Builder with
                     ))
         .> self.pipeline //use...
         .> fun sc -> //添加已注册日志
-            let lr =
-                sc
-                    .BuildServiceProvider()
-                    .GetRequiredService<LoggerRegister>()
+            let lr: LoggerRegister =
+                sc.BuildServiceProvider().GetRequiredService<_>()
 
             sc.AddLogging (fun builder ->
                 lr.LoggerFilters.foldr
@@ -130,39 +129,7 @@ type Builder with
             <| fun pluginType (acc: IServiceProvider) -> acc.GetRequiredService(pluginType) |> always acc
             <| sp
         .> fun sp -> //启动服务主机
-            Host
-                .CreateDefaultBuilder()
-                .ConfigureServices(fun sc ->
-
-                    //每作用域注入服务
-                    for _, info in sp.GetService<ServiceRegister>().ServiceInfos do
-                        sc.AddScoped(info.Type) |> ignore
-
-                    let lr = sp.GetService<LoggerRegister>()
-
-                    sc
-                        //为服务主机配置相同的日志
-                        .AddLogging(fun builder ->
-                            lr.LoggerFilters.foldr
-                            <| (fun (k, v) (acc: ILoggingBuilder) -> acc.AddFilter(k, v))
-                            <| builder
-                            |> ignore
-
-                            lr.LoggerProviders.foldr
-                            <| (fun p (acc: ILoggingBuilder) -> acc.AddProvider p)
-                            <| builder
-                            |> ignore)
-                        //由于构建已完成，所以此处的设施全为单例注入
-                        .AddSingleton<IMappedPostProvider>(fun _ -> sp.GetService<IMappedPostProvider>())
-                        .AddSingleton<IMappedCommentProvider>(fun _ -> sp.GetService<IMappedCommentProvider>())
-                        .AddSingleton<IMappedUserProvider>(fun _ -> sp.GetService<IMappedUserProvider>())
-                        .AddSingleton<IPalaflakeGenerator>(fun _ -> sp.GetService<IPalaflakeGenerator>())
-                        .AddSingleton<IUuidGenerator>(fun _ -> sp.GetService<IUuidGenerator>())
-                        .AddSingleton<ServiceRegister>(fun _ -> sp.GetService<ServiceRegister>())
-                        .AddHostedService(fun sp -> host.make sp)
-                    |> ignore)
-                .Build()
-                .RunAsync()
+            sp.GetService<RunServiceHost>().runAsync sp
             |> always sp
         .> fun sp -> sp.GetRequiredService<Pilipala>()
         |> apply (ServiceCollection())
