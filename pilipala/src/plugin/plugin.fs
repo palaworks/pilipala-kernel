@@ -31,36 +31,6 @@ type PluginAttribute() =
 
 type PluginRegister = { PluginTypes: Type list }
 
-
 //最终整合时应使用foldr以保证顺序
 type PluginRegister with
     member self.registerPlugin t = { PluginTypes = t :: self.PluginTypes }
-
-type internal PluginDispatcher(sc: IServiceCollection, lp: LoggerRegister) =
-
-    /// 启动插件
-    member self.launchPluginByType t =
-        //每次都需要重新构建DI容器，因为每次插件的执行都可能带来新的依赖
-        let scopedSC: IServiceCollection =
-            ServiceCollection()
-
-        for sd in sc do
-            scopedSC.Add sd
-
-        scopedSC
-            .AddSingleton(t, IPluginCfgProvider.make t)
-            .AddLogging(fun builder ->
-                for k, v in lp.LoggerFilters do
-                    builder.AddFilter(k, v) |> ignore
-
-                for p in lp.LoggerProviders do
-                    builder.AddProvider p |> ignore)
-            .AddTransient(t)
-            .BuildServiceProvider()
-            .GetService(t)
-        |> ignore
-
-    /// 启动插件
-    member self.launchPlugin<'p when 'p :> PluginAttribute>() =
-        //when 'p :> PluginAttribute, 'p obviously not struct
-        self.launchPluginByType typeof<'p>

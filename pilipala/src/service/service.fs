@@ -41,7 +41,7 @@ type ServiceRegister =
 type ServiceRegister with
 
     /// 注册服务
-    member self.registerServiceByType(t: Type) =
+    member self.registerService(t: Type) =
         let attr: ServiceAttribute =
             downcast t.GetCustomAttributes(typeof<ServiceAttribute>, false).[0]
 
@@ -56,7 +56,7 @@ type ServiceRegister with
     /// 注册服务
     member self.registerService<'s when 's :> ServiceAttribute>() =
         //when 's :> ServAttribute, 's obviously not struct
-        self.registerServiceByType typeof<'s>
+        self.registerService typeof<'s>
 
     /// 获取服务信息
     member self.getServiceInfo path =
