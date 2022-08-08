@@ -2,10 +2,15 @@
 module pilipala.builder.useService
 
 open System.IO
+open System.Net
 open System.Reflection
+open System.Net.Sockets
 open fsharper.op
 open fsharper.typ
+open fsharper.alias
+open WebSocketer.typ
 open Microsoft.Extensions.DependencyInjection
+open Microsoft.Extensions.Hosting
 open pilipala.service
 open pilipala.util.di
 
@@ -14,7 +19,7 @@ type Builder with
     member self.useService t =
 
         let f (sc: IServiceCollection) =
-            sc.UpdateSingleton<ServiceRegister>(fun old -> old.registerServiceByType t)
+            sc.UpdateSingleton<ServiceRegister>(fun old -> old.registerService t)
 
         { pipeline = self.pipeline .> effect f }
 
@@ -41,3 +46,28 @@ type Builder with
                 .GetType($"pilipala.serv.{servName}")
 
         self.useService servType
+
+    /// 在指定端口启动服务主机
+    member self.ServeOn(port: u16) =
+
+        let f _ =
+            let server = //用于监听的服务器
+                TcpListener(IPAddress.Parse("localhost"), i32 port)
+
+            server.Start()
+
+            Host
+                .CreateDefaultBuilder()
+                .ConfigureServices(fun services ->
+                    services
+                        //添加WS
+                        .AddScoped<WebSocket>(fun _ ->
+                            server.AcceptTcpClient()
+                            |> fun c -> new WebSocket(c))
+                        //添加服务主机
+                        .AddHostedService<ServiceHost>()
+                    |> ignore)
+                .Build()
+                .Run()
+
+        { pipeline = self.pipeline .> effect f }

@@ -6,6 +6,7 @@ open pilipala.data.db
 open pilipala.id
 open pilipala.util.hash
 
+//TODO：应使用随机化IV+CBC以代替ECB模式以获得最佳安全性
 type internal TokenProvider(db: IDbOperationBuilder, uuid: IUuidGenerator) =
 
     let tokenHasher (s: string) = s.bcrypt
