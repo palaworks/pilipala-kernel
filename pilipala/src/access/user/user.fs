@@ -1,6 +1,7 @@
 namespace pilipala.access.user
 
 open System
+open fsharper.op
 open fsharper.typ
 open pilipala.id
 open pilipala.data.db
@@ -78,7 +79,47 @@ type User
         else
             Err "Permission denied"
 
-    member self.GetPost id =
+    member self.GetReadablePost() =
+        let sql =
+            $"SELECT post_id FROM {db.tables.post} \
+              WHERE (post_permission & 3072) < ({mapped.Permission} & 3072) \
+              OR user_id = {mapped.Id}"
+
+        Seq.unfold
+        <| fun list ->
+            match list with
+            | x :: xs ->
+                let post =
+                    Post(palaflake, mappedPostProvider.fetch (coerce x), mappedCommentProvider, mapped)
+
+                Option.Some(post, xs)
+            | _ -> Option.None
+        <| db {
+            getFstCol sql []
+            execute
+        }
+
+    member self.GetWritablePost() =
+        let sql =
+            $"SELECT post_id FROM {db.tables.post} \
+              WHERE (post_permission & 3072) < ({mapped.Permission} & 3072) \
+              OR user_id = {mapped.Id}"
+
+        Seq.unfold
+        <| fun list ->
+            match list with
+            | x :: xs ->
+                let post =
+                    Post(palaflake, mappedPostProvider.fetch (coerce x), mappedCommentProvider, mapped)
+
+                Option.Some(post, xs)
+            | _ -> Option.None
+        <| db {
+            getFstCol sql []
+            execute
+        }
+
+    member self.GetPost id : Result'<Post, string> =
         if db {
             inComment
             getFstVal "post_id" "post_id" id
@@ -88,6 +129,9 @@ type User
         else
             Post(palaflake, mappedPostProvider.fetch id, mappedCommentProvider, mapped)
             |> Ok
+
+    member self.GetReadableComment() = ()
+    member self.GetWritableComment() = ()
 
     member self.GetComment id =
         if db {
