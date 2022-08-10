@@ -55,6 +55,8 @@ type Pilipala
                 mappedUserProvider,
                 mappedUserProvider.fetch id,
                 db,
+                postLogger.alwaysAppend $" (ops user: {name})",
+                commentLogger.alwaysAppend $" (ops user: {name})",
                 userLogger.alwaysAppend $" (ops user: {name})"
             )
             |> Ok
@@ -88,6 +90,8 @@ type Pilipala
                 mappedUserProvider,
                 mappedUserProvider.fetch id,
                 db,
+                postLogger.alwaysAppend $" (ops user: {name})",
+                commentLogger.alwaysAppend $" (ops user: {name})",
                 userLogger.alwaysAppend $" (ops user: {name})"
             )
             |> Ok

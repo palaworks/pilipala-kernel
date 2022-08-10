@@ -1,10 +1,12 @@
 namespace pilipala.container.post
 
 open System
-open fsharper.op
+open Microsoft.Extensions.Logging
+open dbm_test.PgSql
 open fsharper.typ
 open fsharper.alias
 open pilipala.id
+open pilipala.util.log
 open pilipala.access.user
 open pilipala.container.comment
 
@@ -14,7 +16,9 @@ type Post
         palaflake: IPalaflakeGenerator,
         mapped: IMappedPost,
         mappedCommentProvider: IMappedCommentProvider,
-        user: IMappedUser
+        user: IMappedUser,
+        postLogger: ILogger<Post>,
+        commentLogger: ILogger<Comment>
     ) =
 
     member self.CanRead =
@@ -35,68 +39,80 @@ type Post
         if self.CanRead then
             Ok(mapped.Title)
         else
-            Err "Permission denied"
+            postLogger.error $"Get {nameof self.Title} Failed: Permission denied (post id: {mapped.Id})"
+            |> Err
 
     member self.Body =
         if self.CanRead then
             Ok(mapped.Body)
         else
-            Err "Permission denied"
+            postLogger.error $"Get {nameof self.Body} Failed: Permission denied (post id: {mapped.Id})"
+            |> Err
 
     member self.CreateTime =
         if self.CanRead then
             Ok(mapped.CreateTime)
         else
-            Err "Permission denied"
+            postLogger.error $"Get {nameof self.CreateTime} Failed: Permission denied (post id: {mapped.Id})"
+            |> Err
 
     member self.AccessTime =
         if self.CanRead then
             Ok(mapped.AccessTime)
         else
-            Err "Permission denied"
+            postLogger.error $"Get {nameof self.AccessTime} Failed: Permission denied (post id: {mapped.Id})"
+            |> Err
 
     member self.ModifyTime =
         if self.CanRead then
             Ok(mapped.ModifyTime)
         else
-            Err "Permission denied"
+            postLogger.error $"Get {nameof self.ModifyTime} Failed: Permission denied (post id: {mapped.Id})"
+            |> Err
 
     member self.UserId =
         if self.CanRead then
             Ok(mapped.UserId)
         else
-            Err "Permission denied"
+            postLogger.error $"Get {nameof self.UserId} Failed: Permission denied (post id: {mapped.Id})"
+            |> Err
 
     member self.Permission =
         if self.CanRead then
             Ok(mapped.Permission)
         else
-            Err "Permission denied"
+            postLogger.error $"Get {nameof self.Permission} Failed: Permission denied (post id: {mapped.Id})"
+            |> Err
 
     member self.Item
         with get name =
             if self.CanRead then
                 Ok(mapped.[name])
             else
-                Err "Permission denied"
+                postLogger.error $"Get Item.{name} Failed: Permission denied (post id: {mapped.Id})"
+                |> Err
 
     member self.UpdateTitle newTitle =
         if self.CanWrite then
             Ok(mapped.Title <- newTitle)
         else
-            Err "Permission denied"
+            postLogger.error $"Operation {nameof self.UpdateTitle} Failed: Permission denied (post id: {mapped.Id})"
+            |> Err
 
     member self.UpdateBody newBody =
         if self.CanWrite then
             Ok(mapped.Body <- newBody)
         else
-            Err "Permission denied"
+            postLogger.error $"Operation {nameof self.UpdateBody} Failed: Permission denied (post id: {mapped.Id})"
+            |> Err
 
     member self.UpdateItem name v =
         if self.CanRead then
             Ok(mapped.[name] <- v)
         else
-            Err "Permission denied"
+            postLogger.error
+                $"Operation {nameof self.UpdateItem}.{name} Failed: Permission denied (post id: {mapped.Id})"
+            |> Err
 
     member self.NewComment(body: string) =
         if self.CanComment then
@@ -113,7 +129,8 @@ type Post
                 ||| r //可评论性与可见性默认相同
               Item = always None }
             |> mappedCommentProvider.create
-            |> fun x -> Comment(palaflake, x, mappedCommentProvider, user)
+            |> fun x -> Comment(palaflake, x, mappedCommentProvider, user, commentLogger)
             |> Ok
         else
-            Err "Permission denied"
+            postLogger.error $"Operation {nameof self.NewComment} Failed: Permission denied (post id: {mapped.Id})"
+            |> Err
