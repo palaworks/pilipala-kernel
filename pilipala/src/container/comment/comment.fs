@@ -1,7 +1,9 @@
 namespace pilipala.container.comment
 
 open System
+open fsharper.op
 open fsharper.typ
+open fsharper.alias
 open pilipala.id
 open pilipala.access.user
 
@@ -16,19 +18,15 @@ type Comment
 
     member self.CanRead =
         user.Id = mapped.UserId
-        || (user.Permission &&& 3072us) > (mapped.Permission &&& 3072us)
+        || u8 (user.Permission &&& 48us) > (mapped.Permission &&& 48uy)
 
     member self.CanWrite =
         user.Id = mapped.UserId
-        || (user.Permission &&& 300us) > (mapped.Permission &&& 300us)
+        || u8 (user.Permission &&& 12us) > (mapped.Permission &&& 12uy)
 
-    member self.CanReadComment =
+    member self.CanComment =
         user.Id = mapped.UserId
-        || (user.Permission &&& 192us) > (mapped.Permission &&& 192us)
-
-    member self.CanWriteComment =
-        user.Id = mapped.UserId
-        || (user.Permission &&& 48us) > (mapped.Permission &&& 48us)
+        || u8 (user.Permission &&& 3us) > (mapped.Permission &&& 3uy)
 
     member self.Id = mapped.Id
 
@@ -76,13 +74,18 @@ type Comment
             Err "Permission denied"
 
     member self.NewComment(body: string) =
-        if self.CanWriteComment then
+        if self.CanComment then
             { Id = palaflake.next ()
               Body = body
               CreateTime = DateTime.Now
               Binding = BindComment mapped.Id
               UserId = user.Id
-              Permission = user.Permission
+              Permission =
+                let r = (mapped.Permission &&& 48uy) //从评论继承的可见性
+
+                r
+                ||| u8 (user.Permission &&& 12us) //从用户继承的修改权
+                ||| r //可评论性与可见性默认相同
               Item = always None }
             |> mappedCommentProvider.create
             |> fun x -> Comment(palaflake, x, mappedCommentProvider, user)
