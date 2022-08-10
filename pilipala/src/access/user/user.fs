@@ -20,6 +20,8 @@ type User
         mappedUserProvider: IMappedUserProvider,
         mapped: IMappedUser,
         db: IDbOperationBuilder,
+        postLogger: ILogger<Post>,
+        commentLogger: ILogger<Comment>,
         userLogger: ILogger<User>
     ) =
     member self.Id = mapped.Id
@@ -80,7 +82,7 @@ type User
                 ||| r //可评论性与可见性默认相同
               Item = always None }
             |> mappedPostProvider.create
-            |> fun x -> Post(palaflake, x, mappedCommentProvider, mapped)
+            |> fun x -> Post(palaflake, x, mappedCommentProvider, mapped, postLogger, commentLogger)
             |> Ok
         else
             userLogger.error "Create Post Failed: Permission denied"
@@ -95,7 +97,7 @@ type User
             userLogger.error $"Get Post Failed: Invalid post id({id})"
             |> Err
         else
-            Post(palaflake, mappedPostProvider.fetch id, mappedCommentProvider, mapped)
+            Post(palaflake, mappedPostProvider.fetch id, mappedCommentProvider, mapped, postLogger, commentLogger)
             |> Ok
 
     member self.GetComment id =
@@ -107,7 +109,7 @@ type User
             userLogger.error $"Get Comment Failed: Invalid comment id({id})"
             |> Err
         else
-            Comment(palaflake, mappedCommentProvider.fetch id, mappedCommentProvider, mapped)
+            Comment(palaflake, mappedCommentProvider.fetch id, mappedCommentProvider, mapped, commentLogger)
             |> Ok
 
     member self.NewUser(name, pwd: string, permission) =
@@ -142,7 +144,17 @@ type User
                         userLogger.error $"Initialize user pwd failed (affected:{aff})"
                         |> failwith
 
-                    User(palaflake, mappedPostProvider, mappedCommentProvider, mappedUserProvider, x, db, userLogger)
+                    User(
+                        palaflake,
+                        mappedPostProvider,
+                        mappedCommentProvider,
+                        mappedUserProvider,
+                        x,
+                        db,
+                        postLogger,
+                        commentLogger,
+                        userLogger
+                    )
                 |> Ok
         else
             userLogger.error "Create User Failed: Permission denied"
@@ -165,6 +177,8 @@ type User
                     mappedUserProvider,
                     mappedUserProvider.fetch id,
                     db,
+                    postLogger,
+                    commentLogger,
                     userLogger
                 )
                 |> Ok
@@ -178,7 +192,14 @@ type User
             match list with
             | x :: xs ->
                 let post =
-                    Post(palaflake, mappedPostProvider.fetch (coerce x), mappedCommentProvider, mapped)
+                    Post(
+                        palaflake,
+                        mappedPostProvider.fetch (coerce x),
+                        mappedCommentProvider,
+                        mapped,
+                        postLogger,
+                        commentLogger
+                    )
 
                 Option.Some(post, xs)
             | _ -> Option.None
@@ -202,7 +223,13 @@ type User
             match list with
             | x :: xs ->
                 let comment =
-                    Comment(palaflake, mappedCommentProvider.fetch (coerce x), mappedCommentProvider, mapped)
+                    Comment(
+                        palaflake,
+                        mappedCommentProvider.fetch (coerce x),
+                        mappedCommentProvider,
+                        mapped,
+                        commentLogger
+                    )
 
                 Option.Some(comment, xs)
             | _ -> Option.None

@@ -1,10 +1,12 @@
 namespace pilipala.container.comment
 
 open System
+open Microsoft.Extensions.Logging
 open fsharper.op
 open fsharper.typ
 open fsharper.alias
 open pilipala.id
+open pilipala.util.log
 open pilipala.access.user
 
 type Comment
@@ -13,7 +15,8 @@ type Comment
         palaflake: IPalaflakeGenerator,
         mapped: IMappedComment,
         mappedCommentProvider: IMappedCommentProvider,
-        user: IMappedUser
+        user: IMappedUser,
+        commentLogger: ILogger<Comment>
     ) =
 
     member self.CanRead =
@@ -34,44 +37,53 @@ type Comment
         if self.CanRead then
             Ok(mapped.Body)
         else
-            Err "Permission denied"
+            commentLogger.error $"Get {nameof self.Body} Failed: Permission denied (comment id: {mapped.Id})"
+            |> Err
 
     member self.CreateTime =
         if self.CanRead then
             Ok(mapped.CreateTime)
         else
-            Err "Permission denied"
+            commentLogger.error $"Get {nameof self.CreateTime} Failed: Permission denied (comment id: {mapped.Id})"
+            |> Err
 
     member self.UserId =
         if self.CanRead then
             Ok(mapped.UserId)
         else
-            Err "Permission denied"
+            commentLogger.error $"Get {nameof self.UserId} Failed: Permission denied (comment id: {mapped.Id})"
+            |> Err
 
     member self.Permission =
         if self.CanRead then
             Ok(mapped.Permission)
         else
-            Err "Permission denied"
+            commentLogger.error $"Get {nameof self.Permission} Failed: Permission denied (comment id: {mapped.Id})"
+            |> Err
 
     member self.Item
         with get name =
             if self.CanRead then
                 Ok(mapped.[name])
             else
-                Err "Permission denied"
+                commentLogger.error $"Get Item.{name} Failed: Permission denied (comment id: {mapped.Id})"
+                |> Err
 
     member self.UpdateBody newBody =
         if self.CanWrite then
             Ok(mapped.Body <- newBody)
         else
-            Err "Permission denied"
+            commentLogger.error
+                $"Operation {nameof self.UpdateBody} Failed: Permission denied (comment id: {mapped.Id})"
+            |> Err
 
     member self.UpdateItem name v =
         if self.CanWrite then
             Ok(mapped.[name] <- v)
         else
-            Err "Permission denied"
+            commentLogger.error
+                $"Operation {nameof self.UpdateItem} Failed: Permission denied (comment id: {mapped.Id})"
+            |> Err
 
     member self.NewComment(body: string) =
         if self.CanComment then
@@ -88,7 +100,9 @@ type Comment
                 ||| r //可评论性与可见性默认相同
               Item = always None }
             |> mappedCommentProvider.create
-            |> fun x -> Comment(palaflake, x, mappedCommentProvider, user)
+            |> fun x -> Comment(palaflake, x, mappedCommentProvider, user, commentLogger)
             |> Ok
         else
-            Err "Permission denied"
+            commentLogger.error
+                $"Operation {nameof self.NewComment} Failed: Permission denied (comment id: {mapped.Id})"
+            |> Err
