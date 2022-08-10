@@ -2,10 +2,7 @@ namespace pilipala.service
 
 open System
 open System.Text.RegularExpressions
-open fsharper.op
 open fsharper.typ
-open fsharper.alias
-open fsharper.op.Foldable
 
 (*
 servPath是用于路由服务结构的文本
@@ -36,6 +33,7 @@ type ServiceRegister =
     { ServiceInfos: (string * {| Type: Type
                                  EntryPoint: string
                                  AccessLv: ServiceAccessLv |}) list }
+
 
 //最终整合时应使用foldr以保证顺序
 type ServiceRegister with
