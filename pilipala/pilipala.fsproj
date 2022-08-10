@@ -28,7 +28,6 @@
         <Compile Include="src\access\auth\token.fs" />
         <Compile Include="src\access\auth\channel.fs" />
         <Compile Include="src\access\user\mappedProvider.fs" />
-        <Compile Include="src\access\permission\permission.fs" />
         <Compile Include="src\container\comment\mappedProvider.fs" />
         <Compile Include="src\container\comment\comment.fs" />
         <Compile Include="src\container\comment\ext.fs" />

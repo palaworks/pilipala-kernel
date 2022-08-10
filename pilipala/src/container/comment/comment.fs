@@ -85,6 +85,28 @@ type Comment
                 $"Operation {nameof self.UpdateItem} Failed: Permission denied (comment id: {mapped.Id})"
             |> Err
 
+    member self.UpdatePermission(permission: u8) =
+        if self.CanWrite then
+            if (permission &&& 48uy >>> 2)
+               <= (permission &&& 12uy) //确保可写即可读
+               && (permission &&& 48uy >>> 4)
+                  <= (permission &&& 3uy) //确保可评即可读
+               && u8 (user.Permission &&& 48us)
+                  >= (permission &&& 48uy) //不允许过度提权
+               && u8 (user.Permission &&& 12us)
+                  >= (permission &&& 12uy)
+               && u8 (user.Permission &&& 3us)
+                  >= (permission &&& 3uy) then
+                Ok(mapped.Permission <- permission)
+            else
+                commentLogger.error
+                    $"Operation {nameof self.UpdatePermission} Failed: Invalid permission updating (comment id: {mapped.Id})"
+                |> Err
+        else
+            commentLogger.error
+                $"Operation {nameof self.UpdatePermission} Failed: Permission denied (comment id: {mapped.Id})"
+            |> Err
+
     member self.NewComment(body: string) =
         if self.CanComment then
             { Id = palaflake.next ()

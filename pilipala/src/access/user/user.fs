@@ -113,6 +113,7 @@ type User
             |> Ok
 
     member self.NewUser(name, pwd: string, permission) =
+        //TODO，permission应做合法性校验，这包括小于创建者的权限级别以及保证可见性>=可评性>=可写性
         if self.WriteUserPermissionLv >= 2us then //TODO，暂不作实现，仅限pl_register(wu级别2)及root(wu级别3)访问，借助于该验证，子账户系统是可期望的
             if db {
                 inUser

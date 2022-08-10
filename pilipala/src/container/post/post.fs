@@ -107,11 +107,33 @@ type Post
             |> Err
 
     member self.UpdateItem name v =
-        if self.CanRead then
+        if self.CanWrite then
             Ok(mapped.[name] <- v)
         else
             postLogger.error
                 $"Operation {nameof self.UpdateItem}.{name} Failed: Permission denied (post id: {mapped.Id})"
+            |> Err
+
+    member self.UpdatePermission(permission: u8) =
+        if self.CanWrite then
+            if (permission &&& 48uy >>> 2)
+               <= (permission &&& 12uy) //确保可写即可读
+               && (permission &&& 48uy >>> 4)
+                  <= (permission &&& 3uy) //确保可评即可读
+               && u8 (user.Permission &&& 48us)
+                  >= (permission &&& 48uy) //不允许过度提权
+               && u8 (user.Permission &&& 12us)
+                  >= (permission &&& 12uy)
+               && u8 (user.Permission &&& 3us)
+                  >= (permission &&& 3uy) then
+                Ok(mapped.Permission <- permission)
+            else
+                postLogger.error
+                    $"Operation {nameof self.UpdatePermission} Failed: Invalid permission updating (post id: {mapped.Id})"
+                |> Err
+        else
+            postLogger.error
+                $"Operation {nameof self.UpdatePermission} Failed: Permission denied (post id: {mapped.Id})"
             |> Err
 
     member self.NewComment(body: string) =

@@ -47,8 +47,3 @@ let make
 
         member self.create user = self.fetch (init.Batch user)
         member self.delete user_id = finalize.Batch user_id }
-
-//member i.GetPost()=
-(*
-
-            *)
