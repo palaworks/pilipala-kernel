@@ -1,11 +1,13 @@
 namespace pilipala.access.user
 
 open System
+open Microsoft.Extensions.Logging
 open fsharper.op
 open fsharper.typ
 open fsharper.alias
 open pilipala.id
 open pilipala.data.db
+open pilipala.util.log
 open pilipala.util.hash
 open pilipala.container.post
 open pilipala.container.comment
@@ -17,27 +19,25 @@ type User
         mappedCommentProvider: IMappedCommentProvider,
         mappedUserProvider: IMappedUserProvider,
         mapped: IMappedUser,
-        db: IDbOperationBuilder
+        db: IDbOperationBuilder,
+        userLogger: ILogger<User>
     ) =
     member self.Id = mapped.Id
 
-    member self.ReadPostPermissionLv =
-        (mapped.Permission &&& 3072us) >>> 10
+    member self.ReadPermissionLv =
+        mapped.Permission &&& 48us >>> 4
 
-    member self.WritePostPermissionLv =
-        (mapped.Permission &&& 300us) >>> 8
+    member self.WritePermissionLv =
+        mapped.Permission &&& 12us >>> 2
 
-    member self.ReadCommentPermissionLv =
-        (mapped.Permission &&& 192us) >>> 6
-
-    member self.WriteCommentPermissionLv =
-        (mapped.Permission &&& 48us) >>> 4
+    member self.CommentPermissionLv =
+        mapped.Permission &&& 3us
 
     member self.ReadUserPermissionLv =
-        (mapped.Permission &&& 12us) >>> 2
+        mapped.Permission &&& 768us >>> 8
 
     member self.WriteUserPermissionLv =
-        mapped.Permission &&& 3us
+        mapped.Permission &&& 192us >>> 6
 
     member self.Name
         with get () = mapped.Name
@@ -64,7 +64,7 @@ type User
         and set name v = mapped.[name] <- v
 
     member self.NewPost(title, body) =
-        if self.WritePostPermissionLv <> 0us then
+        if self.WritePermissionLv <> 0us then
             { Id = palaflake.next ()
               Title = title
               Body = body
@@ -83,7 +83,8 @@ type User
             |> fun x -> Post(palaflake, x, mappedCommentProvider, mapped)
             |> Ok
         else
-            Err "Permission denied"
+            userLogger.error "Create Post Failed: Permission denied"
+            |> Err
 
     member self.GetPost id : Result'<Post, string> =
         if db {
@@ -91,7 +92,8 @@ type User
             getFstVal "post_id" "post_id" id
             execute
         } = None then
-            Err "Invalid post id"
+            userLogger.error $"Get Post Failed: Invalid post id({id})"
+            |> Err
         else
             Post(palaflake, mappedPostProvider.fetch id, mappedCommentProvider, mapped)
             |> Ok
@@ -102,7 +104,8 @@ type User
             getFstVal "comment_id" "comment_id" id
             execute
         } = None then
-            Err "Invalid comment id"
+            userLogger.error $"Get Comment Failed: Invalid comment id({id})"
+            |> Err
         else
             Comment(palaflake, mappedCommentProvider.fetch id, mappedCommentProvider, mapped)
             |> Ok
@@ -115,7 +118,8 @@ type User
                 execute
                }
                <> None then
-                Err "Username already exists"
+                userLogger.error $"Create User Failed: username({name}) already exists"
+                |> Err
             else
                 { Id = palaflake.next ()
                   Name = name
@@ -135,12 +139,14 @@ type User
                         }
 
                     if aff <> 1 then //非期望行为，let it crash
-                        failwith $"Initialize user pwd failed (affected:{aff})"
+                        userLogger.error $"Initialize user pwd failed (affected:{aff})"
+                        |> failwith
 
-                    User(palaflake, mappedPostProvider, mappedCommentProvider, mappedUserProvider, x, db)
+                    User(palaflake, mappedPostProvider, mappedCommentProvider, mappedUserProvider, x, db, userLogger)
                 |> Ok
         else
-            Err "Permission denied"
+            userLogger.error "Create User Failed: Permission denied"
+            |> Err
 
     member self.GetUser id =
         if self.ReadUserPermissionLv >= 2us then //TODO，暂不作实现，仅限pl_register(ru级别2)及root(ru级别3)访问
@@ -149,7 +155,8 @@ type User
                 getFstVal "user_id" "user_id" id
                 execute
             } = None then
-                Err "Invalid user id"
+                userLogger.error $"Get User Failed: Invalid user id({id})"
+                |> Err
             else
                 User(
                     palaflake,
@@ -157,11 +164,13 @@ type User
                     mappedCommentProvider,
                     mappedUserProvider,
                     mappedUserProvider.fetch id,
-                    db
+                    db,
+                    userLogger
                 )
                 |> Ok
         else
-            Err "Permission denied"
+            userLogger.error $"Get User Failed: Permission denied (target user id: {id})"
+            |> Err
 
     member inline private self.GetPostGen(mask: u8) =
         Seq.unfold
