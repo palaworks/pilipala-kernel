@@ -17,7 +17,7 @@ module IUserModifyPipelineBuilder =
               beforeFail = List<'I -> 'I>() }
 
         let udf = //user defined field
-            Dict<string, BuilderItem<u64 * obj>>()
+            Dict<string, BuilderItem<i64 * obj>>()
 
         { new IUserModifyPipelineBuilder with
             member i.Name = gen ()
@@ -40,7 +40,7 @@ module IUserModifyPipelineBuilder =
 
 module IUserModifyPipeline =
     let make (modifyBuilder: IUserModifyPipelineBuilder, db: IDbOperationBuilder) =
-        let set targetKey (idVal: u64, targetVal) =
+        let set targetKey (idVal: i64, targetVal) =
             match
                 db {
                     inUser
@@ -53,7 +53,7 @@ module IUserModifyPipeline =
             | _ -> None
 
         let udf =
-            Dict<string, u64 * obj -> u64 * obj>()
+            Dict<string, i64 * obj -> i64 * obj>()
 
         do
             for KV (name, builderItem) in modifyBuilder do

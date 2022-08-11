@@ -2,7 +2,6 @@ namespace pilipala.container.post
 
 open System
 open Microsoft.Extensions.Logging
-open dbm_test.PgSql
 open fsharper.typ
 open fsharper.alias
 open pilipala.id

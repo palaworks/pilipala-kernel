@@ -23,10 +23,10 @@ type Pilipala
         mainLogger: ILogger<Pilipala>,
         postLogger: ILogger<Post>,
         commentLogger: ILogger<Comment>,
-        userLogger: Logger<User>
+        userLogger: ILogger<User>
     ) =
 
-    member self.UserLogin(id: u64, pwd: string) =
+    member self.UserLogin(id: i64, pwd: string) =
         let sql =
             $"SELECT user_name, user_pwd_hash FROM {db.tables.user} WHERE user_id = <user_id>"
             |> db.managed.normalizeSql
@@ -71,13 +71,13 @@ type Pilipala
                   execute
               }
               >>= fun x ->
-                      if pwd.bcrypt.Verify(coerce x.["user_pwd_hash"]) then
+                      if { bcrypt = coerce x.["user_pwd_hash"] }.Verify pwd then
                           Some(coerce x.["user_id"])
                       else
                           None
             with
         | None ->
-            mainLogger.error $"User login failed: Invalid user id({id}) or password({pwd})"
+            mainLogger.error $"User login failed: Invalid user name({name}) or password({pwd})"
             |> Err
         | Some id ->
             mainLogger.info $"User login success: {name}"

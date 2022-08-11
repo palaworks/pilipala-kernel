@@ -12,10 +12,12 @@ module IDbOperationBuilder =
               pwd = config.connection.pwd
               db = config.connection.using }
 
+        let managed =
+            new PgSqlManaged(msg, config.pooling.size) :> IDbManaged
+
         { new IDbOperationBuilder with
-            member i.managed =
-                new PgSqlManaged(msg, config.pooling.size)
+            member i.managed = managed
 
             member i.tables = config.map
 
-            member i.makeCmd() = i.managed.mkCmd () }
+            member i.makeCmd() = managed.mkCmd () }

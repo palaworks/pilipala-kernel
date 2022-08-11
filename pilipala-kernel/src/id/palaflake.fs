@@ -10,4 +10,4 @@ module IPalaflakeGenerator =
             palaflake.Generator(serverId, 2022us)
 
         { new IPalaflakeGenerator with
-            member self.next() = u64 (g.Next()) }
+            member self.next() = g.Next() }

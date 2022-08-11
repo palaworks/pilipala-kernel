@@ -21,18 +21,18 @@ type RunServiceHost = { runAsync: IServiceProvider -> Task }
 /// 构造服务主机
 let make (sp: IServiceProvider) =
     let serviceRegister =
-        sp.GetService<ServiceRegister>()
+        sp.GetRequiredService<ServiceRegister>()
 
     let uuidGenerator =
-        sp.GetService<IUuidGenerator>()
+        sp.GetRequiredService<IUuidGenerator>()
 
     let tokenProvider =
-        sp.GetService<TokenProvider>()
+        sp.GetRequiredService<TokenProvider>()
 
     let f (scopedServiceProvider: IServiceProvider) =
 
         let ws =
-            scopedServiceProvider.GetService<WebSocket>()
+            scopedServiceProvider.GetRequiredService<WebSocket>()
 
         //request <service_path>
         let servicePath = ws.recv().Split(' ').[1] //服务路径
@@ -48,7 +48,7 @@ let make (sp: IServiceProvider) =
         match serviceALv with
         | Everyone ->
             let service =
-                scopedServiceProvider.GetService serviceType
+                scopedServiceProvider.GetRequiredService serviceType
 
             //添加非加密网络信道
             let chan = NetChannel(ws)
@@ -81,7 +81,7 @@ let make (sp: IServiceProvider) =
                 ws.send "auth pass" //受信通告
 
                 let service =
-                    scopedServiceProvider.GetService serviceType
+                    scopedServiceProvider.GetRequiredService serviceType
 
                 //添加加密网络信道
                 let chan = NetChannel(ws, sessionKey)

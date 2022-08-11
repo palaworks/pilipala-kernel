@@ -16,7 +16,7 @@ module IPostModifyPipelineBuilder =
               beforeFail = List<'I -> 'I>() }
 
         let udf = //user defined field
-            Dict<string, BuilderItem<u64 * obj>>()
+            Dict<string, BuilderItem<i64 * obj>>()
 
         { new IPostModifyPipelineBuilder with
             member i.Title = gen ()
@@ -41,7 +41,7 @@ module IPostModifyPipelineBuilder =
 
 module IPostModifyPipeline =
     let make (modifyBuilder: IPostModifyPipelineBuilder, db: IDbOperationBuilder) =
-        let set targetKey (idVal: u64, targetVal) =
+        let set targetKey (idVal: i64, targetVal) =
             match
                 db {
                     inPost
@@ -54,7 +54,7 @@ module IPostModifyPipeline =
             | _ -> None
 
         let udf =
-            Dict<string, u64 * obj -> u64 * obj>()
+            Dict<string, i64 * obj -> i64 * obj>()
 
         do
             for KV (name, builderItem) in modifyBuilder do

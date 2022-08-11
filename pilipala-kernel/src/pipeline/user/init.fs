@@ -18,7 +18,7 @@ module IUserInitPipelineBuilder =
         { new IUserInitPipelineBuilder with
             member i.Batch = gen () }
 
-module UserInitPipeline =
+module IUserInitPipeline =
     let make (initBuilder: IUserInitPipelineBuilder, uuid: IUuidGenerator, db: IDbOperationBuilder) =
         let data (user: UserData) =
             let fields: (_ * obj) list =

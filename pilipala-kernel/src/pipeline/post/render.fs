@@ -16,7 +16,7 @@ module IPostRenderPipelineBuilder =
               beforeFail = List<'I -> 'I>() }
 
         let udf = //user defined field
-            Dict<string, BuilderItem<u64, u64 * obj>>()
+            Dict<string, BuilderItem<i64, i64 * obj>>()
 
         { new IPostRenderPipelineBuilder with
             member i.Title = gen ()
@@ -41,7 +41,7 @@ module IPostRenderPipelineBuilder =
 
 module IPostRenderPipeline =
     let make (renderBuilder: IPostRenderPipelineBuilder, db: IDbOperationBuilder) =
-        let get target (idVal: u64) =
+        let get target (idVal: i64) =
             db {
                 inPost
                 getFstVal target "post_id" idVal
@@ -49,7 +49,7 @@ module IPostRenderPipeline =
             }
             |> fmap (fun v -> idVal, coerce v)
 
-        let udf = Dict<string, u64 -> u64 * obj>()
+        let udf = Dict<string, i64 -> i64 * obj>()
 
         do
             for KV (name, builderItem) in renderBuilder do

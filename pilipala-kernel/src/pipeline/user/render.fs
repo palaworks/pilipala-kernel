@@ -17,7 +17,7 @@ module IUserRenderPipelineBuilder =
               beforeFail = List<'I -> 'I>() }
 
         let udf = //user defined field
-            Dict<string, BuilderItem<u64, u64 * obj>>()
+            Dict<string, BuilderItem<i64, i64 * obj>>()
 
         { new IUserRenderPipelineBuilder with
             member i.Name = gen ()
@@ -40,7 +40,7 @@ module IUserRenderPipelineBuilder =
 
 module IUserRenderPipeline =
     let make (renderBuilder: IUserRenderPipelineBuilder, db: IDbOperationBuilder) =
-        let get target (idVal: u64) =
+        let get target (idVal: i64) =
             db {
                 inUser
                 getFstVal target "user_id" idVal
@@ -48,7 +48,7 @@ module IUserRenderPipeline =
             }
             |> fmap (fun v -> idVal, coerce v)
 
-        let udf = Dict<string, u64 -> u64 * obj>()
+        let udf = Dict<string, i64 -> i64 * obj>()
 
         do
             for KV (name, builderItem) in renderBuilder do

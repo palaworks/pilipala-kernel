@@ -7,8 +7,10 @@ open fsharper.op.Foldable
 open Microsoft.Extensions.Logging
 open Microsoft.Extensions.DependencyInjection
 open pilipala
+open pilipala.access.user
 open pilipala.id
 open pilipala.log
+open pilipala.pipeline.user
 open pilipala.plugin
 open pilipala.service
 open pilipala.service.host
@@ -19,6 +21,9 @@ open pilipala.container.comment
 
 type Builder =
     { pipeline: IServiceCollection -> IServiceCollection }
+
+module Builder =
+    let make () = { pipeline = id }
 
 (*
 构造顺序：
@@ -97,6 +102,36 @@ type Builder with
                         sf.GetRequiredService<_>(),
                         sf.GetRequiredService<_>()
                     ))
+                //用户管道构造器
+                .AddSingleton<IUserInitPipelineBuilder>(fun _ -> IUserInitPipelineBuilder.make ())
+                .AddSingleton<IUserRenderPipelineBuilder>(fun _ -> IUserRenderPipelineBuilder.make ())
+                .AddSingleton<IUserModifyPipelineBuilder>(fun _ -> IUserModifyPipelineBuilder.make ())
+                .AddSingleton<IUserFinalizePipelineBuilder>(fun _ -> IUserFinalizePipelineBuilder.make ())
+                //用户管道
+                .AddTransient<_>(fun sf ->
+                    IUserInitPipeline.make (
+                        sf.GetRequiredService<_>(),
+                        sf.GetRequiredService<_>(),
+                        sf.GetRequiredService<_>()
+                    ))
+                .AddTransient<_>(fun sf ->
+                    IUserRenderPipeline.make (sf.GetRequiredService<_>(), sf.GetRequiredService<_>()))
+                .AddTransient<_>(fun sf ->
+                    IUserModifyPipeline.make (sf.GetRequiredService<_>(), sf.GetRequiredService<_>()))
+                .AddTransient<_>(fun sf ->
+                    IUserFinalizePipeline.make (
+                        sf.GetRequiredService<_>(),
+                        sf.GetRequiredService<_>(),
+                        sf.GetRequiredService<_>()
+                    ))
+                //映射用户提供器
+                .AddTransient<_>(fun sf ->
+                    IMappedUserProvider.make (
+                        sf.GetRequiredService<_>(),
+                        sf.GetRequiredService<_>(),
+                        sf.GetRequiredService<_>(),
+                        sf.GetRequiredService<_>()
+                    ))
         .> self.pipeline //use...
         .> fun sc -> //添加已注册日志
             let lr: LoggerRegister =
@@ -119,7 +154,21 @@ type Builder with
             <| fun pluginType (acc: IServiceCollection) -> acc.AddSingleton(pluginType)
             <| sc
         //before build
-        .> fun sc -> sc.AddSingleton<Pilipala>().BuildServiceProvider()
+        .> fun sc ->
+            sc
+                .AddSingleton<Pilipala>(fun sf ->
+                    Pilipala(
+                        sf.GetRequiredService<_>(),
+                        sf.GetRequiredService<_>(),
+                        sf.GetRequiredService<_>(),
+                        sf.GetRequiredService<_>(),
+                        sf.GetRequiredService<_>(),
+                        sf.GetRequiredService<_>(),
+                        sf.GetRequiredService<_>(),
+                        sf.GetRequiredService<_>(),
+                        sf.GetRequiredService<_>()
+                    ))
+                .BuildServiceProvider()
         //after build
         .> fun sp -> //启动已注入插件
             sp
@@ -129,7 +178,9 @@ type Builder with
             <| fun pluginType (acc: IServiceProvider) -> acc.GetRequiredService(pluginType) |> always acc
             <| sp
         .> fun sp -> //启动服务主机
-            sp.GetService<RunServiceHost>().runAsync sp
+            sp
+                .GetRequiredService<RunServiceHost>()
+                .runAsync sp
             |> always sp
         .> fun sp -> sp.GetRequiredService<Pilipala>()
         |> apply (ServiceCollection())

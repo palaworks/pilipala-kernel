@@ -17,7 +17,7 @@ module ICommentModifyPipelineBuilder =
               beforeFail = List<'I -> 'I>() }
 
         let udf = //user defined field
-            Dict<string, BuilderItem<u64 * obj>>()
+            Dict<string, BuilderItem<i64 * obj>>()
 
         { new ICommentModifyPipelineBuilder with
             member i.Body = gen ()
@@ -40,7 +40,7 @@ module ICommentModifyPipelineBuilder =
 
 module ICommentModifyPipeline =
     let make (modifyBuilder: ICommentModifyPipelineBuilder, db: IDbOperationBuilder) =
-        let set targetKey (idVal: u64, targetVal) =
+        let set targetKey (idVal: i64, targetVal) =
             match
                 db {
                     inComment
@@ -53,7 +53,7 @@ module ICommentModifyPipeline =
             | _ -> None
 
         let udf =
-            Dict<string, u64 * obj -> u64 * obj>()
+            Dict<string, i64 * obj -> i64 * obj>()
 
         do
             for KV (name, builderItem) in modifyBuilder do
@@ -69,7 +69,7 @@ module ICommentModifyPipeline =
 
             member self.Binding a =
                 let setBinding v =
-                    let (comment_id: u64), comment_binding, comment_is_reply =
+                    let (comment_id: i64), comment_binding, comment_is_reply =
                         match v with
                         | x, BindPost y -> x, y, false
                         | x, BindComment y -> x, y, true

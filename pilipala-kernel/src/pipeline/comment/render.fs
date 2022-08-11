@@ -17,7 +17,7 @@ module ICommentRenderPipelineBuilder =
               beforeFail = List<'I -> 'I>() }
 
         let udf = //user defined field
-            Dict<string, BuilderItem<u64, u64 * obj>>()
+            Dict<string, BuilderItem<i64, i64 * obj>>()
 
         //site 交由插件实现
         //user_name交由用户组件实现（user_email）
@@ -45,7 +45,7 @@ module ICommentRenderPipelineBuilder =
 
 module ICommentRenderPipeline =
     let make (renderBuilder: ICommentRenderPipelineBuilder, db: IDbOperationBuilder) =
-        let get targetKey (idVal: u64) =
+        let get targetKey (idVal: i64) =
             db {
                 inComment
                 getFstVal targetKey "comment_id" idVal
@@ -53,7 +53,7 @@ module ICommentRenderPipeline =
             }
             |> fmap (fun v -> idVal, coerce v)
 
-        let udf = Dict<string, u64 -> u64 * obj>()
+        let udf = Dict<string, i64 -> i64 * obj>()
 
         do
             for KV (name, builderItem) in renderBuilder do
@@ -76,7 +76,7 @@ module ICommentRenderPipeline =
                         getFstVal "comment_binding" "comment_id" id
                         execute
                     }
-                    >>= fun (comment_binding: u64) ->
+                    >>= fun (comment_binding: i64) ->
                             coerce
                             <%> db {
                                 inComment
