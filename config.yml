@@ -1,3 +1,4 @@
+#this is an example
 database:
   connection:
     host: localhost
