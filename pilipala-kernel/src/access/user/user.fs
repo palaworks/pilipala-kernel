@@ -82,7 +82,7 @@ type User
                 ||| r //可评论性与可见性默认相同
               Item = always None }
             |> mappedPostProvider.create
-            |> fun x -> Post(palaflake, x, mappedCommentProvider, mapped, postLogger, commentLogger)
+            |> fun x -> Post(palaflake, x, mappedCommentProvider, db, mapped, postLogger, commentLogger)
             |> Ok
         else
             userLogger.error "Create Post Failed: Permission denied"
@@ -97,7 +97,7 @@ type User
             userLogger.error $"Get Post Failed: Invalid post id({id})"
             |> Err
         else
-            Post(palaflake, mappedPostProvider.fetch id, mappedCommentProvider, mapped, postLogger, commentLogger)
+            Post(palaflake, mappedPostProvider.fetch id, mappedCommentProvider, db, mapped, postLogger, commentLogger)
             |> Ok
 
     member self.GetComment id =
@@ -109,7 +109,7 @@ type User
             userLogger.error $"Get Comment Failed: Invalid comment id({id})"
             |> Err
         else
-            Comment(palaflake, mappedCommentProvider.fetch id, mappedCommentProvider, mapped, commentLogger)
+            Comment(palaflake, mappedCommentProvider.fetch id, mappedCommentProvider, db, mapped, commentLogger)
             |> Ok
 
     member self.NewUser(name, pwd: string, permission) =
@@ -197,6 +197,7 @@ type User
                         palaflake,
                         mappedPostProvider.fetch (coerce x),
                         mappedCommentProvider,
+                        db,
                         mapped,
                         postLogger,
                         commentLogger
@@ -228,6 +229,7 @@ type User
                         palaflake,
                         mappedCommentProvider.fetch (coerce x),
                         mappedCommentProvider,
+                        db,
                         mapped,
                         commentLogger
                     )

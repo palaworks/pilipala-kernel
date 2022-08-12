@@ -11,14 +11,7 @@ type Post with
     /// 此功能需UserName插件支持
     member self.UserName: Result'<string, _> =
         if self.CanRead then
-            Ok(self.["UserName"].unwrap().coerce ())
-        else
-            Err "Permission denied"
-
-    /// 文章的评论
-    /// 此功能需PostComments插件支持
-    member self.Comments: Result'<IMappedComment seq, _> =
-        if self.CanRead then
-            Ok(self.["Comments"].unwrap().coerce ())
+            self.["UserName"]
+            >>= fun x -> x.unwrap().coerce () |> Ok
         else
             Err "Permission denied"

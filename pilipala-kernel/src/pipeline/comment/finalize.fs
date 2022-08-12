@@ -13,11 +13,13 @@ open pilipala.container.comment
 module ICommentFinalizePipelineBuilder =
     let make () =
         let inline gen () =
-            { collection = List<PipelineCombineMode<'I, 'O>>()
-              beforeFail = List<'I -> 'I>() }
+            { collection = List<_>()
+              beforeFail = List<_>() }
+
+        let batch = gen ()
 
         { new ICommentFinalizePipelineBuilder with
-            member i.Batch = gen () }
+            member i.Batch = batch }
 
 module ICommentFinalizePipeline =
     let make
@@ -45,7 +47,12 @@ module ICommentFinalizePipeline =
                 }
                 |> unwrap
 
-            let comment = //回送被删除的评论
+            if db {
+                inComment
+                delete "comment_id" comment_id
+                whenEq 1
+                execute
+            } = 1 then
                 { Id = comment_id
                   Body = coerce db_data.["comment_body"]
 
@@ -63,19 +70,13 @@ module ICommentFinalizePipeline =
                         udf_render_no_after.TryGetValue(name).intoOption'()
                             .fmap
                         <| (apply ..> snd) comment_id }
+                |> Some
+            else
+                None
 
-            let aff =
-                db {
-                    inComment
-                    delete "comment_id" comment_id
-                    whenEq 1
-                    execute
-                }
-
-            if aff = 1 then Some comment else None
+        let batch =
+            finalizeBuilder.Batch.fullyBuild
+            <| fun fail id -> unwrapOr (data id) (fun _ -> fail id)
 
         { new ICommentFinalizePipeline with
-            member self.Batch a =
-                finalizeBuilder.Batch.fullyBuild
-                <| fun fail id -> unwrapOr (data id) (fun _ -> fail id)
-                |> apply a }
+            member self.Batch a = batch a }

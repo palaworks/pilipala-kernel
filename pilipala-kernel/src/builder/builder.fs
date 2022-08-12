@@ -8,6 +8,7 @@ open Microsoft.Extensions.Logging
 open Microsoft.Extensions.DependencyInjection
 open pilipala
 open pilipala.access.user
+open pilipala.data.db
 open pilipala.id
 open pilipala.log
 open pilipala.pipeline.user
@@ -56,25 +57,22 @@ type Builder with
                 .AddSingleton<IPostModifyPipelineBuilder>(fun _ -> IPostModifyPipelineBuilder.make ())
                 .AddSingleton<IPostFinalizePipelineBuilder>(fun _ -> IPostFinalizePipelineBuilder.make ())
                 //文章管道
-                .AddTransient<_>(fun sf ->
-                    IPostInitPipeline.make (sf.GetRequiredService<_>(), sf.GetRequiredService<_>()))
-                .AddTransient<_>(fun sf ->
-                    IPostRenderPipeline.make (sf.GetRequiredService<_>(), sf.GetRequiredService<_>()))
-                .AddTransient<_>(fun sf ->
-                    IPostModifyPipeline.make (sf.GetRequiredService<_>(), sf.GetRequiredService<_>()))
+                .AddTransient<_>(fun sf -> IPostInitPipeline.make (sf.GetRequiredService(), sf.GetRequiredService()))
+                .AddTransient<_>(fun sf -> IPostRenderPipeline.make (sf.GetRequiredService(), sf.GetRequiredService()))
+                .AddTransient<_>(fun sf -> IPostModifyPipeline.make (sf.GetRequiredService(), sf.GetRequiredService()))
                 .AddTransient<_>(fun sf ->
                     IPostFinalizePipeline.make (
-                        sf.GetRequiredService<_>(),
-                        sf.GetRequiredService<_>(),
-                        sf.GetRequiredService<_>()
+                        sf.GetRequiredService(),
+                        sf.GetRequiredService(),
+                        sf.GetRequiredService()
                     ))
                 //映射文章提供器
                 .AddTransient<_>(fun sf ->
                     IMappedPostProvider.make (
-                        sf.GetRequiredService<_>(),
-                        sf.GetRequiredService<_>(),
-                        sf.GetRequiredService<_>(),
-                        sf.GetRequiredService<_>()
+                        sf.GetRequiredService(),
+                        sf.GetRequiredService(),
+                        sf.GetRequiredService(),
+                        sf.GetRequiredService()
                     ))
                 //评论管道构造器
                 .AddSingleton<ICommentInitPipelineBuilder>(fun _ -> ICommentInitPipelineBuilder.make ())
@@ -82,25 +80,24 @@ type Builder with
                 .AddSingleton<ICommentModifyPipelineBuilder>(fun _ -> ICommentModifyPipelineBuilder.make ())
                 .AddSingleton<ICommentFinalizePipelineBuilder>(fun _ -> ICommentFinalizePipelineBuilder.make ())
                 //评论管道
+                .AddTransient<_>(fun sf -> ICommentInitPipeline.make (sf.GetRequiredService(), sf.GetRequiredService()))
                 .AddTransient<_>(fun sf ->
-                    ICommentInitPipeline.make (sf.GetRequiredService<_>(), sf.GetRequiredService<_>()))
+                    ICommentRenderPipeline.make (sf.GetRequiredService(), sf.GetRequiredService()))
                 .AddTransient<_>(fun sf ->
-                    ICommentRenderPipeline.make (sf.GetRequiredService<_>(), sf.GetRequiredService<_>()))
-                .AddTransient<_>(fun sf ->
-                    ICommentModifyPipeline.make (sf.GetRequiredService<_>(), sf.GetRequiredService<_>()))
+                    ICommentModifyPipeline.make (sf.GetRequiredService(), sf.GetRequiredService()))
                 .AddTransient<_>(fun sf ->
                     ICommentFinalizePipeline.make (
-                        sf.GetRequiredService<_>(),
-                        sf.GetRequiredService<_>(),
-                        sf.GetRequiredService<_>()
+                        sf.GetRequiredService(),
+                        sf.GetRequiredService(),
+                        sf.GetRequiredService()
                     ))
                 //映射评论提供器
                 .AddTransient<_>(fun sf ->
                     IMappedCommentProvider.make (
-                        sf.GetRequiredService<_>(),
-                        sf.GetRequiredService<_>(),
-                        sf.GetRequiredService<_>(),
-                        sf.GetRequiredService<_>()
+                        sf.GetRequiredService(),
+                        sf.GetRequiredService(),
+                        sf.GetRequiredService(),
+                        sf.GetRequiredService()
                     ))
                 //用户管道构造器
                 .AddSingleton<IUserInitPipelineBuilder>(fun _ -> IUserInitPipelineBuilder.make ())
@@ -109,33 +106,27 @@ type Builder with
                 .AddSingleton<IUserFinalizePipelineBuilder>(fun _ -> IUserFinalizePipelineBuilder.make ())
                 //用户管道
                 .AddTransient<_>(fun sf ->
-                    IUserInitPipeline.make (
-                        sf.GetRequiredService<_>(),
-                        sf.GetRequiredService<_>(),
-                        sf.GetRequiredService<_>()
-                    ))
-                .AddTransient<_>(fun sf ->
-                    IUserRenderPipeline.make (sf.GetRequiredService<_>(), sf.GetRequiredService<_>()))
-                .AddTransient<_>(fun sf ->
-                    IUserModifyPipeline.make (sf.GetRequiredService<_>(), sf.GetRequiredService<_>()))
+                    IUserInitPipeline.make (sf.GetRequiredService(), sf.GetRequiredService(), sf.GetRequiredService()))
+                .AddTransient<_>(fun sf -> IUserRenderPipeline.make (sf.GetRequiredService(), sf.GetRequiredService()))
+                .AddTransient<_>(fun sf -> IUserModifyPipeline.make (sf.GetRequiredService(), sf.GetRequiredService()))
                 .AddTransient<_>(fun sf ->
                     IUserFinalizePipeline.make (
-                        sf.GetRequiredService<_>(),
-                        sf.GetRequiredService<_>(),
-                        sf.GetRequiredService<_>()
+                        sf.GetRequiredService(),
+                        sf.GetRequiredService(),
+                        sf.GetRequiredService()
                     ))
                 //映射用户提供器
                 .AddTransient<_>(fun sf ->
                     IMappedUserProvider.make (
-                        sf.GetRequiredService<_>(),
-                        sf.GetRequiredService<_>(),
-                        sf.GetRequiredService<_>(),
-                        sf.GetRequiredService<_>()
+                        sf.GetRequiredService(),
+                        sf.GetRequiredService(),
+                        sf.GetRequiredService(),
+                        sf.GetRequiredService()
                     ))
         .> self.pipeline //use...
         .> fun sc -> //添加已注册日志
             let lr: LoggerRegister =
-                sc.BuildServiceProvider().GetRequiredService<_>()
+                sc.BuildServiceProvider().GetRequiredService()
 
             sc.AddLogging (fun builder ->
                 lr.LoggerFilters.foldr
@@ -147,26 +138,20 @@ type Builder with
                 <| (fun p (acc: ILoggingBuilder) -> acc.AddProvider p)
                 <| builder
                 |> ignore)
-        .> fun sc -> //注入已注册插件
-            sc.BuildServiceProvider().GetRequiredService<PluginRegister>()
-                .PluginTypes
-                .foldr
-            <| fun pluginType (acc: IServiceCollection) -> acc.AddSingleton(pluginType)
-            <| sc
         //before build
         .> fun sc ->
             sc
-                .AddSingleton<Pilipala>(fun sf ->
-                    Pilipala(
-                        sf.GetRequiredService<_>(),
-                        sf.GetRequiredService<_>(),
-                        sf.GetRequiredService<_>(),
-                        sf.GetRequiredService<_>(),
-                        sf.GetRequiredService<_>(),
-                        sf.GetRequiredService<_>(),
-                        sf.GetRequiredService<_>(),
-                        sf.GetRequiredService<_>(),
-                        sf.GetRequiredService<_>()
+                .AddSingleton<App>(fun sf ->
+                    App(
+                        sf.GetRequiredService(),
+                        sf.GetRequiredService(),
+                        sf.GetRequiredService(),
+                        sf.GetRequiredService(),
+                        sf.GetRequiredService(),
+                        sf.GetRequiredService(),
+                        sf.GetRequiredService(),
+                        sf.GetRequiredService(),
+                        sf.GetRequiredService()
                     ))
                 .BuildServiceProvider()
         //after build
@@ -175,12 +160,53 @@ type Builder with
                 .GetRequiredService<PluginRegister>()
                 .PluginTypes
                 .foldr
-            <| fun pluginType (acc: IServiceProvider) -> acc.GetRequiredService(pluginType) |> always acc
+            <| fun pluginType (acc: IServiceProvider) ->
+                //在新的容器中限定插件资产以及标识作用域
+                ServiceCollection()
+                    .AddSingleton<IDbOperationBuilder>(fun _ -> sp.GetRequiredService())
+                    .AddSingleton<IPluginCfgProvider>(fun _ -> IPluginCfgProvider.make pluginType)
+                    //文章构造资产
+                    .AddSingleton<IPostInitPipelineBuilder>(fun _ -> sp.GetRequiredService())
+                    .AddSingleton<IPostRenderPipelineBuilder>(fun _ -> sp.GetRequiredService())
+                    .AddSingleton<IPostModifyPipelineBuilder>(fun _ -> sp.GetRequiredService())
+                    .AddSingleton<IPostFinalizePipelineBuilder>(fun _ -> sp.GetRequiredService())
+                    .AddTransient<IPostInitPipeline>(fun _ -> sp.GetRequiredService())
+                    .AddTransient<IPostRenderPipeline>(fun _ -> sp.GetRequiredService())
+                    .AddTransient<IPostModifyPipeline>(fun _ -> sp.GetRequiredService())
+                    .AddTransient<IPostFinalizePipeline>(fun _ -> sp.GetRequiredService())
+                    .AddTransient<IMappedPostProvider>(fun _ -> sp.GetRequiredService())
+                    //评论构造资产
+                    .AddSingleton<ICommentInitPipelineBuilder>(fun _ -> sp.GetRequiredService())
+                    .AddSingleton<ICommentRenderPipelineBuilder>(fun _ -> sp.GetRequiredService())
+                    .AddSingleton<ICommentModifyPipelineBuilder>(fun _ -> sp.GetRequiredService())
+                    .AddSingleton<ICommentFinalizePipelineBuilder>(fun _ -> sp.GetRequiredService())
+                    .AddSingleton<ICommentInitPipeline>(fun _ -> sp.GetRequiredService())
+                    .AddSingleton<ICommentRenderPipeline>(fun _ -> sp.GetRequiredService())
+                    .AddSingleton<ICommentModifyPipeline>(fun _ -> sp.GetRequiredService())
+                    .AddSingleton<ICommentFinalizePipeline>(fun _ -> sp.GetRequiredService())
+                    .AddSingleton<IMappedCommentProvider>(fun _ -> sp.GetRequiredService())
+                    //用户构造资产
+                    .AddSingleton<IUserInitPipelineBuilder>(fun _ -> sp.GetRequiredService())
+                    .AddSingleton<IUserRenderPipelineBuilder>(fun _ -> sp.GetRequiredService())
+                    .AddSingleton<IUserModifyPipelineBuilder>(fun _ -> sp.GetRequiredService())
+                    .AddSingleton<IUserFinalizePipelineBuilder>(fun _ -> sp.GetRequiredService())
+                    .AddSingleton<IUserInitPipeline>(fun _ -> sp.GetRequiredService())
+                    .AddSingleton<IUserRenderPipeline>(fun _ -> sp.GetRequiredService())
+                    .AddSingleton<IUserModifyPipeline>(fun _ -> sp.GetRequiredService())
+                    .AddSingleton<IUserFinalizePipeline>(fun _ -> sp.GetRequiredService())
+                    .AddSingleton<IMappedUserProvider>(fun _ -> sp.GetRequiredService())
+                    //...
+                    .AddSingleton(
+                        pluginType
+                    )
+                    .BuildServiceProvider()
+                    .GetRequiredService pluginType
+                |> always acc
             <| sp
         .> fun sp -> //启动服务主机
             sp
                 .GetRequiredService<RunServiceHost>()
                 .runAsync sp
             |> always sp
-        .> fun sp -> sp.GetRequiredService<Pilipala>()
+        .> fun sp -> sp.GetRequiredService(): App
         |> apply (ServiceCollection())

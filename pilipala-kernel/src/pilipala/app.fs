@@ -12,7 +12,7 @@ open pilipala.access.user
 open pilipala.container.post
 open pilipala.container.comment
 
-type Pilipala
+type App
     internal
     (
         palaflake: IPalaflakeGenerator,
@@ -20,7 +20,7 @@ type Pilipala
         mappedCommentProvider: IMappedCommentProvider,
         mappedUserProvider: IMappedUserProvider,
         db: IDbOperationBuilder,
-        mainLogger: ILogger<Pilipala>,
+        mainLogger: ILogger<App>,
         postLogger: ILogger<Post>,
         commentLogger: ILogger<Comment>,
         userLogger: ILogger<User>

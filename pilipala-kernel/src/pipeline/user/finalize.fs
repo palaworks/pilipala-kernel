@@ -13,11 +13,13 @@ open pilipala.pipeline.user
 module IUserFinalizePipelineBuilder =
     let make () =
         let inline gen () =
-            { collection = List<PipelineCombineMode<'I, 'O>>()
-              beforeFail = List<'I -> 'I>() }
+            { collection = List<_>()
+              beforeFail = List<_>() }
+
+        let batch = gen ()
 
         { new IUserFinalizePipelineBuilder with
-            member i.Batch = gen () }
+            member i.Batch = batch }
 
 module IUserFinalizePipeline =
     let make
@@ -45,7 +47,12 @@ module IUserFinalizePipeline =
                 }
                 |> unwrap
 
-            let user = //回送被删除的用户
+            if db {
+                inUser
+                delete "user_id" user_id
+                whenEq 1
+                execute
+            } = 1 then
                 { Id = user_id
                   Name = coerce db_data.["user_name"]
                   Email = coerce db_data.["user_email"]
@@ -57,19 +64,13 @@ module IUserFinalizePipeline =
                         udf_render_no_after.TryGetValue(name).intoOption'()
                             .fmap
                         <| (apply ..> snd) user_id }
+                |> Some
+            else
+                None
 
-            let aff =
-                db {
-                    inUser
-                    delete "user_id" user_id
-                    whenEq 1
-                    execute
-                }
-
-            if aff = 1 then Some user else None
+        let batch =
+            finalizeBuilder.Batch.fullyBuild
+            <| fun fail id -> unwrapOr (data id) (fun _ -> fail id)
 
         { new IUserFinalizePipeline with
-            member self.Batch a =
-                finalizeBuilder.Batch.fullyBuild
-                <| fun fail id -> unwrapOr (data id) (fun _ -> fail id)
-                |> apply a }
+            member self.Batch a = batch a }

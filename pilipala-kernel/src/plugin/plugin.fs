@@ -1,11 +1,6 @@
 namespace pilipala.plugin
 
 open System
-open fsharper.op.Pattern
-open Microsoft.Extensions.Logging
-open Microsoft.Extensions.DependencyInjection
-open pilipala.log
-open pilipala.plugin
 
 (*
 插件需要遵循下列规范：
@@ -17,11 +12,6 @@ open pilipala.plugin
 *)
 
 //虽然理论上该实现能够启动同一文件夹下的众多插件（dll），但建议的实践是一个插件（dll）放一个文件夹
-
-/// 插件特性，仅限修饰类
-[<AttributeUsage(AttributeTargets.Class)>]
-type PluginAttribute() =
-    inherit Attribute()
 
 //dir目录下应有多个文件夹
 //每个文件夹对应一个插件，例如：

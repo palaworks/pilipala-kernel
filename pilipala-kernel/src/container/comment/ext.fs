@@ -10,14 +10,7 @@ type Comment with
     /// 此功能需UserName插件支持
     member self.UserName: Result'<string, _> =
         if self.CanRead then
-            Ok(self.["UserName"].unwrap().coerce ())
-        else
-            Err "Permission denied"
-
-    /// 评论的回复
-    /// 此功能需CommentReplies插件支持
-    member self.Replies: Result'<IMappedComment seq, _> =
-        if self.CanRead then
-            Ok(self.["Replies"].unwrap().coerce ())
+            self.["UserName"]
+            >>= fun x -> x.unwrap().coerce () |> Ok
         else
             Err "Permission denied"

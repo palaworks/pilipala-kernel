@@ -40,7 +40,7 @@
         <Compile Include="src\service\host.fs" />
         <Compile Include="src\plugin\config.fs" />
         <Compile Include="src\plugin\plugin.fs" />
-        <Compile Include="src\pilipala\pilipala.fs" />
+        <Compile Include="src\pilipala\app.fs" />
         <Compile Include="src\builder\builder.fs" />
         <Compile Include="src\builder\useDb.fs" />
         <Compile Include="src\builder\usePlugin.fs" />
@@ -63,12 +63,15 @@
     <ItemGroup>
       <Reference Include="DbManaged">
         <HintPath>..\..\DbManaged\bin\Debug\net6.0\DbManaged.dll</HintPath>
+        <Private>False</Private>
       </Reference>
       <Reference Include="fsharper">
         <HintPath>..\..\fsharper\bin\Debug\net6.0\fsharper.dll</HintPath>
+        <Private>False</Private>
       </Reference>
       <Reference Include="pilipala-frame">
         <HintPath>..\..\pilipala-sdk\pilipala-frame\bin\Debug\net6.0\pilipala-frame.dll</HintPath>
+        <Private>False</Private>
       </Reference>
       <Reference Include="pilipala.util">
         <HintPath>..\..\pilipala-sdk\pilipala.util\bin\Debug\net6.0\pilipala.util.dll</HintPath>

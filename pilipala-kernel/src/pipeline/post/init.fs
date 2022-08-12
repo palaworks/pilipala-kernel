@@ -10,11 +10,13 @@ open pilipala.container.post
 module IPostInitPipelineBuilder =
     let make () =
         let inline gen () =
-            { collection = List<PipelineCombineMode<'I, 'O>>()
-              beforeFail = List<'I -> 'I>() }
+            { collection = List<_>()
+              beforeFail = List<_>() }
+
+        let batch = gen ()
 
         { new IPostInitPipelineBuilder with
-            member i.Batch = gen () }
+            member i.Batch = batch }
 
 module IPostInitPipeline =
     let make (initBuilder: IPostInitPipelineBuilder, db: IDbOperationBuilder) =
@@ -39,8 +41,9 @@ module IPostInitPipeline =
 
             if aff = 1 then Some post.Id else None
 
+        let batch =
+            initBuilder.Batch.fullyBuild
+            <| fun fail x -> unwrapOr (data x) (fun _ -> fail x)
+
         { new IPostInitPipeline with
-            member i.Batch a =
-                initBuilder.Batch.fullyBuild
-                <| fun fail x -> unwrapOr (data x) (fun _ -> fail x)
-                |> apply a }
+            member i.Batch a = batch a }

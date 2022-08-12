@@ -11,11 +11,13 @@ open pilipala.container.comment
 module ICommentInitPipelineBuilder =
     let make () =
         let inline gen () =
-            { collection = List<PipelineCombineMode<'I, 'O>>()
-              beforeFail = List<'I -> 'I>() }
+            { collection = List<_>()
+              beforeFail = List<_>() }
+
+        let batch = gen ()
 
         { new ICommentInitPipelineBuilder with
-            member i.Batch = gen () }
+            member i.Batch = batch }
 
 module ICommentInitPipeline =
     let make (initBuilder: ICommentInitPipelineBuilder, db: IDbOperationBuilder) =
@@ -49,8 +51,9 @@ module ICommentInitPipeline =
             else
                 None
 
+        let batch =
+            initBuilder.Batch.fullyBuild
+            <| fun fail x -> unwrapOr (data x) (fun _ -> fail x)
+
         { new ICommentInitPipeline with
-            member self.Batch a =
-                initBuilder.Batch.fullyBuild
-                <| fun fail x -> unwrapOr (data x) (fun _ -> fail x)
-                |> apply a }
+            member self.Batch a = batch a }

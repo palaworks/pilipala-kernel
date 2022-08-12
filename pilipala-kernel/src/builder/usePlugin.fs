@@ -18,7 +18,7 @@ type Builder with
 
         { pipeline = self.pipeline .> effect f }
 
-    member self.usePlugin<'p when 'p :> PluginAttribute>() = self.usePlugin typeof<'p>
+    member self.usePlugin<'p when 'p: not struct>() = self.usePlugin typeof<'p>
 
     /// 从程序集文件夹注册
     /// dir示例：./plugin/Llink

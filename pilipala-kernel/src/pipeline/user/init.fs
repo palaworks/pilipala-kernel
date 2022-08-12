@@ -12,11 +12,13 @@ open pilipala.access.user
 module IUserInitPipelineBuilder =
     let make () =
         let inline gen () =
-            { collection = List<PipelineCombineMode<'I, 'O>>()
-              beforeFail = List<'I -> 'I>() }
+            { collection = List<_>()
+              beforeFail = List<_>() }
+
+        let batch = gen ()
 
         { new IUserInitPipelineBuilder with
-            member i.Batch = gen () }
+            member i.Batch = batch }
 
 module IUserInitPipeline =
     let make (initBuilder: IUserInitPipelineBuilder, uuid: IUuidGenerator, db: IDbOperationBuilder) =
@@ -39,8 +41,9 @@ module IUserInitPipeline =
 
             if aff = 1 then Some user.Id else None
 
+        let batch =
+            initBuilder.Batch.fullyBuild
+            <| fun fail x -> unwrapOr (data x) (fun _ -> fail x)
+
         { new IUserInitPipeline with
-            member self.Batch a =
-                initBuilder.Batch.fullyBuild
-                <| fun fail x -> unwrapOr (data x) (fun _ -> fail x)
-                |> apply a }
+            member self.Batch a = batch a }

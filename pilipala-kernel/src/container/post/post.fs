@@ -4,6 +4,7 @@ open System
 open Microsoft.Extensions.Logging
 open fsharper.typ
 open fsharper.alias
+open pilipala.data.db
 open pilipala.id
 open pilipala.util.log
 open pilipala.access.user
@@ -15,6 +16,7 @@ type Post
         palaflake: IPalaflakeGenerator,
         mapped: IMappedPost,
         mappedCommentProvider: IMappedCommentProvider,
+        db: IDbOperationBuilder,
         user: IMappedUser,
         postLogger: ILogger<Post>,
         commentLogger: ILogger<Comment>
@@ -91,6 +93,38 @@ type Post
                 postLogger.error $"Get Item.{name} Failed: Permission denied (post id: {mapped.Id})"
                 |> Err
 
+    member self.Comments =
+        if self.CanRead then
+            let sql =
+                $"SELECT comment_id FROM {db.tables.comment} \
+                  WHERE comment_is_reply = false AND comment_binding = {mapped.Id}"
+
+            Seq.unfold
+            <| fun (list: obj list) ->
+                match list with
+                | id :: ids ->
+                    Option.Some(
+                        Comment(
+                            palaflake,
+                            mappedCommentProvider.fetch (downcast id),
+                            mappedCommentProvider,
+                            db,
+                            user,
+                            commentLogger
+                        ),
+                        ids
+                    )
+
+                | [] -> Option.None
+            <| db {
+                getFstCol sql []
+                execute
+            }
+            |> Ok
+        else
+            commentLogger.error $"Get Comments Failed: Permission denied (post id: {mapped.Id})"
+            |> Err
+
     member self.UpdateTitle newTitle =
         if self.CanWrite then
             Ok(mapped.Title <- newTitle)
@@ -150,7 +184,7 @@ type Post
                 ||| r //可评论性与可见性默认相同
               Item = always None }
             |> mappedCommentProvider.create
-            |> fun x -> Comment(palaflake, x, mappedCommentProvider, user, commentLogger)
+            |> fun x -> Comment(palaflake, x, mappedCommentProvider, db, user, commentLogger)
             |> Ok
         else
             postLogger.error $"Operation {nameof self.NewComment} Failed: Permission denied (post id: {mapped.Id})"
