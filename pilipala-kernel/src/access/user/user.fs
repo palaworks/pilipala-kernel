@@ -113,8 +113,42 @@ type User
             |> Ok
 
     member self.NewUser(name, pwd: string, permission) =
-        //TODO，permission应做合法性校验，这包括小于创建者的权限级别以及保证可见性>=可评性>=可写性
-        if self.WriteUserPermissionLv >= 2us then //TODO，暂不作实现，仅限pl_register(wu级别2)及root(wu级别3)访问，借助于该验证，子账户系统是可期望的
+        let creator_wu_lv =
+            self.Permission &&& 192us >>> 6
+
+        let target_ru_lv =
+            permission &&& 768us >>> 8
+
+        let target_wu_lv =
+            permission &&& 192us >>> 6
+
+        let target_r_lv = permission &&& 48us >>> 4
+        let target_w_lv = permission &&& 12us >>> 2
+        let target_c_lv = permission &&& 3us
+
+        //小于创建者的权限级别（防止管理员自克隆）
+        if target_ru_lv >= creator_wu_lv
+           || target_wu_lv >= creator_wu_lv
+           || target_r_lv >= creator_wu_lv
+           || target_w_lv >= creator_wu_lv
+           || target_c_lv >= creator_wu_lv then
+            $"Create User Failed: illegal permission({permission}) \
+              (any target permission({permission}) must be lower than creator({self.Name})'s write user permission)"
+            |> userLogger.error
+            |> Err
+        //保证可见性>=可评性>=可写性
+        elif target_r_lv < target_c_lv then
+            $"Create User Failed: illegal permission({permission}) \
+              (violate constraint: read level >= comment level)"
+            |> userLogger.error
+            |> Err
+        elif target_c_lv < target_w_lv then
+            $"Create User Failed: illegal permission({permission}) \
+              (violate constraint: comment level >= write level)"
+            |> userLogger.error
+            |> Err
+        //TODO，暂不作实现：仅限pl_register(wu级别2)及root(wu级别3)访问，借助于该验证，子账户系统是可期望的
+        elif self.WriteUserPermissionLv >= 2us then
             if db {
                 inUser
                 getFstVal "user_name" "user_name" name
