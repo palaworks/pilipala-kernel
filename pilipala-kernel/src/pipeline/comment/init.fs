@@ -3,6 +3,7 @@ namespace pilipala.pipeline.comment
 open System.Collections.Generic
 open fsharper.op
 open fsharper.typ
+open fsharper.op.Pattern
 open pilipala.data.db
 open pilipala.pipeline
 open pilipala.pipeline.comment
@@ -45,8 +46,6 @@ module ICommentInitPipeline =
                 }
 
             if aff = 1 then
-                //TODO 可以添加Item迭代器，以实现在Init管道的udf初始化
-                //for KV (name, v) in comment do
                 Some comment.Id
             else
                 None

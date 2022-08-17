@@ -2,6 +2,8 @@
 
 open fsharper.op
 open fsharper.typ
+open fsharper.op.Foldable
+open fsharper.op.Pattern
 open pilipala.container.comment
 open pilipala.pipeline.comment
 
@@ -45,5 +47,10 @@ let make
                         <| fun v -> fmap (apply (comment_id, v)) modify.[name]
                         |> ignore }
 
-        member self.create comment = self.fetch (init.Batch comment)
+        member self.create comment =
+            self.fetch (init.Batch comment)
+            |> effect (fun mapped -> //初始化udf
+                for KV (name, value) in comment do
+                    mapped.[name] <- Some value)
+
         member self.delete comment_id = finalize.Batch comment_id }

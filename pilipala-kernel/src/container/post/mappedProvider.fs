@@ -2,6 +2,7 @@
 
 open fsharper.op
 open fsharper.typ
+open fsharper.op.Pattern
 open pilipala.pipeline.post
 
 let make
@@ -52,5 +53,10 @@ let make
                         <| fun v -> fmap (apply (post_id, v)) modify.[name]
                         |> ignore }
 
-        member self.create post = self.fetch (init.Batch post)
+        member self.create post =
+            self.fetch (init.Batch post)
+            |> effect (fun mapped -> //初始化udf
+                for KV (name, value) in post do
+                    mapped.[name] <- Some value)
+
         member self.delete post_id = finalize.Batch post_id }
