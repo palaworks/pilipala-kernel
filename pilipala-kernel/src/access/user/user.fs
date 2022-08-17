@@ -80,7 +80,7 @@ type User
                 r
                 ||| u8 (mapped.Permission &&& 12us) //从用户继承的修改权
                 ||| r //可评论性与可见性默认相同
-              Item = always None }
+              Props = Map [] }
             |> mappedPostProvider.create
             |> fun x -> Post(palaflake, x, mappedCommentProvider, db, mapped, postLogger, commentLogger)
             |> Ok
@@ -160,11 +160,11 @@ type User
             else
                 { Id = palaflake.next ()
                   Name = name
-                  Email = "" //应由用户自行绑定
+                  Email = "" //应由用户自行指定
                   CreateTime = DateTime.Now
                   AccessTime = DateTime.Now
-                  Permission = permission //TODO，暂不作实现，推荐的权限级别为337(commentator)
-                  Item = always None }
+                  Permission = permission
+                  Props = Map [] } //应由用户自行指定
                 |> mappedUserProvider.create
                 |> fun x ->
                     let aff =

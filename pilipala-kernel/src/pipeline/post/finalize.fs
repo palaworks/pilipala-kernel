@@ -5,6 +5,7 @@ open fsharper.op
 open fsharper.typ
 open fsharper.alias
 open fsharper.op.Pattern
+open fsharper.op.Foldable
 open pilipala.data.db
 open pilipala.pipeline
 open pilipala.container.post
@@ -30,12 +31,6 @@ module IPostFinalizePipeline =
             db: IDbOperationBuilder
         ) =
 
-        let udf_render_no_after = //去除了After部分的udf渲染管道，因为After可能包含渲染逻辑
-            Dict<_, _>()
-            |> effect (fun dict ->
-                for KV (name, builderItem) in renderBuilder do //遍历udf
-                    //udf管道初始为只会panic的GenericPipe，必须Replace后使用
-                    dict.Add(name, builderItem.noneAfterBuild id))
 
         let data (post_id: i64) =
             let db_data =
@@ -45,6 +40,14 @@ module IPostFinalizePipeline =
                     execute
                 }
                 |> unwrap
+
+            let props =
+                renderBuilder.foldl //迭代器只会遍历udf
+                <| fun (map: Map<_, _>) (KV (name, it)) ->
+                    //构建时去除After部分，因为After可能包含渲染逻辑和通知逻辑
+                    let valueF = it.noneAfterBuild id .> snd
+                    map.Add(name, valueF post_id)
+                <| Map []
 
             if db {
                 inPost
@@ -60,11 +63,7 @@ module IPostFinalizePipeline =
                   ModifyTime = coerce db_data.["post_modify_time"]
                   UserId = coerce db_data.["user_id"]
                   Permission = coerce db_data.["post_permission"]
-                  Item = //只读
-                    fun name ->
-                        udf_render_no_after.TryGetValue(name).intoOption'()
-                            .fmap
-                        <| (apply ..> snd) post_id }
+                  Props = props }
                 |> Some
             else
                 None

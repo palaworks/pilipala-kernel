@@ -153,7 +153,7 @@ type Comment
                 r
                 ||| u8 (user.Permission &&& 12us) //从用户继承的修改权
                 ||| r //可评论性与可见性默认相同
-              Item = always None }
+              Props = Map [] }
             |> mappedCommentProvider.create
             |> fun x -> Comment(palaflake, x, mappedCommentProvider, db, user, commentLogger)
             |> Ok

@@ -35,9 +35,7 @@ module ICommentModifyPipelineBuilder =
                 if udf.ContainsKey name then
                     udf.[name]
                 else
-                    let x = gen ()
-                    udf.Add(name, x)
-                    x
+                    gen () |> effect (fun x -> udf.Add(name, x))
 
             member i.GetEnumerator() : IEnumerator = udf.GetEnumerator()
             member i.GetEnumerator() : IEnumerator<_> = udf.GetEnumerator() }
