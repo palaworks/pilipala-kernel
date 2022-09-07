@@ -10,7 +10,7 @@ open fsharper.op
 open fsharper.typ
 open fsharper.alias
 open fsharper.op.Foldable
-open WebSocketer.typ
+open WebSocketSharp
 open Microsoft.Extensions.Logging
 open Microsoft.Extensions.Hosting
 open Microsoft.Extensions.DependencyInjection
@@ -68,11 +68,6 @@ type Builder with
             Host
                 .CreateDefaultBuilder()
                 .ConfigureServices(fun sc ->
-
-                    let server = //用于监听的服务器
-                        TcpListener(IPAddress.Parse("localhost"), i32 port)
-                        |> effect (fun listener -> listener.Start())
-
                     sp
                         .GetService<ServiceRegister>()
                         .ServiceInfos
@@ -103,7 +98,7 @@ type Builder with
                         .AddSingleton<IPalaflakeGenerator>(fun _ -> sp.GetService<_>())
                         .AddSingleton<IUuidGenerator>(fun _ -> sp.GetService<_>())
                         .AddSingleton<ServiceRegister>(fun _ -> sp.GetService<_>())
-                        .AddScoped<WebSocket>(fun _ -> new WebSocket(server.AcceptTcpClient()))
+                        .AddScoped<WebSocket>(fun _ -> new WebSocket($"ws://localhost:{port}"))
                         .AddHostedService(fun sp' -> host.make sp')
                     |> ignore)
                 .Build()

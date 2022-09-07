@@ -2,13 +2,15 @@ module pilipala.service.host
 
 open System
 open System.Net.Sockets
+open System.Threading.Channels
 open System.Threading.Tasks
 open System.Security.Cryptography
 open fsharper.op
 open fsharper.typ
+open fsharper.op.Async
 open Microsoft.Extensions.Hosting
 open Microsoft.Extensions.DependencyInjection
-open WebSocketer.typ
+open WebSocketSharp
 open pilipala.id
 open pilipala.service
 open pilipala.util.crypto
@@ -34,8 +36,12 @@ let make (sp: IServiceProvider) =
         let ws =
             scopedServiceProvider.GetRequiredService<WebSocket>()
 
+        let buf = Channel.CreateUnbounded<string>()
+        ws.OnMessage.Add(fun e -> buf.Writer.WriteAsync e.Data |> ignore)
+        let recv () = buf.Reader.ReadAsync().Result
+
         //request <service_path>
-        let servicePath = ws.recv().Split(' ').[1] //服务路径
+        let servicePath = recv().Split(' ').[1] //服务路径
 
         let serviceInfo =
             serviceRegister
@@ -63,22 +69,22 @@ let make (sp: IServiceProvider) =
                 <| chan.Read do
                 chan.Write response //回送服务结果
         | NeedAuth ->
-            ws.send "need auth" //服务端问候
-            let clientPubKey = ws.recv () //接收客户公钥
+            ws.Send "need auth" //服务端问候
+            let clientPubKey = recv () //接收客户公钥
 
             let sessionKey = uuidGenerator.next () //生成会话密钥
 
             sessionKey //将会话密钥使用客户公钥加密后送回
             |> rsa.encrypt clientPubKey RSAEncryptionPadding.Pkcs1
-            |> ws.send
+            |> ws.Send
 
             //接收密文解密到凭据
             let clientToken =
-                ws.recv ()
+                recv ()
                 |> aes.decrypt (hexToBytes sessionKey) [||] CipherMode.ECB PaddingMode.Zeros
 
             let whenCheckPass () =
-                ws.send "auth pass" //受信通告
+                ws.Send "auth pass" //受信通告
 
                 let service =
                     scopedServiceProvider.GetRequiredService serviceType
@@ -96,7 +102,7 @@ let make (sp: IServiceProvider) =
                     <| chan.Read do
                     chan.Write response //回送服务结果
 
-            let whenCheckFailed () = ws.send "auth failed"
+            let whenCheckFailed () = ws.Send "auth failed"
 
             //凭据校验
             if tokenProvider.check clientToken then
@@ -104,7 +110,7 @@ let make (sp: IServiceProvider) =
             else
                 whenCheckFailed () //凭据无效
 
-        ws.Dispose()
+        ws.Close()
 
     { new BackgroundService() with
         member self.ExecuteAsync ct =
