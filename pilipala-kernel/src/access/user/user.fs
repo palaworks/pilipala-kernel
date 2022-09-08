@@ -26,20 +26,15 @@ type User
     ) =
     member self.Id = mapped.Id
 
-    member self.ReadPermissionLv =
-        mapped.Permission &&& 48us >>> 4
+    member self.ReadPermissionLv = mapped.Permission &&& 48us >>> 4
 
-    member self.WritePermissionLv =
-        mapped.Permission &&& 12us >>> 2
+    member self.WritePermissionLv = mapped.Permission &&& 12us >>> 2
 
-    member self.CommentPermissionLv =
-        mapped.Permission &&& 3us
+    member self.CommentPermissionLv = mapped.Permission &&& 3us
 
-    member self.ReadUserPermissionLv =
-        mapped.Permission &&& 768us >>> 8
+    member self.ReadUserPermissionLv = mapped.Permission &&& 768us >>> 8
 
-    member self.WriteUserPermissionLv =
-        mapped.Permission &&& 192us >>> 6
+    member self.WriteUserPermissionLv = mapped.Permission &&& 192us >>> 6
 
     member self.Name
         with get () = mapped.Name
@@ -113,14 +108,11 @@ type User
             |> Ok
 
     member self.NewUser(name, pwd: string, permission) =
-        let creator_wu_lv =
-            self.Permission &&& 192us >>> 6
+        let creator_wu_lv = self.Permission &&& 192us >>> 6
 
-        let target_ru_lv =
-            permission &&& 768us >>> 8
+        let target_ru_lv = permission &&& 768us >>> 8
 
-        let target_wu_lv =
-            permission &&& 192us >>> 6
+        let target_wu_lv = permission &&& 192us >>> 6
 
         let target_r_lv = permission &&& 48us >>> 4
         let target_w_lv = permission &&& 12us >>> 2
@@ -147,7 +139,7 @@ type User
               (violate constraint: comment level >= write level)"
             |> userLogger.error
             |> Err
-        //TODO，暂不作实现：仅限pl_register(wu级别2)及root(wu级别3)访问，借助于该验证，子账户系统是可期望的
+        //仅限pl_register(wu级别2)及root(wu级别3)创建用户
         elif self.WriteUserPermissionLv >= 2us then
             if db {
                 inUser

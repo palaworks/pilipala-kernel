@@ -15,4 +15,4 @@
 * [pilipala-sdk](https://github.com/Thaumy/pilipala-sdk)
   * pilipala-frame
   * pilipala.util
-* [WebSocketer](https://github.com/Thaumy/WebSocketer)
+* [websocket-sharp](https://github.com/Thaumy/websocket-sharp)

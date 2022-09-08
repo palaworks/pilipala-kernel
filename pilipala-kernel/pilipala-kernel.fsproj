@@ -76,8 +76,8 @@
       <Reference Include="pilipala.util">
         <HintPath>..\..\pilipala-sdk\pilipala.util\bin\Debug\net6.0\pilipala.util.dll</HintPath>
       </Reference>
-      <Reference Include="WebSocketer">
-        <HintPath>..\..\WebsSocketer\bin\Debug\net6.0\WebSocketer.dll</HintPath>
+      <Reference Include="websocket-sharp">
+        <HintPath>..\..\websocket-sharp\websocket-sharp\bin\Release\net6.0\websocket-sharp.dll</HintPath>
       </Reference>
     </ItemGroup>
 
