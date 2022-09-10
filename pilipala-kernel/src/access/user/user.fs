@@ -85,7 +85,7 @@ type User
 
     member self.GetPost id : Result'<Post, string> =
         if db {
-            inComment
+            inPost
             getFstVal "post_id" "post_id" id
             execute
         } = None then
