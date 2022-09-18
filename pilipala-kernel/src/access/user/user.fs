@@ -26,15 +26,20 @@ type User
     ) =
     member self.Id = mapped.Id
 
-    member self.ReadPermissionLv = mapped.Permission &&& 48us >>> 4
+    member self.ReadPermissionLv =
+        mapped.Permission &&& 48us >>> 4
 
-    member self.WritePermissionLv = mapped.Permission &&& 12us >>> 2
+    member self.WritePermissionLv =
+        mapped.Permission &&& 12us >>> 2
 
-    member self.CommentPermissionLv = mapped.Permission &&& 3us
+    member self.CommentPermissionLv =
+        mapped.Permission &&& 3us
 
-    member self.ReadUserPermissionLv = mapped.Permission &&& 768us >>> 8
+    member self.ReadUserPermissionLv =
+        mapped.Permission &&& 768us >>> 8
 
-    member self.WriteUserPermissionLv = mapped.Permission &&& 192us >>> 6
+    member self.WriteUserPermissionLv =
+        mapped.Permission &&& 192us >>> 6
 
     member self.Name
         with get () = mapped.Name
@@ -85,7 +90,7 @@ type User
 
     member self.GetPost id : Result'<Post, string> =
         if db {
-            inComment
+            inPost
             getFstVal "post_id" "post_id" id
             execute
         } = None then
@@ -108,11 +113,14 @@ type User
             |> Ok
 
     member self.NewUser(name, pwd: string, permission) =
-        let creator_wu_lv = self.Permission &&& 192us >>> 6
+        let creator_wu_lv =
+            self.Permission &&& 192us >>> 6
 
-        let target_ru_lv = permission &&& 768us >>> 8
+        let target_ru_lv =
+            permission &&& 768us >>> 8
 
-        let target_wu_lv = permission &&& 192us >>> 6
+        let target_wu_lv =
+            permission &&& 192us >>> 6
 
         let target_r_lv = permission &&& 48us >>> 4
         let target_w_lv = permission &&& 12us >>> 2
@@ -235,7 +243,8 @@ type User
             getFstCol
                 $"SELECT post_id FROM {db.tables.post} \
                   WHERE user_id = {mapped.Id} \
-                  OR ({mapped.Permission} & {mask}) > (post_permission & {mask})"
+                  OR ({mapped.Permission} & {mask}) > (post_permission & {mask}) \
+                  ORDER BY post_create_time DESC"
                 []
 
             execute
@@ -266,7 +275,8 @@ type User
             getFstCol
                 $"SELECT comment_id FROM {db.tables.comment} \
                   WHERE user_id = {mapped.Id} \
-                  OR ({mapped.Permission} & {mask}) > (comment_permission & {mask})"
+                  OR ({mapped.Permission} & {mask}) > (comment_permission & {mask}) \
+                  ORDER BY comment_create_time DESC"
                 []
 
             execute

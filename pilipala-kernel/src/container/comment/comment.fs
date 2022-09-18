@@ -74,7 +74,7 @@ type Comment
         if self.CanRead then
             let sql =
                 $"SELECT comment_id FROM {db.tables.comment} \
-                  WHERE comment_is_reply = false AND comment_binding = {mapped.Id}"
+                  WHERE comment_is_reply = true AND comment_binding = {mapped.Id}"
 
             Seq.unfold
             <| fun (list: obj list) ->
