@@ -200,7 +200,11 @@ type Builder with
                         pluginType
                     )
                     .BuildServiceProvider()
-                    .GetRequiredService pluginType
+                    .GetRequiredService(pluginType)
+                |> effect (fun _ -> //记录到日志
+                    sp
+                        .GetRequiredService<ILogger<Builder>>()
+                        .LogInformation($"Plugin Loaded: {pluginType.Name}"))
                 |> always acc
             <| sp
         .> fun sp -> //启动服务主机
