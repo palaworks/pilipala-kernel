@@ -122,7 +122,7 @@ type Post
             }
             |> Ok
         else
-            commentLogger.error $"Get Comments Failed: Permission denied (post id: {mapped.Id})"
+            commentLogger.error $"Get {nameof self.Comments} Failed: Permission denied (post id: {mapped.Id})"
             |> Err
 
     member self.UpdateTitle newTitle =

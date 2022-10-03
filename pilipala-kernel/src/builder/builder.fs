@@ -204,7 +204,7 @@ type Builder with
                 |> effect (fun _ -> //记录到日志
                     sp
                         .GetRequiredService<ILogger<Builder>>()
-                        .LogInformation($"Plugin Loaded: {pluginType.Name}"))
+                        .LogInformation($"Plugin loaded: {pluginType.Name}"))
                 |> always acc
             <| sp
         .> fun sp -> //启动服务主机
