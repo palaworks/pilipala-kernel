@@ -24,3 +24,4 @@ type PluginRegister = { PluginTypes: Type list }
 //最终整合时应使用foldr以保证顺序
 type PluginRegister with
     member self.registerPlugin t = { PluginTypes = t :: self.PluginTypes }
+

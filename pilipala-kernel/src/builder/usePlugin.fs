@@ -1,14 +1,17 @@
 [<AutoOpen>]
 module pilipala.builder.usePlugin
 
+open System
 open System.IO
 open System.Reflection
+open System.Runtime.Loader
 open fsharper.op
 open fsharper.typ
 open Microsoft.Extensions.DependencyInjection
 open pilipala.log
 open pilipala.plugin
 open pilipala.util.di
+open pilipala.plugin.util
 
 type Builder with
 
@@ -35,9 +38,11 @@ type Builder with
 
         let pluginDllPath = pluginDll.FullName
 
+        let ctx = pluginCtx pluginDllPath
+
         let pluginType =
-            Assembly
-                .LoadFrom(pluginDllPath)
+            ctx
+                .LoadFromAssemblyName(AssemblyName(pluginName))
                 .GetType($"pilipala.plugin.{pluginName}")
 
         self.usePlugin pluginType

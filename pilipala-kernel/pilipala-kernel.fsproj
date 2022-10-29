@@ -12,7 +12,6 @@
         <Compile Include="src\id\uuid.fs" />
         <Compile Include="src\id\palaflake.fs" />
         <Compile Include="src\data\db.fs" />
-        <Compile Include="src\data\kv.fs" />
         <Compile Include="src\pipeline\post\init.fs" />
         <Compile Include="src\pipeline\post\render.fs" />
         <Compile Include="src\pipeline\post\modify.fs" />
@@ -40,6 +39,7 @@
         <Compile Include="src\service\host.fs" />
         <Compile Include="src\plugin\config.fs" />
         <Compile Include="src\plugin\plugin.fs" />
+        <Compile Include="src\plugin\util.fs" />
         <Compile Include="src\pilipala\app.fs" />
         <Compile Include="src\builder\builder.fs" />
         <Compile Include="src\builder\useDb.fs" />
@@ -51,13 +51,11 @@
     </ItemGroup>
 
     <ItemGroup>
-        <PackageReference Include="Markdig" Version="0.30.2" />
         <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="6.0.0" />
         <PackageReference Include="Microsoft.Extensions.Hosting" Version="6.0.1" />
-        <PackageReference Include="Microsoft.IdentityModel.Tokens" Version="6.22.0" />
         <PackageReference Include="Newtonsoft.Json" Version="13.0.1" />
         <PackageReference Include="YamlDotNet" Version="12.0.0" />
-        <PackageReference Update="FSharp.Core" Version="6.0.5" />
+        <PackageReference Update="FSharp.Core" Version="6.0.6" />
     </ItemGroup>
 
     <ItemGroup>
