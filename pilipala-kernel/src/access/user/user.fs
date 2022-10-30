@@ -132,18 +132,18 @@ type User
            || target_r_lv >= creator_wu_lv
            || target_w_lv >= creator_wu_lv
            || target_c_lv >= creator_wu_lv then
-            $"Create User Failed: illegal permission({permission}) \
+            $"Operation {nameof self.NewUser} Failed: illegal permission({permission}) \
               (any target permission({permission}) must be lower than creator({self.Name})'s write user permission)"
             |> userLogger.error
             |> Err
         //保证可见性>=可评性>=可写性
         elif target_r_lv < target_c_lv then
-            $"Create User Failed: illegal permission({permission}) \
+            $"Operation {nameof self.NewUser} Failed: illegal permission({permission}) \
               (violate constraint: read level >= comment level)"
             |> userLogger.error
             |> Err
         elif target_c_lv < target_w_lv then
-            $"Create User Failed: illegal permission({permission}) \
+            $"Operation {nameof self.NewUser} Failed: illegal permission({permission}) \
               (violate constraint: comment level >= write level)"
             |> userLogger.error
             |> Err
@@ -155,7 +155,7 @@ type User
                 execute
                }
                <> None then
-                userLogger.error $"Create User Failed: username({name}) already exists"
+                userLogger.error $"Operation {nameof self.NewUser} Failed: username({name}) already exists"
                 |> Err
             else
                 { Id = palaflake.next ()
@@ -176,7 +176,7 @@ type User
                         }
 
                     if aff <> 1 then //非期望行为，let it crash
-                        userLogger.error $"Initialize user pwd failed (affected:{aff})"
+                        userLogger.error $"Operation {nameof self.NewUser} Failed: unable to initialize user pwd (affected:{aff})"
                         |> failwith
 
                     User(
@@ -192,7 +192,7 @@ type User
                     )
                 |> Ok
         else
-            userLogger.error "Create User Failed: Permission denied"
+            userLogger.error $"Operation {nameof self.NewUser} Failed: Permission denied"
             |> Err
 
     member self.GetUser id =
@@ -202,7 +202,7 @@ type User
                 getFstVal "user_id" "user_id" id
                 execute
             } = None then
-                userLogger.error $"Get User Failed: Invalid user id({id})"
+                userLogger.error $"Operation {nameof self.GetUser} Failed: Invalid user id({id})"
                 |> Err
             else
                 User(
@@ -218,7 +218,7 @@ type User
                 )
                 |> Ok
         else
-            userLogger.error $"Get User Failed: Permission denied (target user id: {id})"
+            userLogger.error $"Operation {nameof self.GetUser} Failed: Permission denied (target user id: {id})"
             |> Err
 
     member inline private self.GetPostGen(mask: u8) =

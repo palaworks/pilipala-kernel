@@ -99,7 +99,7 @@ type Comment
             }
             |> Ok
         else
-            commentLogger.error $"Get Comments Failed: Permission denied (comment id: {mapped.Id})"
+            commentLogger.error $"Get {nameof self.Comments} Failed: Permission denied (comment id: {mapped.Id})"
             |> Err
 
     member self.UpdateBody newBody =

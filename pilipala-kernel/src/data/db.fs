@@ -16,8 +16,15 @@ module IDbOperationBuilder =
             new PgSqlManaged(msg, config.pooling.size) :> IDbManaged
 
         { new IDbOperationBuilder with
-            member i.managed = managed
 
-            member i.tables = config.map
+            member i.makeCmd() = managed.mkCmd ()
 
-            member i.makeCmd() = managed.mkCmd () }
+            member i.execute f = managed.executeQuery f
+
+            member i.executeQueryAsync f = managed.executeQueryAsync f
+
+            member i.queue f = managed.queueQuery f
+
+            member i.delay f = managed.delayQuery f
+
+            member i.tables = config.map }

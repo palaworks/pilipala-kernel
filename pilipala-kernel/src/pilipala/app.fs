@@ -28,8 +28,7 @@ type App
 
     member self.UserLogin(id: i64, pwd: string) =
         let sql =
-            $"SELECT user_name, user_pwd_hash FROM {db.tables.user} WHERE user_id = <user_id>"
-            |> db.managed.normalizeSql
+            $"SELECT user_name, user_pwd_hash FROM {db.tables.user} WHERE user_id = :user_id"
 
         match db {
                   getFstRow sql [ ("user_id", id) ]
@@ -63,8 +62,7 @@ type App
 
     member self.UserLogin(name, pwd: string) =
         let sql =
-            $"SELECT user_id, user_pwd_hash FROM {db.tables.user} WHERE user_name = <user_name>"
-            |> db.managed.normalizeSql
+            $"SELECT user_id, user_pwd_hash FROM {db.tables.user} WHERE user_name = :user_name"
 
         match db {
                   getFstRow sql [ ("user_name", name) ]

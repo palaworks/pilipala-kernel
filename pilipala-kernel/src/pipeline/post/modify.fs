@@ -8,7 +8,6 @@ open fsharper.alias
 open fsharper.op.Pattern
 open pilipala.data.db
 open pilipala.pipeline
-open pilipala.util
 
 module IPostModifyPipelineBuilder =
     let make () =

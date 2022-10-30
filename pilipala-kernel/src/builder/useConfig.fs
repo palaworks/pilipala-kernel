@@ -3,6 +3,7 @@ module pilipala.builder.useConfig
 
 open System.Collections.Generic
 open fsharper.op
+open fsharper.typ
 open fsharper.alias
 open fsharper.op.Pattern
 open fsharper.op.Foldable
@@ -27,7 +28,9 @@ type Builder with
     /// 使用配置文件自动构造内核
     member self.useConfig(path: string) =
         let config =
-            { yaml = readFile path }.deserializeTo<Config> ()
+            { yaml = readFile path }
+                .deserializeTo<Config>()
+                .unwrap ()
 
         self //acc is builder
         |> fun (acc: Builder) -> acc.useDb config.database
