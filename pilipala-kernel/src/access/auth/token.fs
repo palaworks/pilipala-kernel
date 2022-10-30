@@ -54,8 +54,7 @@ type internal TokenProvider(db: IDbOperationBuilder, uuid: IUuidGenerator) =
     member self.check(token_hash: string) =
         //TODO 貌似sql也可以采用消除基本类型偏执的规格化思路
         let sql =
-            $"SELECT COUNT(*) FROM {db.tables.token} WHERE tokenHash = <tokenHash>"
-            |> db.managed.normalizeSql
+            $"SELECT COUNT(*) FROM {db.tables.token} WHERE tokenHash = :tokenHash"
 
         let n =
             db {

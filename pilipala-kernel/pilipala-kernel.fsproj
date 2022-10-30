@@ -9,59 +9,60 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <Compile Include="src\id\uuid.fs" />
-        <Compile Include="src\id\palaflake.fs" />
-        <Compile Include="src\data\db.fs" />
-        <Compile Include="src\pipeline\post\init.fs" />
-        <Compile Include="src\pipeline\post\render.fs" />
-        <Compile Include="src\pipeline\post\modify.fs" />
-        <Compile Include="src\pipeline\post\finalize.fs" />
-        <Compile Include="src\pipeline\comment\init.fs" />
-        <Compile Include="src\pipeline\comment\render.fs" />
-        <Compile Include="src\pipeline\comment\modify.fs" />
-        <Compile Include="src\pipeline\comment\finalize.fs" />
-        <Compile Include="src\pipeline\user\init.fs" />
-        <Compile Include="src\pipeline\user\render.fs" />
-        <Compile Include="src\pipeline\user\modify.fs" />
-        <Compile Include="src\pipeline\user\finalize.fs" />
-        <Compile Include="src\access\auth\token.fs" />
-        <Compile Include="src\access\auth\channel.fs" />
-        <Compile Include="src\access\user\mappedProvider.fs" />
-        <Compile Include="src\container\comment\mappedProvider.fs" />
-        <Compile Include="src\container\comment\comment.fs" />
-        <Compile Include="src\container\comment\ext.fs" />
-        <Compile Include="src\container\post\mappedProvider.fs" />
-        <Compile Include="src\container\post\post.fs" />
-        <Compile Include="src\container\post\ext.fs" />
-        <Compile Include="src\access\user\user.fs" />
-        <Compile Include="src\log.fs" />
-        <Compile Include="src\service\service.fs" />
-        <Compile Include="src\service\host.fs" />
-        <Compile Include="src\plugin\config.fs" />
-        <Compile Include="src\plugin\plugin.fs" />
-        <Compile Include="src\plugin\util.fs" />
-        <Compile Include="src\pilipala\app.fs" />
-        <Compile Include="src\builder\builder.fs" />
-        <Compile Include="src\builder\useDb.fs" />
-        <Compile Include="src\builder\usePlugin.fs" />
-        <Compile Include="src\builder\useLog.fs" />
-        <Compile Include="src\builder\useService.fs" />
-        <Compile Include="src\builder\useConfig.fs" />
-        <Compile Include="src\assembly.fs" />
+        <Compile Include="src\id\uuid.fs"/>
+        <Compile Include="src\id\palaflake.fs"/>
+        <Compile Include="src\data\db.fs"/>
+        <Compile Include="src\pipeline\post\init.fs"/>
+        <Compile Include="src\pipeline\post\render.fs"/>
+        <Compile Include="src\pipeline\post\modify.fs"/>
+        <Compile Include="src\pipeline\post\finalize.fs"/>
+        <Compile Include="src\pipeline\comment\init.fs"/>
+        <Compile Include="src\pipeline\comment\render.fs"/>
+        <Compile Include="src\pipeline\comment\modify.fs"/>
+        <Compile Include="src\pipeline\comment\finalize.fs"/>
+        <Compile Include="src\pipeline\user\init.fs"/>
+        <Compile Include="src\pipeline\user\render.fs"/>
+        <Compile Include="src\pipeline\user\modify.fs"/>
+        <Compile Include="src\pipeline\user\finalize.fs"/>
+        <Compile Include="src\access\auth\token.fs"/>
+        <Compile Include="src\access\auth\channel.fs"/>
+        <Compile Include="src\access\user\mappedProvider.fs"/>
+        <Compile Include="src\container\comment\mappedProvider.fs"/>
+        <Compile Include="src\container\comment\comment.fs"/>
+        <Compile Include="src\container\comment\ext.fs"/>
+        <Compile Include="src\container\post\mappedProvider.fs"/>
+        <Compile Include="src\container\post\post.fs"/>
+        <Compile Include="src\container\post\ext.fs"/>
+        <Compile Include="src\access\user\user.fs"/>
+        <Compile Include="src\log.fs"/>
+        <Compile Include="src\service\service.fs"/>
+        <Compile Include="src\service\host.fs"/>
+        <Compile Include="src\plugin\config.fs"/>
+        <Compile Include="src\plugin\plugin.fs"/>
+        <Compile Include="src\plugin\util.fs"/>
+        <Compile Include="src\pilipala\app.fs"/>
+        <Compile Include="src\builder\builder.fs"/>
+        <Compile Include="src\builder\useDb.fs"/>
+        <Compile Include="src\builder\usePlugin.fs"/>
+        <Compile Include="src\builder\useLog.fs"/>
+        <Compile Include="src\builder\useService.fs"/>
+        <Compile Include="src\builder\useConfig.fs"/>
+        <Compile Include="src\assembly.fs"/>
     </ItemGroup>
 
     <ItemGroup>
-        <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="6.0.1" />
-        <PackageReference Include="Microsoft.Extensions.Hosting" Version="6.0.1" />
-        <PackageReference Update="FSharp.Core" Version="6.0.6" />
+        <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="6.0.1"/>
+        <PackageReference Include="Microsoft.Extensions.Hosting" Version="6.0.1"/>
+        <PackageReference Update="FSharp.Core" Version="6.0.6"/>
     </ItemGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..\..\DbManaged\DbManaged.fsproj" />
-      <ProjectReference Include="..\..\fsharper\fsharper.fsproj" />
-      <ProjectReference Include="..\..\pilipala-sdk\pilipala-frame\pilipala-frame.fsproj" />
-      <ProjectReference Include="..\..\pilipala-sdk\pilipala.util\pilipala.util.fsproj" />
-      <ProjectReference Include="..\..\websocket-sharp\websocket-sharp\websocket-sharp.csproj" />
+        <ProjectReference Include="..\..\DbManaged\DbManaged.fsproj"/>
+        <ProjectReference Include="..\..\fsharper\fsharper.fsproj"/>
+        <ProjectReference Include="..\..\pilipala-sdk\pilipala-frame\pilipala-frame.fsproj"/>
+        <ProjectReference Include="..\..\pilipala-sdk\pilipala.data.db-ext\pilipala.data.db-ext.fsproj"/>
+        <ProjectReference Include="..\..\pilipala-sdk\pilipala.util\pilipala.util.fsproj"/>
+        <ProjectReference Include="..\..\websocket-sharp\websocket-sharp\websocket-sharp.csproj"/>
     </ItemGroup>
 
 </Project>
