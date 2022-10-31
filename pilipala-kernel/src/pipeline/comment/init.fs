@@ -11,6 +11,7 @@ open pilipala.container.comment
 
 module ICommentInitPipelineBuilder =
     let make () =
+        
         let inline gen () =
             { collection = List<_>()
               beforeFail = List<_>() }
@@ -22,6 +23,7 @@ module ICommentInitPipelineBuilder =
 
 module ICommentInitPipeline =
     let make (initBuilder: ICommentInitPipelineBuilder, db: IDbOperationBuilder) =
+    
         let data (comment: CommentData) =
             let comment_binding, comment_is_reply =
                 match comment.Binding with
