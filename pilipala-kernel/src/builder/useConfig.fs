@@ -1,3 +1,5 @@
+//TODO useConfig is deprecated
+
 [<AutoOpen>]
 module pilipala.builder.useConfig
 

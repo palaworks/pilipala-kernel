@@ -46,8 +46,10 @@ type Builder with
                       LoggerFilters = [] }
                 )
                 .AddSingleton<_>({ PluginTypes = [] }) //插件注册器
+                (*//TODO service is deprecated
                 .AddSingleton<_>({ ServiceInfos = [] }) //服务注册器
                 .AddSingleton<_>({ runAsync = always Task.CompletedTask }) //空的服务主机启动器
+                *)
                 //ID生成器
                 .AddSingleton<IPalaflakeGenerator>(fun _ -> IPalaflakeGenerator.make 01uy)
                 .AddSingleton<IUuidGenerator>(fun _ -> IUuidGenerator.make ())
@@ -207,10 +209,12 @@ type Builder with
                         .LogInformation($"Plugin loaded: {pluginType.Name}"))
                 |> always acc
             <| sp
+        (*//TODO service is deprecated
         .> fun sp -> //启动服务主机
             sp
                 .GetRequiredService<RunServiceHost>()
                 .runAsync sp
             |> always sp
         .> fun sp -> sp.GetRequiredService(): App
+        *)
         |> apply (ServiceCollection())

@@ -1,3 +1,5 @@
+//TODO service is deprecated
+
 [<AutoOpen>]
 module pilipala.builder.useService
 
@@ -45,7 +47,7 @@ type Builder with
 
         let servDll =
             servDir.GetFileSystemInfos().toList ()
-            |> filterOnce (fun x -> x.Name = $"{servName}.dll")
+            |> find (fun x -> x.Name = $"{servName}.dll")
             |> unwrap
 
         let servDllPath = servDll.FullName
