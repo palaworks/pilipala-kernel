@@ -12,18 +12,19 @@ open pilipala.util.hash
 open pilipala.container.post
 open pilipala.container.comment
 
-type User
+type internal User
     (
         palaflake: IPalaflakeGenerator,
         mappedPostProvider: IMappedPostProvider,
         mappedCommentProvider: IMappedCommentProvider,
         mappedUserProvider: IMappedUserProvider,
+        handler: IMappedUser,  //用于行为授权的上级用户
         mapped: IMappedUser,
         db: IDbOperationBuilder,
         postLogger: ILogger<Post>,
         commentLogger: ILogger<Comment>,
         userLogger: ILogger<User>
-    ) =
+    ) as impl =
     member self.Id = mapped.Id
 
     member self.ReadPermissionLv =
@@ -41,31 +42,15 @@ type User
     member self.WriteUserPermissionLv =
         mapped.Permission &&& 192us >>> 6
 
-    member self.Name
-        with get () = mapped.Name
-        and set v = mapped.Name <- v
+    member self.Name = mapped.Name
+    member self.Email = mapped.Email
+    member self.CreateTime = mapped.CreateTime
+    member self.AccessTime = mapped.AccessTime
+    member self.Permission = mapped.Permission
 
-    member self.Email
-        with get () = mapped.Email
-        and set v = mapped.Email <- v
+    member self.Item name = mapped.[name]
 
-    member self.CreateTime
-        with get () = mapped.CreateTime
-        and set v = mapped.CreateTime <- v
-
-    member self.AccessTime
-        with get () = mapped.AccessTime
-        and set v = mapped.AccessTime <- v
-
-    member self.Permission
-        with get () = mapped.Permission
-        and set v = mapped.Permission <- v
-
-    member self.Item
-        with get name = mapped.[name]
-        and set name v = mapped.[name] <- v
-
-    member self.NewPost(title, body) =
+    member self.NewPost title body =
         if self.WritePermissionLv <> 0us then
             { Id = palaflake.next ()
               Title = title
@@ -82,13 +67,13 @@ type User
                 ||| r //可评论性与可见性默认相同
               Props = Map [] }
             |> mappedPostProvider.create
-            |> fun x -> Post(palaflake, x, mappedCommentProvider, db, mapped, postLogger, commentLogger)
+            |> fun x -> Post(palaflake, x, mappedCommentProvider, db, mapped, postLogger, commentLogger) :> IPost
             |> Ok
         else
             userLogger.error "Create Post Failed: Permission denied"
             |> Err
 
-    member self.GetPost id : Result'<Post, string> =
+    member self.GetPost id =
         if db {
             inPost
             getFstVal "post_id" "post_id" id
@@ -98,6 +83,7 @@ type User
             |> Err
         else
             Post(palaflake, mappedPostProvider.fetch id, mappedCommentProvider, db, mapped, postLogger, commentLogger)
+            :> IPost
             |> Ok
 
     member self.GetComment id =
@@ -110,9 +96,10 @@ type User
             |> Err
         else
             Comment(palaflake, mappedCommentProvider.fetch id, mappedCommentProvider, db, mapped, commentLogger)
+            :> IComment
             |> Ok
 
-    member self.NewUser(name, pwd: string, permission) =
+    member self.NewUser name (pwd: string) permission =
         let creator_wu_lv =
             self.Permission &&& 192us >>> 6
 
@@ -176,7 +163,8 @@ type User
                         }
 
                     if aff <> 1 then //非期望行为，let it crash
-                        userLogger.error $"Operation {nameof self.NewUser} Failed: unable to initialize user pwd (affected:{aff})"
+                        userLogger.error
+                            $"Operation {nameof self.NewUser} Failed: unable to initialize user pwd (affected:{aff})"
                         |> failwith
 
                     User(
@@ -184,12 +172,14 @@ type User
                         mappedPostProvider,
                         mappedCommentProvider,
                         mappedUserProvider,
+                        handler,
                         x,
                         db,
                         postLogger,
                         commentLogger,
                         userLogger
                     )
+                    :> IUser
                 |> Ok
         else
             userLogger.error $"Operation {nameof self.NewUser} Failed: Permission denied"
@@ -210,12 +200,14 @@ type User
                     mappedPostProvider,
                     mappedCommentProvider,
                     mappedUserProvider,
+                    handler,
                     mappedUserProvider.fetch id,
                     db,
                     postLogger,
                     commentLogger,
                     userLogger
                 )
+                :> IUser
                 |> Ok
         else
             userLogger.error $"Operation {nameof self.GetUser} Failed: Permission denied (target user id: {id})"
@@ -236,6 +228,7 @@ type User
                         postLogger,
                         commentLogger
                     )
+                    :> IPost
 
                 Option.Some(post, xs)
             | _ -> Option.None
@@ -268,6 +261,7 @@ type User
                         mapped,
                         commentLogger
                     )
+                    :> IComment
 
                 Option.Some(comment, xs)
             | _ -> Option.None
@@ -285,3 +279,116 @@ type User
     member self.GetReadableComment() = self.GetCommentGen(48uy)
     member self.GetWritableComment() = self.GetCommentGen(12uy)
     member self.GetCommentableComment() = self.GetCommentGen(3uy)
+
+    member self.UpdateName newName =
+        if self.WriteUserPermissionLv <> 0us then
+            mapped.Name <- newName
+            Ok()
+        else
+            $"Operation {nameof self.UpdateName} Failed: Permission denied"
+            |> userLogger.error
+            |> Err
+
+    member self.UpdateEmail newEmail =
+        if self.WriteUserPermissionLv <> 0us then
+            mapped.Email <- newEmail
+            Ok()
+        else
+            $"Operation {nameof self.UpdateEmail} Failed: Permission denied"
+            |> userLogger.error
+            |> Err
+
+    member self.UpdatePermission newPermission =
+        let handler_wu_lv =
+            handler.Permission &&& 192us >>> 6
+
+        let target_ru_lv =
+            newPermission &&& 768us >>> 8
+
+        let target_wu_lv =
+            newPermission &&& 192us >>> 6
+
+        let target_r_lv =
+            newPermission &&& 48us >>> 4
+
+        let target_w_lv =
+            newPermission &&& 12us >>> 2
+
+        let target_c_lv = newPermission &&& 3us
+
+        //小于授权上级的用户的权限级别（防止管理员自克隆）
+        if target_ru_lv >= handler_wu_lv
+           || target_wu_lv >= handler_wu_lv
+           || target_r_lv >= handler_wu_lv
+           || target_w_lv >= handler_wu_lv
+           || target_c_lv >= handler_wu_lv then
+            $"Operation {nameof self.UpdatePermission} Failed: illegal permission({newPermission}) \
+              (any target permission({newPermission}) must be lower than handler({self.Name})'s write user permission)"
+            |> userLogger.error
+            |> Err
+        //保证可见性>=可评性>=可写性
+        elif target_r_lv < target_c_lv then
+            $"Operation {nameof self.UpdatePermission} Failed: illegal permission({newPermission}) \
+              (violate constraint: read level >= comment level)"
+            |> userLogger.error
+            |> Err
+        elif target_c_lv < target_w_lv then
+            $"Operation {nameof self.UpdatePermission} Failed: illegal permission({newPermission}) \
+              (violate constraint: comment level >= write level)"
+            |> userLogger.error
+            |> Err
+        else
+            mapped.Permission <- newPermission
+            Ok()
+
+    member self.UpdateItem itemName newValue =
+        if self.WriteUserPermissionLv <> 0us then
+            mapped.[itemName] <- Some newValue
+            Ok()
+        else
+            $"Operation {nameof self.UpdateItem} Failed: Permission denied"
+            |> userLogger.error
+            |> Err
+
+    interface IUser with
+        member i.ReadPermissionLv =
+            impl.ReadPermissionLv
+
+        member i.WritePermissionLv =
+            impl.WritePermissionLv
+
+        member i.CommentPermissionLv =
+            impl.CommentPermissionLv
+
+        member i.ReadUserPermissionLv =
+            impl.ReadUserPermissionLv
+
+        member i.WriteUserPermissionLv =
+            impl.WriteUserPermissionLv
+
+        member i.Id = impl.Id
+        member i.Name = impl.Name
+        member i.Email = impl.Email
+        member i.CreateTime = impl.CreateTime
+        member i.AccessTime = impl.AccessTime
+        member i.Permission = impl.Permission
+
+        member i.Item x = impl.Item x
+
+        member i.GetPost x = impl.GetPost x
+        member i.GetComment x = impl.GetComment x
+        member i.GetUser x = impl.GetUser x
+        member i.UpdateItem x y = impl.UpdateItem x y
+
+        member i.NewUser x y z = impl.NewUser x y z
+        member i.NewPost x y = impl.NewPost x y
+        member i.UpdateName x = impl.UpdateName x
+        member i.UpdateEmail x = impl.UpdateEmail x
+        member i.UpdatePermission x = impl.UpdatePermission x
+
+        member i.GetReadablePost() = impl.GetReadablePost()
+        member i.GetWritablePost() = impl.GetWritablePost()
+        member i.GetCommentablePost() = impl.GetCommentablePost()
+        member i.GetReadableComment() = impl.GetReadableComment()
+        member i.GetWritableComment() = impl.GetWritableComment()
+        member i.GetCommentableComment() = impl.GetCommentableComment()

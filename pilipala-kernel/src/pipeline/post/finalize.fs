@@ -31,7 +31,6 @@ module IPostFinalizePipeline =
             db: IDbOperationBuilder
         ) =
 
-
         let data (post_id: i64) =
             let db_data =
                 db {

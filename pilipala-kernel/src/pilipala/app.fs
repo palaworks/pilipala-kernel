@@ -24,9 +24,9 @@ type App
         postLogger: ILogger<Post>,
         commentLogger: ILogger<Comment>,
         userLogger: ILogger<User>
-    ) =
+    ) as impl =
 
-    member self.UserLogin(id: i64, pwd: string) =
+    member self.userLoginById id (pwd: string) =
         let sql =
             $"SELECT user_name, user_pwd_hash FROM {db.tables.user} WHERE user_id = :user_id"
 
@@ -47,20 +47,24 @@ type App
             mainLogger.info $"User login success: {name}"
             |> ignore
 
+            let mappedUser = mappedUserProvider.fetch id
+
             User(
                 palaflake,
                 mappedPostProvider,
                 mappedCommentProvider,
                 mappedUserProvider,
-                mappedUserProvider.fetch id,
+                mappedUser,
+                mappedUser,
                 db,
                 postLogger.alwaysAppend $" (ops user: {name})",
                 commentLogger.alwaysAppend $" (ops user: {name})",
                 userLogger.alwaysAppend $" (ops user: {name})"
             )
+            :> IUser
             |> Ok
 
-    member self.UserLogin(name, pwd: string) =
+    member self.userLoginByName name pwd =
         let sql =
             $"SELECT user_id, user_pwd_hash FROM {db.tables.user} WHERE user_name = :user_name"
 
@@ -81,15 +85,23 @@ type App
             mainLogger.info $"User login success: {name}"
             |> ignore
 
+            let mappedUser = mappedUserProvider.fetch id
+
             User(
                 palaflake,
                 mappedPostProvider,
                 mappedCommentProvider,
                 mappedUserProvider,
-                mappedUserProvider.fetch id,
+                mappedUser,
+                mappedUser,
                 db,
                 postLogger.alwaysAppend $" (ops user: {name})",
                 commentLogger.alwaysAppend $" (ops user: {name})",
                 userLogger.alwaysAppend $" (ops user: {name})"
             )
+            :> IUser
             |> Ok
+
+    interface IApp with
+        member i.userLoginById x y = impl.userLoginById x y
+        member i.userLoginByName x y = impl.userLoginByName x y

@@ -1,3 +1,5 @@
+//TODO service is deprecated
+
 module pilipala.service.host
 
 open System
@@ -39,7 +41,7 @@ let make (sp: IServiceProvider) =
         let buf = Channel.CreateUnbounded<string>()
         ws.OnMessage.Add(fun e -> buf.Writer.WriteAsync e.Data |> ignore)
         let recv () = buf.Reader.ReadAsync().Result
-
+        
         //request <service_path>
         let servicePath = recv().Split(' ').[1] //服务路径
 

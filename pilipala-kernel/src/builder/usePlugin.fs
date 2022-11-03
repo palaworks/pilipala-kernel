@@ -15,9 +15,12 @@ open pilipala.plugin.util
 
 type Builder with
 
-    member self.usePlugin t =
+    member self.usePlugin(t: Type) =
+        let attr: HookOnAttribute =
+            downcast t.GetCustomAttribute(typeof<HookOnAttribute>, true)
+
         let f (sc: IServiceCollection) =
-            sc.UpdateSingleton<PluginRegister>(fun old -> old.registerPlugin t)
+            sc.UpdateSingleton<PluginRegister>(fun old -> old.registerPlugin (t, attr.time))
 
         { pipeline = self.pipeline .> effect f }
 
@@ -33,7 +36,7 @@ type Builder with
 
         let pluginDll =
             pluginDir.GetFileSystemInfos().toList ()
-            |> filterOnce (fun x -> x.Name = $"{pluginName}.dll")
+            |> find (fun x -> x.Name = $"{pluginName}.dll")
             |> unwrap
 
         let pluginDllPath = pluginDll.FullName

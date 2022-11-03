@@ -1,3 +1,5 @@
+//TODO service is deprecated
+
 namespace pilipala.service
 
 open System
@@ -59,7 +61,7 @@ type ServiceRegister with
     /// 获取服务信息
     member self.getServiceInfo path =
         self.ServiceInfos
-        |> filterOnce (fun x -> fst x = path)
+        |> find (fun x -> fst x = path)
 
     /// 匹配获取服务信息
     member self.matchServiceInfo pathRegexp =

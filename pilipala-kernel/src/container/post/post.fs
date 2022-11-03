@@ -10,8 +10,7 @@ open pilipala.util.log
 open pilipala.access.user
 open pilipala.container.comment
 
-type Post
-    internal
+type internal Post
     (
         palaflake: IPalaflakeGenerator,
         mapped: IMappedPost,
@@ -20,21 +19,21 @@ type Post
         user: IMappedUser,
         postLogger: ILogger<Post>,
         commentLogger: ILogger<Comment>
-    ) =
+    ) as impl =
 
-    member self.CanRead =
+    member _.CanRead =
         user.Id = mapped.UserId
         || u8 (user.Permission &&& 48us) > (mapped.Permission &&& 48uy)
 
-    member self.CanWrite =
+    member _.CanWrite =
         user.Id = mapped.UserId
         || u8 (user.Permission &&& 12us) > (mapped.Permission &&& 12uy)
 
-    member self.CanComment =
+    member _.CanComment =
         user.Id = mapped.UserId
         || u8 (user.Permission &&& 3us) > (mapped.Permission &&& 3uy)
 
-    member self.Id = mapped.Id
+    member _.Id = mapped.Id
 
     member self.Title =
         if self.CanRead then
@@ -111,7 +110,8 @@ type Post
                             db,
                             user,
                             commentLogger
-                        ),
+                        )
+                        :> IComment,
                         ids
                     )
 
@@ -141,7 +141,7 @@ type Post
 
     member self.UpdateItem name v =
         if self.CanWrite then
-            Ok(mapped.[name] <- v)
+            Ok(mapped.[name] <- Some v)
         else
             postLogger.error
                 $"Operation {nameof self.UpdateItem}.{name} Failed: Permission denied (post id: {mapped.Id})"
@@ -184,8 +184,31 @@ type Post
                 ||| r //可评论性与可见性默认相同
               Props = Map [] }
             |> mappedCommentProvider.create
-            |> fun x -> Comment(palaflake, x, mappedCommentProvider, db, user, commentLogger)
+            |> fun x -> Comment(palaflake, x, mappedCommentProvider, db, user, commentLogger) :> IComment
             |> Ok
         else
             postLogger.error $"Operation {nameof self.NewComment} Failed: Permission denied (post id: {mapped.Id})"
             |> Err
+
+    interface IPost with
+
+        member i.CanRead = impl.CanRead
+        member i.CanWrite = impl.CanWrite
+        member i.CanComment = impl.CanComment
+
+        member i.Id = impl.Id
+        member i.Title = impl.Title
+        member i.Body = impl.Body
+        member i.CreateTime = impl.CreateTime
+        member i.AccessTime = impl.AccessTime
+        member i.ModifyTime = impl.ModifyTime
+        member i.UserId = impl.UserId
+        member i.Permission = impl.Permission
+
+        member i.Item x = impl.Item x
+        member i.Comments = impl.Comments
+        member i.UpdateTitle x = impl.UpdateTitle x
+        member i.UpdateBody x = impl.UpdateBody x
+        member i.UpdateItem x y = impl.UpdateItem x y
+        member i.UpdatePermission x = impl.UpdatePermission x
+        member i.NewComment x = impl.NewComment x
