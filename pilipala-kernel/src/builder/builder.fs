@@ -143,7 +143,7 @@ type Builder with
         //before build
         .> fun sc ->
             sc
-                .AddSingleton<App>(fun sf ->
+                .AddSingleton<IApp, _>(fun sf ->
                     App(
                         sf.GetRequiredService(),
                         sf.GetRequiredService(),
@@ -220,8 +220,8 @@ type Builder with
             |> always sp
         *)
         .> fun sp ->
-            sp.GetRequiredService<App>()
-            |> effect (fun _ ->
+            sp.GetRequiredService<IApp>()
+            |> effect (fun app ->
                 sp
                     .GetRequiredService<PluginRegister>()
                     .Plugins
@@ -230,6 +230,7 @@ type Builder with
                     if hookTime = AppLifeCycle.AfterBuild then
                         //在新的容器中限定插件资产以及标识作用域
                         ServiceCollection()
+                            .AddSingleton<IApp>(fun _ -> app)
                             .AddSingleton<IDbOperationBuilder>(fun _ -> sp.GetRequiredService())
                             .AddSingleton<IPluginCfgProvider>(fun _ -> IPluginCfgProvider.make pluginType)
                             //文章管道资产

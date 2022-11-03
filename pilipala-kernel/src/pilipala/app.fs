@@ -24,9 +24,9 @@ type App
         postLogger: ILogger<Post>,
         commentLogger: ILogger<Comment>,
         userLogger: ILogger<User>
-    ) =
+    ) as impl =
 
-    member self.userLoginById(id: i64, pwd: string) =
+    member self.userLoginById id (pwd: string) =
         let sql =
             $"SELECT user_name, user_pwd_hash FROM {db.tables.user} WHERE user_id = :user_id"
 
@@ -64,7 +64,7 @@ type App
             :> IUser
             |> Ok
 
-    member self.userLoginByName(name, pwd: string) =
+    member self.userLoginByName name pwd =
         let sql =
             $"SELECT user_id, user_pwd_hash FROM {db.tables.user} WHERE user_name = :user_name"
 
@@ -101,3 +101,7 @@ type App
             )
             :> IUser
             |> Ok
+
+    interface IApp with
+        member i.userLoginById x y = impl.userLoginById x y
+        member i.userLoginByName x y = impl.userLoginByName x y
