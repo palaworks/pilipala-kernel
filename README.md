@@ -15,4 +15,5 @@
 * [pilipala-sdk](https://github.com/Thaumy/pilipala-sdk)
   * pilipala-frame
   * pilipala.util
+  * pilipala.data.db-ext
 * [websocket-sharp](https://github.com/Thaumy/websocket-sharp)
