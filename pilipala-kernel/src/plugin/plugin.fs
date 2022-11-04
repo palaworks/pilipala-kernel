@@ -19,9 +19,14 @@ open System
 //./pilipala/plugin/Palang
 //./pilipala/plugin/Mailssage
 
-type PluginRegister = { Plugins: (Type * AppLifeCycle) list }
-//TODO 暂时实现为所有生命周期的插件存储到一起，但可以分开存储
+type PluginRegister =
+    { BeforeBuild: Type list
+      AfterBuild: Type list }
 
 //最终整合时应使用foldr以保证顺序
 type PluginRegister with
-    member self.registerPlugin t = { Plugins = t :: self.Plugins }
+    member self.registerPlugin t hookTime =
+        if hookTime = AppLifeCycle.BeforeBuild then
+            { self with BeforeBuild = t :: self.BeforeBuild }
+        else
+            { self with AfterBuild = t :: self.AfterBuild }
