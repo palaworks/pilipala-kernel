@@ -140,9 +140,8 @@ type Builder with
                         sf.GetRequiredService()
                     ))
                 .BuildServiceProvider()
-        //after build
-        .> fun sp -> //启动已注入插件(BeforeBuild
-            sp
+        .> fun sp ->
+            sp //启动BeforeBuild生命周期插件
                 .GetRequiredService<PluginRegister>()
                 .BeforeBuild
                 .foldr
@@ -194,9 +193,9 @@ type Builder with
                 |> always acc
             <| sp
         .> fun sp ->
-            sp.GetRequiredService<IApp>().effect
+            sp.GetRequiredService<IApp>().effect //build
             <| fun app ->
-                sp
+                sp //启动AfterBuild生命周期插件
                     .GetRequiredService<PluginRegister>()
                     .AfterBuild
                     .foldr
