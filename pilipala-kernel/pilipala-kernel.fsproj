@@ -33,8 +33,6 @@
         <Compile Include="src\container\post\post.fs" />
         <Compile Include="src\access\user\user.fs" />
         <Compile Include="src\log.fs" />
-        <Compile Include="src\service\service.fs" />
-        <Compile Include="src\service\host.fs" />
         <Compile Include="src\plugin\config.fs" />
         <Compile Include="src\plugin\plugin.fs" />
         <Compile Include="src\plugin\util.fs" />
@@ -43,8 +41,6 @@
         <Compile Include="src\builder\useDb.fs" />
         <Compile Include="src\builder\usePlugin.fs" />
         <Compile Include="src\builder\useLog.fs" />
-        <Compile Include="src\builder\useService.fs" />
-        <Compile Include="src\builder\useConfig.fs" />
         <Compile Include="src\assembly.fs" />
     </ItemGroup>
 
