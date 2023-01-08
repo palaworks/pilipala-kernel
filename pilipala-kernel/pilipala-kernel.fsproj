@@ -24,8 +24,6 @@
         <Compile Include="src\pipeline\user\render.fs" />
         <Compile Include="src\pipeline\user\modify.fs" />
         <Compile Include="src\pipeline\user\finalize.fs" />
-        <Compile Include="src\access\auth\token.fs" />
-        <Compile Include="src\access\auth\channel.fs" />
         <Compile Include="src\access\user\mappedProvider.fs" />
         <Compile Include="src\container\comment\mappedProvider.fs" />
         <Compile Include="src\container\comment\comment.fs" />
