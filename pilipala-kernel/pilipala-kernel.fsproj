@@ -39,7 +39,6 @@
         <Compile Include="src\builder\useDb.fs" />
         <Compile Include="src\builder\usePlugin.fs" />
         <Compile Include="src\builder\useLog.fs" />
-        <Compile Include="src\assembly.fs" />
     </ItemGroup>
 
     <ItemGroup>
