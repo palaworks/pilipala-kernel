@@ -2,17 +2,17 @@
 Microsoft Visual Studio Solution File, Format Version 12.00
 Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "pilipala-kernel", "pilipala-kernel.fsproj", "{559614A8-DBA0-43F5-BC6B-DD078F17BC9A}"
 EndProject
-Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "pilipala.util", "..\..\pilipala-sdk\pilipala.util\pilipala.util.fsproj", "{E80A7647-0B7D-4AF3-A1EB-0FCFE30E9867}"
+Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "pilipala.util", "..\pilipala-sdk\pilipala.util\pilipala.util.fsproj", "{E80A7647-0B7D-4AF3-A1EB-0FCFE30E9867}"
 EndProject
-Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "pilipala-frame", "..\..\pilipala-sdk\pilipala-frame\pilipala-frame.fsproj", "{B8001BEA-E988-4406-B923-62EFFDA9D8EA}"
+Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "pilipala-frame", "..\pilipala-sdk\pilipala-frame\pilipala-frame.fsproj", "{B8001BEA-E988-4406-B923-62EFFDA9D8EA}"
 EndProject
-Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "fsharper", "..\..\fsharper\fsharper.fsproj", "{FA652CA3-3AFC-48BE-90F2-9333C47AE23E}"
+Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "fsharper", "..\fsharper\fsharper.fsproj", "{FA652CA3-3AFC-48BE-90F2-9333C47AE23E}"
 EndProject
-Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "DbManaged", "..\..\DbManaged\DbManaged.fsproj", "{440D1A63-D8B1-4FF2-BF61-5EB84B245FA7}"
+Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "DbManaged", "..\DbManaged\DbManaged.fsproj", "{440D1A63-D8B1-4FF2-BF61-5EB84B245FA7}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "websocket-sharp", "..\..\websocket-sharp\websocket-sharp\websocket-sharp.csproj", "{8DC6E9AB-C641-40DA-B23F-C90D1FBF24FF}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "websocket-sharp", "..\websocket-sharp\websocket-sharp\websocket-sharp.csproj", "{8DC6E9AB-C641-40DA-B23F-C90D1FBF24FF}"
 EndProject
-Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "pilipala.data.db-ext", "..\..\pilipala-sdk\pilipala.data.db-ext\pilipala.data.db-ext.fsproj", "{EC715AB9-054A-4C20-824E-CE669193AC47}"
+Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "pilipala.data.db-ext", "..\pilipala-sdk\pilipala.data.db-ext\pilipala.data.db-ext.fsproj", "{EC715AB9-054A-4C20-824E-CE669193AC47}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
