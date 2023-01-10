@@ -10,10 +10,10 @@ module IDbOperationBuilder =
               port = config.connection.port
               usr = config.connection.usr
               pwd = config.connection.pwd
-              db = config.connection.using }
+              db = config.definition.name }
 
         let managed =
-            new PgSqlManaged(msg, config.pooling.size) :> IDbManaged
+            new PgSqlManaged(msg, config.performance.pooling) :> IDbManaged
 
         { new IDbOperationBuilder with
 
@@ -27,4 +27,7 @@ module IDbOperationBuilder =
 
             member i.delay f = managed.delayQuery f
 
-            member i.tables = config.map }
+            member i.tables =
+                {| user = config.definition.user
+                   post = config.definition.post
+                   comment = config.definition.comment |} }
