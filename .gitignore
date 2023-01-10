@@ -56,3 +56,6 @@ cmake-build-debug
 build
 bin
 obj
+
+# proj
+*.DotSettings.user
