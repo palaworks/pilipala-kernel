@@ -162,6 +162,14 @@ type internal Comment
                 $"Operation {nameof self.NewComment} Failed: Permission denied (comment id: {mapped.Id})"
             |> Err
 
+    member self.Drop() =
+        //TODO handle UAF problem
+        if self.CanWrite then
+            mappedCommentProvider.delete mapped.Id |> Ok
+        else
+            commentLogger.error $"Operation {nameof self.Drop} Failed: Permission denied (comment id: {mapped.Id})"
+            |> Err
+
     interface IComment with
 
         member i.CanRead = impl.CanRead
@@ -180,4 +188,6 @@ type internal Comment
         member i.UpdateBody x = impl.UpdateBody x
         member i.UpdatePermission x = impl.UpdatePermission x
         member i.UpdateItem x y = impl.UpdateItem x y
+
         member i.NewComment x = impl.NewComment x
+        member i.Drop() = impl.Drop()

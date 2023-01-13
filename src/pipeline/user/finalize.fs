@@ -66,7 +66,7 @@ module IUserFinalizePipeline =
 
         let batch =
             finalizeBuilder.Batch.fullyBuild
-            <| fun fail id -> unwrapOr (data id) (fun _ -> fail id)
+            <| fun fail id -> unwrapOrEval (data id) (fun _ -> fail id)
 
         { new IUserFinalizePipeline with
             member self.Batch a = batch a }

@@ -57,7 +57,7 @@ module IUserModifyPipeline =
                 | _ -> None
 
             builder.fullyBuild
-            <| fun fail x -> unwrapOr (set field x) (fun _ -> fail x)
+            <| fun fail x -> unwrapOrEval (set field x) (fun _ -> fail x)
 
         let udf =
             Dict<_, _>()

@@ -67,7 +67,9 @@ type internal User
                 ||| r //可评论性与可见性默认相同
               Props = Map [] }
             |> mappedPostProvider.create
-            |> fun x -> Post(palaflake, x, mappedCommentProvider, db, mapped, postLogger, commentLogger) :> IPost
+            |> fun x ->
+                Post(palaflake, x, mappedPostProvider, mappedCommentProvider, db, mapped, postLogger, commentLogger)
+                :> IPost
             |> Ok
         else
             userLogger.error "Create Post Failed: Permission denied"
@@ -82,7 +84,16 @@ type internal User
             userLogger.error $"Get Post Failed: Invalid post id({id})"
             |> Err
         else
-            Post(palaflake, mappedPostProvider.fetch id, mappedCommentProvider, db, mapped, postLogger, commentLogger)
+            Post(
+                palaflake,
+                mappedPostProvider.fetch id,
+                mappedPostProvider,
+                mappedCommentProvider,
+                db,
+                mapped,
+                postLogger,
+                commentLogger
+            )
             :> IPost
             |> Ok
 
@@ -222,6 +233,7 @@ type internal User
                     Post(
                         palaflake,
                         mappedPostProvider.fetch (coerce x),
+                        mappedPostProvider,
                         mappedCommentProvider,
                         db,
                         mapped,
@@ -350,6 +362,14 @@ type internal User
             |> userLogger.error
             |> Err
 
+    member self.Drop() =
+        //TODO handle UAF problem
+        if self.WriteUserPermissionLv >= 2us then //TODO，暂不作实现，仅限pl_register(wu级别2)及root(wu级别3)访问
+            mappedUserProvider.delete mapped.Id |> Ok
+        else
+            postLogger.error $"Operation {nameof self.Drop} Failed: Permission denied (post id: {mapped.Id})"
+            |> Err
+
     interface IUser with
         member i.ReadPermissionLv =
             impl.ReadPermissionLv
@@ -380,8 +400,6 @@ type internal User
         member i.GetUser x = impl.GetUser x
         member i.UpdateItem x y = impl.UpdateItem x y
 
-        member i.NewUser x y z = impl.NewUser x y z
-        member i.NewPost x y = impl.NewPost x y
         member i.UpdateName x = impl.UpdateName x
         member i.UpdateEmail x = impl.UpdateEmail x
         member i.UpdatePermission x = impl.UpdatePermission x
@@ -392,3 +410,7 @@ type internal User
         member i.GetReadableComment() = impl.GetReadableComment()
         member i.GetWritableComment() = impl.GetWritableComment()
         member i.GetCommentableComment() = impl.GetCommentableComment()
+
+        member i.NewUser x y z = impl.NewUser x y z
+        member i.NewPost x y = impl.NewPost x y
+        member i.Drop() = impl.Drop()

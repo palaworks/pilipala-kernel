@@ -55,7 +55,7 @@ module IUserRenderPipeline =
                 |> fmap (fun v -> idVal, coerce v)
 
             builder.fullyBuild
-            <| fun fail id -> unwrapOr (get field id) (fun _ -> fail id)
+            <| fun fail id -> unwrapOrEval (get field id) (fun _ -> fail id)
 
         let name =
             gen renderBuilder.Name "user_name"

@@ -57,7 +57,7 @@ module IPostRenderPipeline =
                 |> fmap (fun v -> idVal, coerce v)
 
             builderItem.fullyBuild
-            <| fun fail id -> unwrapOr (get field id) (fun _ -> fail id)
+            <| fun fail id -> unwrapOrEval (get field id) (fun _ -> fail id)
 
         let title =
             gen renderBuilder.Title "post_title"
