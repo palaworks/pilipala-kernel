@@ -43,7 +43,7 @@ module IUserInitPipeline =
 
         let batch =
             initBuilder.Batch.fullyBuild
-            <| fun fail x -> unwrapOr (data x) (fun _ -> fail x)
+            <| fun fail x -> unwrapOrEval (data x) (fun _ -> fail x)
 
         { new IUserInitPipeline with
             member self.Batch a = batch a }

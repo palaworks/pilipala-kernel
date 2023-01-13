@@ -61,7 +61,7 @@ module IPostModifyPipeline =
                 | _ -> None
 
             builder.fullyBuild
-            <| fun fail x -> unwrapOr (set field x) (fun _ -> fail x)
+            <| fun fail x -> unwrapOrEval (set field x) (fun _ -> fail x)
 
         let title =
             gen modifyBuilder.Title "post_title"

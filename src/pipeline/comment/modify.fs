@@ -57,7 +57,7 @@ module ICommentModifyPipeline =
                 | _ -> None
 
             builder.fullyBuild
-            <| fun fail x -> unwrapOr (set field x) (fun _ -> fail x)
+            <| fun fail x -> unwrapOrEval (set field x) (fun _ -> fail x)
 
         let body =
             gen modifyBuilder.Body "comment_body"
@@ -88,7 +88,7 @@ module ICommentModifyPipeline =
                     None
 
             modifyBuilder.Binding.fullyBuild
-            <| fun fail x -> unwrapOr (setBinding x) (fun _ -> fail x)
+            <| fun fail x -> unwrapOrEval (setBinding x) (fun _ -> fail x)
 
         let createTime =
             gen modifyBuilder.CreateTime "comment_create_time"

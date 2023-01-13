@@ -14,6 +14,7 @@ type internal Post
     (
         palaflake: IPalaflakeGenerator,
         mapped: IMappedPost,
+        mappedPostProvider: IMappedPostProvider,
         mappedCommentProvider: IMappedCommentProvider,
         db: IDbOperationBuilder,
         user: IMappedUser,
@@ -190,6 +191,14 @@ type internal Post
             postLogger.error $"Operation {nameof self.NewComment} Failed: Permission denied (post id: {mapped.Id})"
             |> Err
 
+    member self.Drop() =
+        //TODO handle UAF problem
+        if self.CanWrite then
+            mappedPostProvider.delete mapped.Id |> Ok
+        else
+            postLogger.error $"Operation {nameof self.Drop} Failed: Permission denied (post id: {mapped.Id})"
+            |> Err
+
     interface IPost with
 
         member i.CanRead = impl.CanRead
@@ -211,4 +220,6 @@ type internal Post
         member i.UpdateBody x = impl.UpdateBody x
         member i.UpdateItem x y = impl.UpdateItem x y
         member i.UpdatePermission x = impl.UpdatePermission x
+
         member i.NewComment x = impl.NewComment x
+        member i.Drop() = impl.Drop()

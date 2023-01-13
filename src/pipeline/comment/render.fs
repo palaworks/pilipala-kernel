@@ -57,7 +57,7 @@ module ICommentRenderPipeline =
                 |> fmap (fun v -> idVal, coerce v)
 
             builder.fullyBuild
-            <| fun fail id -> unwrapOr (get field id) (fun _ -> fail id)
+            <| fun fail id -> unwrapOrEval (get field id) (fun _ -> fail id)
 
         let body =
             gen renderBuilder.Body "comment_body"
@@ -84,7 +84,7 @@ module ICommentRenderPipeline =
                                     Some(id, BindPost comment_binding)
 
             renderBuilder.Binding.fullyBuild
-            <| fun fail id -> unwrapOr (getBinding id) (fun _ -> fail id)
+            <| fun fail id -> unwrapOrEval (getBinding id) (fun _ -> fail id)
 
         let createTime =
             gen renderBuilder.CreateTime "comment_create_time"
