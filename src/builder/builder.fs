@@ -111,17 +111,16 @@ type Builder with
                     ))
         .> self.pipeline //use...
         .> fun sc -> //添加已注册日志
-            let lr: LoggerRegister =
-                sc.BuildServiceProvider().GetRequiredService()
+            let lr: LoggerRegister = sc.BuildServiceProvider().GetRequiredService()
 
-            sc.AddLogging (fun builder ->
+            sc.AddLogging(fun builder ->
                 lr.LoggerFilters.foldr
-                <| (fun (k, v) (acc: ILoggingBuilder) -> acc.AddFilter(k, v))
+                <| fun (k, v) (acc: ILoggingBuilder) -> acc.AddFilter(k, v)
                 <| builder
                 |> ignore
 
                 lr.LoggerProviders.foldr
-                <| (fun p (acc: ILoggingBuilder) -> acc.AddProvider p)
+                <| fun p (acc: ILoggingBuilder) -> acc.AddProvider p
                 <| builder
                 |> ignore)
         //before build
@@ -180,6 +179,19 @@ type Builder with
                     .AddSingleton<IUserModifyPipeline>(fun _ -> sp.GetRequiredService())
                     .AddSingleton<IUserFinalizePipeline>(fun _ -> sp.GetRequiredService())
                     .AddSingleton<IMappedUserProvider>(fun _ -> sp.GetRequiredService())
+                    //configure logger
+                    .AddLogging(fun builder ->
+                        let lr: LoggerRegister = sp.GetRequiredService()
+
+                        lr.LoggerFilters.foldr
+                        <| fun (k, v) (builder: ILoggingBuilder) -> builder.AddFilter(k, v)
+                        <| builder
+                        |> ignore
+
+                        lr.LoggerProviders.foldr
+                        <| fun p (builder: ILoggingBuilder) -> builder.AddProvider p
+                        <| builder
+                        |> ignore)
                     //...
                     .AddSingleton(
                         pluginType
@@ -223,6 +235,19 @@ type Builder with
                         .AddSingleton<IUserModifyPipeline>(fun _ -> sp.GetRequiredService())
                         .AddSingleton<IUserFinalizePipeline>(fun _ -> sp.GetRequiredService())
                         .AddSingleton<IMappedUserProvider>(fun _ -> sp.GetRequiredService())
+                        //configure logger
+                        .AddLogging(fun builder ->
+                            let lr: LoggerRegister = sp.GetRequiredService()
+
+                            lr.LoggerFilters.foldr
+                            <| fun (k, v) (builder: ILoggingBuilder) -> builder.AddFilter(k, v)
+                            <| builder
+                            |> ignore
+
+                            lr.LoggerProviders.foldr
+                            <| fun p (builder: ILoggingBuilder) -> builder.AddProvider p
+                            <| builder
+                            |> ignore)
                         //...
                         .AddSingleton(
                             pluginType
