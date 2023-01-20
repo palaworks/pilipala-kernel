@@ -24,36 +24,54 @@ type Builder =
 module Builder =
     let make () = { pipeline = id }
 
+module ext_IServiceCollection =
+    type IServiceCollection with
+
+        member self.addTransient(f: _ -> 't) = self.AddTransient<'t> f
+        member self.addScoped(f: _ -> 't) = self.AddScoped<'t> f
+        member self.addSingleton(f: _ -> 't) = self.AddSingleton<'t> f
+        member self.addSingletonValue(v: 'v) = self.AddSingleton<'v> v
+        member self.addSingletonType(t: Type) = self.AddSingleton t
+
+        member self.configureLogging(lr: LoggerRegister) =
+            self.AddLogging(fun builder -> lr.configure builder)
+
+open ext_IServiceCollection
+
 type Builder with
 
     member self.build() =
         fun (sc: IServiceCollection) ->
             sc
-                .AddSingleton<_>( //日志注册器
+                //日志注册器
+                .addSingletonValue(
                     { LoggerProviders = []
                       LoggerFilters = [] }
                 )
-                .AddSingleton<_>({ BeforeBuild = []; AfterBuild = [] }) //插件注册器
+                //插件注册器
+                .addSingletonValue(
+                    { BeforeBuild = []; AfterBuild = [] }
+                )
                 //ID生成器
-                .AddSingleton<IPalaflakeGenerator>(fun _ -> IPalaflakeGenerator.make 01uy)
-                .AddSingleton<IUuidGenerator>(fun _ -> IUuidGenerator.make ())
+                .addSingleton(fun _ -> IPalaflakeGenerator.make 01uy)
+                .addSingleton(fun _ -> IUuidGenerator.make ())
                 //文章管道构造器
-                .AddSingleton<IPostInitPipelineBuilder>(fun _ -> IPostInitPipelineBuilder.make ())
-                .AddSingleton<IPostRenderPipelineBuilder>(fun _ -> IPostRenderPipelineBuilder.make ())
-                .AddSingleton<IPostModifyPipelineBuilder>(fun _ -> IPostModifyPipelineBuilder.make ())
-                .AddSingleton<IPostFinalizePipelineBuilder>(fun _ -> IPostFinalizePipelineBuilder.make ())
+                .addSingleton(fun _ -> IPostInitPipelineBuilder.make ())
+                .addSingleton(fun _ -> IPostRenderPipelineBuilder.make ())
+                .addSingleton(fun _ -> IPostModifyPipelineBuilder.make ())
+                .addSingleton(fun _ -> IPostFinalizePipelineBuilder.make ())
                 //文章管道
-                .AddTransient<_>(fun sf -> IPostInitPipeline.make (sf.GetRequiredService(), sf.GetRequiredService()))
-                .AddTransient<_>(fun sf -> IPostRenderPipeline.make (sf.GetRequiredService(), sf.GetRequiredService()))
-                .AddTransient<_>(fun sf -> IPostModifyPipeline.make (sf.GetRequiredService(), sf.GetRequiredService()))
-                .AddTransient<_>(fun sf ->
+                .addTransient(fun sf -> IPostInitPipeline.make (sf.GetRequiredService(), sf.GetRequiredService()))
+                .addTransient(fun sf -> IPostRenderPipeline.make (sf.GetRequiredService(), sf.GetRequiredService()))
+                .addTransient(fun sf -> IPostModifyPipeline.make (sf.GetRequiredService(), sf.GetRequiredService()))
+                .addTransient(fun sf ->
                     IPostFinalizePipeline.make (
                         sf.GetRequiredService(),
                         sf.GetRequiredService(),
                         sf.GetRequiredService()
                     ))
                 //映射文章提供器
-                .AddTransient<_>(fun sf ->
+                .addTransient(fun sf ->
                     IMappedPostProvider.make (
                         sf.GetRequiredService(),
                         sf.GetRequiredService(),
@@ -61,24 +79,22 @@ type Builder with
                         sf.GetRequiredService()
                     ))
                 //评论管道构造器
-                .AddSingleton<ICommentInitPipelineBuilder>(fun _ -> ICommentInitPipelineBuilder.make ())
-                .AddSingleton<ICommentRenderPipelineBuilder>(fun _ -> ICommentRenderPipelineBuilder.make ())
-                .AddSingleton<ICommentModifyPipelineBuilder>(fun _ -> ICommentModifyPipelineBuilder.make ())
-                .AddSingleton<ICommentFinalizePipelineBuilder>(fun _ -> ICommentFinalizePipelineBuilder.make ())
+                .addSingleton(fun _ -> ICommentInitPipelineBuilder.make ())
+                .addSingleton(fun _ -> ICommentRenderPipelineBuilder.make ())
+                .addSingleton(fun _ -> ICommentModifyPipelineBuilder.make ())
+                .addSingleton(fun _ -> ICommentFinalizePipelineBuilder.make ())
                 //评论管道
-                .AddTransient<_>(fun sf -> ICommentInitPipeline.make (sf.GetRequiredService(), sf.GetRequiredService()))
-                .AddTransient<_>(fun sf ->
-                    ICommentRenderPipeline.make (sf.GetRequiredService(), sf.GetRequiredService()))
-                .AddTransient<_>(fun sf ->
-                    ICommentModifyPipeline.make (sf.GetRequiredService(), sf.GetRequiredService()))
-                .AddTransient<_>(fun sf ->
+                .addTransient(fun sf -> ICommentInitPipeline.make (sf.GetRequiredService(), sf.GetRequiredService()))
+                .addTransient(fun sf -> ICommentRenderPipeline.make (sf.GetRequiredService(), sf.GetRequiredService()))
+                .addTransient(fun sf -> ICommentModifyPipeline.make (sf.GetRequiredService(), sf.GetRequiredService()))
+                .addTransient(fun sf ->
                     ICommentFinalizePipeline.make (
                         sf.GetRequiredService(),
                         sf.GetRequiredService(),
                         sf.GetRequiredService()
                     ))
                 //映射评论提供器
-                .AddTransient<_>(fun sf ->
+                .addTransient(fun sf ->
                     IMappedCommentProvider.make (
                         sf.GetRequiredService(),
                         sf.GetRequiredService(),
@@ -86,23 +102,23 @@ type Builder with
                         sf.GetRequiredService()
                     ))
                 //用户管道构造器
-                .AddSingleton<IUserInitPipelineBuilder>(fun _ -> IUserInitPipelineBuilder.make ())
-                .AddSingleton<IUserRenderPipelineBuilder>(fun _ -> IUserRenderPipelineBuilder.make ())
-                .AddSingleton<IUserModifyPipelineBuilder>(fun _ -> IUserModifyPipelineBuilder.make ())
-                .AddSingleton<IUserFinalizePipelineBuilder>(fun _ -> IUserFinalizePipelineBuilder.make ())
+                .addSingleton(fun _ -> IUserInitPipelineBuilder.make ())
+                .addSingleton(fun _ -> IUserRenderPipelineBuilder.make ())
+                .addSingleton(fun _ -> IUserModifyPipelineBuilder.make ())
+                .addSingleton(fun _ -> IUserFinalizePipelineBuilder.make ())
                 //用户管道
-                .AddTransient<_>(fun sf ->
+                .addTransient(fun sf ->
                     IUserInitPipeline.make (sf.GetRequiredService(), sf.GetRequiredService(), sf.GetRequiredService()))
-                .AddTransient<_>(fun sf -> IUserRenderPipeline.make (sf.GetRequiredService(), sf.GetRequiredService()))
-                .AddTransient<_>(fun sf -> IUserModifyPipeline.make (sf.GetRequiredService(), sf.GetRequiredService()))
-                .AddTransient<_>(fun sf ->
+                .addTransient(fun sf -> IUserRenderPipeline.make (sf.GetRequiredService(), sf.GetRequiredService()))
+                .addTransient(fun sf -> IUserModifyPipeline.make (sf.GetRequiredService(), sf.GetRequiredService()))
+                .addTransient(fun sf ->
                     IUserFinalizePipeline.make (
                         sf.GetRequiredService(),
                         sf.GetRequiredService(),
                         sf.GetRequiredService()
                     ))
                 //映射用户提供器
-                .AddTransient<_>(fun sf ->
+                .addTransient (fun sf ->
                     IMappedUserProvider.make (
                         sf.GetRequiredService(),
                         sf.GetRequiredService(),
@@ -111,22 +127,11 @@ type Builder with
                     ))
         .> self.pipeline //use...
         .> fun sc -> //添加已注册日志
-            let lr: LoggerRegister = sc.BuildServiceProvider().GetRequiredService()
-
-            sc.AddLogging(fun builder ->
-                lr.LoggerFilters.foldr
-                <| fun (k, v) (acc: ILoggingBuilder) -> acc.AddFilter(k, v)
-                <| builder
-                |> ignore
-
-                lr.LoggerProviders.foldr
-                <| fun p (acc: ILoggingBuilder) -> acc.AddProvider p
-                <| builder
-                |> ignore)
+            sc.configureLogging (sc.BuildServiceProvider().GetRequiredService(): LoggerRegister)
         //before build
         .> fun sc ->
             sc
-                .AddSingleton<IApp, _>(fun sf ->
+                .addSingleton(fun sf ->
                     App(
                         sf.GetRequiredService(),
                         sf.GetRequiredService(),
@@ -137,7 +142,7 @@ type Builder with
                         sf.GetRequiredService(),
                         sf.GetRequiredService(),
                         sf.GetRequiredService()
-                    ))
+                    ): IApp)
                 .BuildServiceProvider()
         .> fun sp ->
             sp //启动BeforeBuild生命周期插件
@@ -147,53 +152,44 @@ type Builder with
             <| fun pluginType (acc: IServiceProvider) ->
                 //在新的容器中限定插件资产以及标识作用域
                 ServiceCollection()
-                    .AddSingleton<IDbOperationBuilder>(fun _ -> sp.GetRequiredService())
-                    .AddSingleton<IPluginCfgProvider>(fun _ -> IPluginCfgProvider.make pluginType)
+                    .addSingleton(fun _ -> sp.GetRequiredService(): IDbOperationBuilder)
+                    .addSingleton(fun _ -> IPluginCfgProvider.make pluginType)
                     //文章构造资产
-                    .AddSingleton<IPostInitPipelineBuilder>(fun _ -> sp.GetRequiredService())
-                    .AddSingleton<IPostRenderPipelineBuilder>(fun _ -> sp.GetRequiredService())
-                    .AddSingleton<IPostModifyPipelineBuilder>(fun _ -> sp.GetRequiredService())
-                    .AddSingleton<IPostFinalizePipelineBuilder>(fun _ -> sp.GetRequiredService())
-                    .AddTransient<IPostInitPipeline>(fun _ -> sp.GetRequiredService())
-                    .AddTransient<IPostRenderPipeline>(fun _ -> sp.GetRequiredService())
-                    .AddTransient<IPostModifyPipeline>(fun _ -> sp.GetRequiredService())
-                    .AddTransient<IPostFinalizePipeline>(fun _ -> sp.GetRequiredService())
-                    .AddTransient<IMappedPostProvider>(fun _ -> sp.GetRequiredService())
+                    .addSingleton(fun _ -> sp.GetRequiredService(): IPostInitPipelineBuilder)
+                    .addSingleton(fun _ -> sp.GetRequiredService(): IPostRenderPipelineBuilder)
+                    .addSingleton(fun _ -> sp.GetRequiredService(): IPostModifyPipelineBuilder)
+                    .addSingleton(fun _ -> sp.GetRequiredService(): IPostFinalizePipelineBuilder)
+                    .addTransient(fun _ -> sp.GetRequiredService(): IPostInitPipeline)
+                    .addTransient(fun _ -> sp.GetRequiredService(): IPostRenderPipeline)
+                    .addTransient(fun _ -> sp.GetRequiredService(): IPostModifyPipeline)
+                    .addTransient(fun _ -> sp.GetRequiredService(): IPostFinalizePipeline)
+                    .addTransient(fun _ -> sp.GetRequiredService(): IMappedPostProvider)
                     //评论构造资产
-                    .AddSingleton<ICommentInitPipelineBuilder>(fun _ -> sp.GetRequiredService())
-                    .AddSingleton<ICommentRenderPipelineBuilder>(fun _ -> sp.GetRequiredService())
-                    .AddSingleton<ICommentModifyPipelineBuilder>(fun _ -> sp.GetRequiredService())
-                    .AddSingleton<ICommentFinalizePipelineBuilder>(fun _ -> sp.GetRequiredService())
-                    .AddSingleton<ICommentInitPipeline>(fun _ -> sp.GetRequiredService())
-                    .AddSingleton<ICommentRenderPipeline>(fun _ -> sp.GetRequiredService())
-                    .AddSingleton<ICommentModifyPipeline>(fun _ -> sp.GetRequiredService())
-                    .AddSingleton<ICommentFinalizePipeline>(fun _ -> sp.GetRequiredService())
-                    .AddSingleton<IMappedCommentProvider>(fun _ -> sp.GetRequiredService())
+                    .addSingleton(fun _ -> sp.GetRequiredService(): ICommentInitPipelineBuilder)
+                    .addSingleton(fun _ -> sp.GetRequiredService(): ICommentRenderPipelineBuilder)
+                    .addSingleton(fun _ -> sp.GetRequiredService(): ICommentModifyPipelineBuilder)
+                    .addSingleton(fun _ -> sp.GetRequiredService(): ICommentFinalizePipelineBuilder)
+                    .addSingleton(fun _ -> sp.GetRequiredService(): ICommentInitPipeline)
+                    .addSingleton(fun _ -> sp.GetRequiredService(): ICommentRenderPipeline)
+                    .addSingleton(fun _ -> sp.GetRequiredService(): ICommentModifyPipeline)
+                    .addSingleton(fun _ -> sp.GetRequiredService(): ICommentFinalizePipeline)
+                    .addSingleton(fun _ -> sp.GetRequiredService(): IMappedCommentProvider)
                     //用户构造资产
-                    .AddSingleton<IUserInitPipelineBuilder>(fun _ -> sp.GetRequiredService())
-                    .AddSingleton<IUserRenderPipelineBuilder>(fun _ -> sp.GetRequiredService())
-                    .AddSingleton<IUserModifyPipelineBuilder>(fun _ -> sp.GetRequiredService())
-                    .AddSingleton<IUserFinalizePipelineBuilder>(fun _ -> sp.GetRequiredService())
-                    .AddSingleton<IUserInitPipeline>(fun _ -> sp.GetRequiredService())
-                    .AddSingleton<IUserRenderPipeline>(fun _ -> sp.GetRequiredService())
-                    .AddSingleton<IUserModifyPipeline>(fun _ -> sp.GetRequiredService())
-                    .AddSingleton<IUserFinalizePipeline>(fun _ -> sp.GetRequiredService())
-                    .AddSingleton<IMappedUserProvider>(fun _ -> sp.GetRequiredService())
-                    //configure logger
-                    .AddLogging(fun builder ->
-                        let lr: LoggerRegister = sp.GetRequiredService()
-
-                        lr.LoggerFilters.foldr
-                        <| fun (k, v) (builder: ILoggingBuilder) -> builder.AddFilter(k, v)
-                        <| builder
-                        |> ignore
-
-                        lr.LoggerProviders.foldr
-                        <| fun p (builder: ILoggingBuilder) -> builder.AddProvider p
-                        <| builder
-                        |> ignore)
+                    .addSingleton(fun _ -> sp.GetRequiredService(): IUserInitPipelineBuilder)
+                    .addSingleton(fun _ -> sp.GetRequiredService(): IUserRenderPipelineBuilder)
+                    .addSingleton(fun _ -> sp.GetRequiredService(): IUserModifyPipelineBuilder)
+                    .addSingleton(fun _ -> sp.GetRequiredService(): IUserFinalizePipelineBuilder)
+                    .addSingleton(fun _ -> sp.GetRequiredService(): IUserInitPipeline)
+                    .addSingleton(fun _ -> sp.GetRequiredService(): IUserRenderPipeline)
+                    .addSingleton(fun _ -> sp.GetRequiredService(): IUserModifyPipeline)
+                    .addSingleton(fun _ -> sp.GetRequiredService(): IUserFinalizePipeline)
+                    .addSingleton(fun _ -> sp.GetRequiredService(): IMappedUserProvider)
                     //...
-                    .AddSingleton(
+                    .configureLogging(
+                        sp.GetRequiredService(): LoggerRegister
+                    )
+                    //...
+                    .addSingletonType(
                         pluginType
                     )
                     .BuildServiceProvider()
@@ -214,42 +210,33 @@ type Builder with
                 <| fun pluginType (acc: IServiceProvider) ->
                     //在新的容器中限定插件资产以及标识作用域
                     ServiceCollection()
-                        .AddSingleton<IApp>(fun _ -> app)
-                        .AddSingleton<IDbOperationBuilder>(fun _ -> sp.GetRequiredService())
-                        .AddSingleton<IPluginCfgProvider>(fun _ -> IPluginCfgProvider.make pluginType)
+                        .addSingleton(fun _ -> app) //IAPP
+                        .addSingleton(fun _ -> sp.GetRequiredService(): IDbOperationBuilder)
+                        .addSingleton(fun _ -> IPluginCfgProvider.make pluginType)
                         //文章管道资产
-                        .AddTransient<IPostInitPipeline>(fun _ -> sp.GetRequiredService())
-                        .AddTransient<IPostRenderPipeline>(fun _ -> sp.GetRequiredService())
-                        .AddTransient<IPostModifyPipeline>(fun _ -> sp.GetRequiredService())
-                        .AddTransient<IPostFinalizePipeline>(fun _ -> sp.GetRequiredService())
-                        .AddTransient<IMappedPostProvider>(fun _ -> sp.GetRequiredService())
+                        .addTransient(fun _ -> sp.GetRequiredService(): IPostInitPipeline)
+                        .addTransient(fun _ -> sp.GetRequiredService(): IPostRenderPipeline)
+                        .addTransient(fun _ -> sp.GetRequiredService(): IPostModifyPipeline)
+                        .addTransient(fun _ -> sp.GetRequiredService(): IPostFinalizePipeline)
+                        .addTransient(fun _ -> sp.GetRequiredService(): IMappedPostProvider)
                         //评论管道资产
-                        .AddSingleton<ICommentInitPipeline>(fun _ -> sp.GetRequiredService())
-                        .AddSingleton<ICommentRenderPipeline>(fun _ -> sp.GetRequiredService())
-                        .AddSingleton<ICommentModifyPipeline>(fun _ -> sp.GetRequiredService())
-                        .AddSingleton<ICommentFinalizePipeline>(fun _ -> sp.GetRequiredService())
-                        .AddSingleton<IMappedCommentProvider>(fun _ -> sp.GetRequiredService())
+                        .addSingleton(fun _ -> sp.GetRequiredService(): ICommentInitPipeline)
+                        .addSingleton(fun _ -> sp.GetRequiredService(): ICommentRenderPipeline)
+                        .addSingleton(fun _ -> sp.GetRequiredService(): ICommentModifyPipeline)
+                        .addSingleton(fun _ -> sp.GetRequiredService(): ICommentFinalizePipeline)
+                        .addSingleton(fun _ -> sp.GetRequiredService(): IMappedCommentProvider)
                         //用户管道资产
-                        .AddSingleton<IUserInitPipeline>(fun _ -> sp.GetRequiredService())
-                        .AddSingleton<IUserRenderPipeline>(fun _ -> sp.GetRequiredService())
-                        .AddSingleton<IUserModifyPipeline>(fun _ -> sp.GetRequiredService())
-                        .AddSingleton<IUserFinalizePipeline>(fun _ -> sp.GetRequiredService())
-                        .AddSingleton<IMappedUserProvider>(fun _ -> sp.GetRequiredService())
-                        //configure logger
-                        .AddLogging(fun builder ->
-                            let lr: LoggerRegister = sp.GetRequiredService()
-
-                            lr.LoggerFilters.foldr
-                            <| fun (k, v) (builder: ILoggingBuilder) -> builder.AddFilter(k, v)
-                            <| builder
-                            |> ignore
-
-                            lr.LoggerProviders.foldr
-                            <| fun p (builder: ILoggingBuilder) -> builder.AddProvider p
-                            <| builder
-                            |> ignore)
+                        .addSingleton(fun _ -> sp.GetRequiredService(): IUserInitPipeline)
+                        .addSingleton(fun _ -> sp.GetRequiredService(): IUserRenderPipeline)
+                        .addSingleton(fun _ -> sp.GetRequiredService(): IUserModifyPipeline)
+                        .addSingleton(fun _ -> sp.GetRequiredService(): IUserFinalizePipeline)
+                        .addSingleton(fun _ -> sp.GetRequiredService(): IMappedUserProvider)
                         //...
-                        .AddSingleton(
+                        .configureLogging(
+                            sp.GetRequiredService(): LoggerRegister
+                        )
+                        //...
+                        .addSingletonType(
                             pluginType
                         )
                         .BuildServiceProvider()

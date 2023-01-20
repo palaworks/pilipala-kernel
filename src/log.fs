@@ -1,8 +1,6 @@
 namespace pilipala.log
 
-open System.Collections.Generic
-open Microsoft.Extensions.Logging.Configuration
-open fsharper.alias
+open fsharper.op
 open Microsoft.Extensions.Logging
 
 type LoggerRegister =
@@ -19,3 +17,14 @@ type LoggerRegister with
     /// 注册日志过滤器
     member self.registerLoggerFilter(category: string, lv: LogLevel) =
         { self with LoggerFilters = (category, lv) :: self.LoggerFilters }
+
+    member self.configure(builder: ILoggingBuilder) =
+        self.LoggerFilters.foldr
+        <| fun (k, v) (builder: ILoggingBuilder) -> builder.AddFilter(k, v)
+        <| builder
+        |> ignore
+
+        self.LoggerProviders.foldr
+        <| fun p (builder: ILoggingBuilder) -> builder.AddProvider p
+        <| builder
+        |> ignore
