@@ -35,7 +35,7 @@ type App
                   execute
               }
               >>= fun x ->
-                      if pwd.bcrypt.Verify(coerce x.["user_pwd_hash"]) then
+                      if { bcrypt = coerce x.["user_pwd_hash"] }.Verify pwd then
                           Some(id, coerce x.["user_name"])
                       else
                           None
