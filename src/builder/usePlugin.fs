@@ -4,11 +4,9 @@ module pilipala.builder.usePlugin
 open System
 open System.IO
 open System.Reflection
-open System.Runtime.Loader
+open Microsoft.Extensions.DependencyInjection
 open fsharper.op
 open fsharper.typ
-open Microsoft.Extensions.DependencyInjection
-open pilipala.log
 open pilipala.plugin
 open pilipala.util.di
 open pilipala.plugin.util

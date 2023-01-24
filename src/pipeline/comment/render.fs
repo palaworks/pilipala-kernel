@@ -71,18 +71,20 @@ module ICommentRenderPipeline =
                     getFstVal "comment_binding_id" "comment_id" id
                     execute
                 }
-                >>= fun (comment_binding_id: i64) ->
-                        coerce
-                        <%> db {
-                            inComment
-                            getFstVal "comment_is_reply" "comment_id" id
-                            execute
-                        }
-                        >>= fun (comment_is_reply: bool) ->
-                                if comment_is_reply then
-                                    Some(id, BindComment comment_binding_id)
-                                else
-                                    Some(id, BindPost comment_binding_id)
+                |> bind
+                <| fun (comment_binding_id: i64) ->
+                    coerce
+                    <%> db {
+                        inComment
+                        getFstVal "comment_is_reply" "comment_id" id
+                        execute
+                    }
+                    |> bind
+                    <| fun (comment_is_reply: bool) ->
+                        if comment_is_reply then
+                            Some(id, BindComment comment_binding_id)
+                        else
+                            Some(id, BindPost comment_binding_id)
 
             renderBuilder.Binding.fullyBuild
             <| fun fail id -> unwrapOrEval (getBinding id) (fun _ -> fail id)

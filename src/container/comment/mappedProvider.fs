@@ -2,7 +2,6 @@
 
 open fsharper.op
 open fsharper.typ
-open fsharper.op.Foldable
 open fsharper.op.Pattern
 open pilipala.container.comment
 open pilipala.pipeline.comment

@@ -57,20 +57,11 @@ module IUserRenderPipeline =
             builder.fullyBuild
             <| fun fail id -> unwrapOrEval (get field id) (fun _ -> fail id)
 
-        let name =
-            gen renderBuilder.Name "user_name"
-
-        let email =
-            gen renderBuilder.Email "user_email"
-
-        let createTime =
-            gen renderBuilder.CreateTime "user_create_time"
-
-        let accessTime =
-            gen renderBuilder.AccessTime "user_access_time"
-
-        let permission =
-            gen renderBuilder.Permission "user_permission"
+        let name = gen renderBuilder.Name "user_name"
+        let email = gen renderBuilder.Email "user_email"
+        let createTime = gen renderBuilder.CreateTime "user_create_time"
+        let accessTime = gen renderBuilder.AccessTime "user_access_time"
+        let permission = gen renderBuilder.Permission "user_permission"
 
         let udf =
             Dict<_, _>()

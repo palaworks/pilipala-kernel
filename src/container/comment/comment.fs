@@ -4,8 +4,8 @@ open System
 open Microsoft.Extensions.Logging
 open fsharper.typ
 open fsharper.alias
-open pilipala.data.db
 open pilipala.id
+open pilipala.data.db
 open pilipala.util.log
 open pilipala.access.user
 

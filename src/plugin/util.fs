@@ -2,14 +2,10 @@ module pilipala.plugin.util
 
 open System
 open System.Runtime.Loader
-open fsharper.typ
 
 let pluginCtx pluginDllPath =
 
-    let main_ctx = AssemblyLoadContext.Default
-
-    let resolver =
-        AssemblyDependencyResolver(pluginDllPath)
+    let resolver = AssemblyDependencyResolver(pluginDllPath)
 
     { new AssemblyLoadContext() with
 

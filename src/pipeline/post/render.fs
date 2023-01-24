@@ -1,6 +1,5 @@
 namespace pilipala.pipeline.post
 
-open System
 open System.Collections
 open System.Collections.Generic
 open fsharper.op
@@ -59,26 +58,13 @@ module IPostRenderPipeline =
             builderItem.fullyBuild
             <| fun fail id -> unwrapOrEval (get field id) (fun _ -> fail id)
 
-        let title =
-            gen renderBuilder.Title "post_title"
-
-        let body =
-            gen renderBuilder.Body "post_body"
-
-        let createTime =
-            gen renderBuilder.CreateTime "post_create_time"
-
-        let accessTime =
-            gen renderBuilder.AccessTime "post_access_time"
-
-        let modifyTime =
-            gen renderBuilder.ModifyTime "post_modify_time"
-
-        let userId =
-            gen renderBuilder.UserId "user_id"
-
-        let permission =
-            gen renderBuilder.Permission "post_permission"
+        let title = gen renderBuilder.Title "post_title"
+        let body = gen renderBuilder.Body "post_body"
+        let createTime = gen renderBuilder.CreateTime "post_create_time"
+        let accessTime = gen renderBuilder.AccessTime "post_access_time"
+        let modifyTime = gen renderBuilder.ModifyTime "post_modify_time"
+        let userId = gen renderBuilder.UserId "user_id"
+        let permission = gen renderBuilder.Permission "post_permission"
 
         let udf =
             Dict<_, _>()

@@ -5,7 +5,6 @@ open fsharper.op
 open fsharper.typ
 open fsharper.alias
 open fsharper.op.Pattern
-open fsharper.op.Foldable
 open pilipala.data.db
 open pilipala.pipeline
 open pilipala.container.post
@@ -48,12 +47,14 @@ module IPostFinalizePipeline =
                     map.Add(name, valueF post_id)
                 <| Map []
 
-            if db {
-                inPost
-                delete "post_id" post_id
-                whenEq 1
-                execute
-            } = 1 then
+            if
+                db {
+                    inPost
+                    delete "post_id" post_id
+                    whenEq 1
+                    execute
+                } = 1
+            then
                 { Id = post_id //回送被删除的文章
                   Title = coerce db_data.["post_title"]
                   Body = coerce db_data.["post_body"]

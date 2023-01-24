@@ -25,6 +25,7 @@ type PluginRegister =
 
 //最终整合时应使用foldr以保证顺序
 type PluginRegister with
+
     member self.registerPlugin t hookTime =
         if hookTime = AppLifeCycle.BeforeBuild then
             { self with BeforeBuild = t :: self.BeforeBuild }

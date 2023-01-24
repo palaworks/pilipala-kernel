@@ -47,11 +47,7 @@ let make
 
                 member i.Item
                     with get name = fmap ((apply ..> snd) post_id) render.[name]
-                    and set name v =
-                        bind
-                        <| v
-                        <| fun v -> fmap (apply (post_id, v)) modify.[name]
-                        |> ignore }
+                    and set name v = v.bind (fun v -> fmap (apply (post_id, v)) modify.[name]) |> ignore }
 
         member self.create post =
             self.fetch (init.Batch post)
