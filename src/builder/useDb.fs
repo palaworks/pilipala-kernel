@@ -1,8 +1,8 @@
 [<AutoOpen>]
 module pilipala.builder.useDb
 
-open fsharper.typ
 open Microsoft.Extensions.DependencyInjection
+open fsharper.typ
 open pilipala.builder
 open pilipala.data.db
 

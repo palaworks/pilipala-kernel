@@ -5,7 +5,6 @@ open fsharper.op
 open fsharper.typ
 open fsharper.alias
 open fsharper.op.Pattern
-open fsharper.op.Foldable
 open pilipala.data.db
 open pilipala.pipeline
 open pilipala.access.user
@@ -47,12 +46,14 @@ module IUserFinalizePipeline =
                     map.Add(name, valueF user_id)
                 <| Map []
 
-            if db {
-                inUser
-                delete "user_id" user_id
-                whenEq 1
-                execute
-            } = 1 then
+            if
+                db {
+                    inUser
+                    delete "user_id" user_id
+                    whenEq 1
+                    execute
+                } = 1
+            then
                 { Id = user_id
                   Name = coerce db_data.["user_name"]
                   Email = coerce db_data.["user_email"]

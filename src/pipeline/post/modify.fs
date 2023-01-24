@@ -88,13 +88,9 @@ module IPostModifyPipeline =
             <| fun fail x -> unwrapOrEval (set x) (fun _ -> fail x)
 
         let createTime = gen modifyBuilder.CreateTime "post_create_time"
-
         let accessTime = gen modifyBuilder.AccessTime "post_access_time"
-
         let modifyTime = gen modifyBuilder.ModifyTime "post_modify_time"
-
         let userId = gen modifyBuilder.UserId "user_id"
-
         let permission = gen modifyBuilder.Permission "post_permission"
 
         let udf =

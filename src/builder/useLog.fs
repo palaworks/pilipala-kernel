@@ -1,8 +1,8 @@
 [<AutoOpen>]
 module pilipala.builder.useLog
 
-open fsharper.typ
 open Microsoft.Extensions.DependencyInjection
+open fsharper.typ
 open pilipala.log
 open pilipala.util.di
 

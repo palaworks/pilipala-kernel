@@ -7,8 +7,7 @@ module IPluginCfgProvider =
 
     let make (t: Type) =
 
-        let configPath =
-            $"./config/plugin/{t.Name}/config.json"
+        let configPath = $"./config/plugin/{t.Name}/config.json"
 
         { new IPluginCfgProvider with
             member i.config

@@ -3,7 +3,6 @@ namespace pilipala
 open Microsoft.Extensions.Logging
 open fsharper.op
 open fsharper.typ
-open fsharper.alias
 open pilipala.id
 open pilipala.data.db
 open pilipala.util.log
@@ -30,22 +29,23 @@ type App
         let sql =
             $"SELECT user_name, user_pwd_hash FROM {db.tables.user} WHERE user_id = :user_id"
 
-        match db {
-                  getFstRow sql [ ("user_id", id) ]
-                  execute
-              }
-              >>= fun x ->
-                      if { bcrypt = coerce x.["user_pwd_hash"] }.Verify pwd then
-                          Some(id, coerce x.["user_name"])
-                      else
-                          None
-            with
+        match
+            db {
+                getFstRow sql [ ("user_id", id) ]
+                execute
+            }
+            |> bind
+            <| fun x ->
+                if { bcrypt = coerce x.["user_pwd_hash"] }.Verify pwd then
+                    Some(id, coerce x.["user_name"])
+                else
+                    None
+        with
         | None ->
             mainLogger.error $"User login failed: Invalid user id({id}) or password({pwd})"
             |> Err
         | Some (id, name) ->
-            mainLogger.info $"User login success: {name}"
-            |> ignore
+            mainLogger.info $"User login success: {name}" |> ignore
 
             let mappedUser = mappedUserProvider.fetch id
 
@@ -68,22 +68,23 @@ type App
         let sql =
             $"SELECT user_id, user_pwd_hash FROM {db.tables.user} WHERE user_name = :user_name"
 
-        match db {
-                  getFstRow sql [ ("user_name", name) ]
-                  execute
-              }
-              >>= fun x ->
-                      if { bcrypt = coerce x.["user_pwd_hash"] }.Verify pwd then
-                          Some(coerce x.["user_id"])
-                      else
-                          None
-            with
+        match
+            db {
+                getFstRow sql [ ("user_name", name) ]
+                execute
+            }
+            |> bind
+            <| fun x ->
+                if { bcrypt = coerce x.["user_pwd_hash"] }.Verify pwd then
+                    Some(coerce x.["user_id"])
+                else
+                    None
+        with
         | None ->
             mainLogger.error $"User login failed: Invalid user name({name}) or password({pwd})"
             |> Err
         | Some id ->
-            mainLogger.info $"User login success: {name}"
-            |> ignore
+            mainLogger.info $"User login success: {name}" |> ignore
 
             let mappedUser = mappedUserProvider.fetch id
 

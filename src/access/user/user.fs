@@ -18,7 +18,7 @@ type internal User
         mappedPostProvider: IMappedPostProvider,
         mappedCommentProvider: IMappedCommentProvider,
         mappedUserProvider: IMappedUserProvider,
-        handler: IMappedUser,  //用于行为授权的上级用户
+        handler: IMappedUser,
         mapped: IMappedUser,
         db: IDbOperationBuilder,
         postLogger: ILogger<Post>,
@@ -27,20 +27,11 @@ type internal User
     ) as impl =
     member self.Id = mapped.Id
 
-    member self.ReadPermissionLv =
-        mapped.Permission &&& 48us >>> 4
-
-    member self.WritePermissionLv =
-        mapped.Permission &&& 12us >>> 2
-
-    member self.CommentPermissionLv =
-        mapped.Permission &&& 3us
-
-    member self.ReadUserPermissionLv =
-        mapped.Permission &&& 768us >>> 8
-
-    member self.WriteUserPermissionLv =
-        mapped.Permission &&& 192us >>> 6
+    member self.ReadPermissionLv = mapped.Permission &&& 48us >>> 4
+    member self.WritePermissionLv = mapped.Permission &&& 12us >>> 2
+    member self.CommentPermissionLv = mapped.Permission &&& 3us
+    member self.ReadUserPermissionLv = mapped.Permission &&& 768us >>> 8
+    member self.WriteUserPermissionLv = mapped.Permission &&& 192us >>> 6
 
     member self.Name = mapped.Name
     member self.Email = mapped.Email
@@ -72,17 +63,17 @@ type internal User
                 :> IPost
             |> Ok
         else
-            userLogger.error "Create Post Failed: Permission denied"
-            |> Err
+            userLogger.error "Create Post Failed: Permission denied" |> Err
 
     member self.GetPost id =
-        if db {
-            inPost
-            getFstVal "post_id" "post_id" id
-            execute
-        } = None then
-            userLogger.error $"Get Post Failed: Invalid post id({id})"
-            |> Err
+        if
+            db {
+                inPost
+                getFstVal "post_id" "post_id" id
+                execute
+            } = None
+        then
+            userLogger.error $"Get Post Failed: Invalid post id({id})" |> Err
         else
             Post(
                 palaflake,
@@ -98,38 +89,35 @@ type internal User
             |> Ok
 
     member self.GetComment id =
-        if db {
-            inComment
-            getFstVal "comment_id" "comment_id" id
-            execute
-        } = None then
-            userLogger.error $"Get Comment Failed: Invalid comment id({id})"
-            |> Err
+        if
+            db {
+                inComment
+                getFstVal "comment_id" "comment_id" id
+                execute
+            } = None
+        then
+            userLogger.error $"Get Comment Failed: Invalid comment id({id})" |> Err
         else
             Comment(palaflake, mappedCommentProvider.fetch id, mappedCommentProvider, db, mapped, commentLogger)
             :> IComment
             |> Ok
 
     member self.NewUser name (pwd: string) permission =
-        let creator_wu_lv =
-            self.Permission &&& 192us >>> 6
-
-        let target_ru_lv =
-            permission &&& 768us >>> 8
-
-        let target_wu_lv =
-            permission &&& 192us >>> 6
-
+        let creator_wu_lv = self.Permission &&& 192us >>> 6
+        let target_ru_lv = permission &&& 768us >>> 8
+        let target_wu_lv = permission &&& 192us >>> 6
         let target_r_lv = permission &&& 48us >>> 4
         let target_w_lv = permission &&& 12us >>> 2
         let target_c_lv = permission &&& 3us
 
         //小于创建者的权限级别（防止管理员自克隆）
-        if target_ru_lv >= creator_wu_lv
-           || target_wu_lv >= creator_wu_lv
-           || target_r_lv >= creator_wu_lv
-           || target_w_lv >= creator_wu_lv
-           || target_c_lv >= creator_wu_lv then
+        if
+            target_ru_lv >= creator_wu_lv
+            || target_wu_lv >= creator_wu_lv
+            || target_r_lv >= creator_wu_lv
+            || target_w_lv >= creator_wu_lv
+            || target_c_lv >= creator_wu_lv
+        then
             $"Operation {nameof self.NewUser} Failed: illegal permission({permission}) \
               (any target permission({permission}) must be lower than creator({self.Name})'s write user permission)"
             |> userLogger.error
@@ -147,12 +135,14 @@ type internal User
             |> Err
         //仅限pl_register(wu级别2)及root(wu级别3)创建用户
         elif self.WriteUserPermissionLv >= 2us then
-            if db {
-                inUser
-                getFstVal "user_name" "user_name" name
-                execute
-               }
-               <> None then
+            if
+                db {
+                    inUser
+                    getFstVal "user_name" "user_name" name
+                    execute
+                }
+                <> None
+            then
                 userLogger.error $"Operation {nameof self.NewUser} Failed: username({name}) already exists"
                 |> Err
             else
@@ -198,11 +188,13 @@ type internal User
 
     member self.GetUser id =
         if self.ReadUserPermissionLv >= 2us then //TODO，暂不作实现，仅限pl_register(ru级别2)及root(ru级别3)访问
-            if db {
-                inUser
-                getFstVal "user_id" "user_id" id
-                execute
-            } = None then
+            if
+                db {
+                    inUser
+                    getFstVal "user_id" "user_id" id
+                    execute
+                } = None
+            then
                 userLogger.error $"Operation {nameof self.GetUser} Failed: Invalid user id({id})"
                 |> Err
             else
@@ -311,29 +303,21 @@ type internal User
             |> Err
 
     member self.UpdatePermission newPermission =
-        let handler_wu_lv =
-            handler.Permission &&& 192us >>> 6
-
-        let target_ru_lv =
-            newPermission &&& 768us >>> 8
-
-        let target_wu_lv =
-            newPermission &&& 192us >>> 6
-
-        let target_r_lv =
-            newPermission &&& 48us >>> 4
-
-        let target_w_lv =
-            newPermission &&& 12us >>> 2
-
+        let handler_wu_lv = handler.Permission &&& 192us >>> 6
+        let target_ru_lv = newPermission &&& 768us >>> 8
+        let target_wu_lv = newPermission &&& 192us >>> 6
+        let target_r_lv = newPermission &&& 48us >>> 4
+        let target_w_lv = newPermission &&& 12us >>> 2
         let target_c_lv = newPermission &&& 3us
 
         //小于授权上级的用户的权限级别（防止管理员自克隆）
-        if target_ru_lv >= handler_wu_lv
-           || target_wu_lv >= handler_wu_lv
-           || target_r_lv >= handler_wu_lv
-           || target_w_lv >= handler_wu_lv
-           || target_c_lv >= handler_wu_lv then
+        if
+            target_ru_lv >= handler_wu_lv
+            || target_wu_lv >= handler_wu_lv
+            || target_r_lv >= handler_wu_lv
+            || target_w_lv >= handler_wu_lv
+            || target_c_lv >= handler_wu_lv
+        then
             $"Operation {nameof self.UpdatePermission} Failed: illegal permission({newPermission}) \
               (any target permission({newPermission}) must be lower than handler({self.Name})'s write user permission)"
             |> userLogger.error
@@ -371,20 +355,11 @@ type internal User
             |> Err
 
     interface IUser with
-        member i.ReadPermissionLv =
-            impl.ReadPermissionLv
-
-        member i.WritePermissionLv =
-            impl.WritePermissionLv
-
-        member i.CommentPermissionLv =
-            impl.CommentPermissionLv
-
-        member i.ReadUserPermissionLv =
-            impl.ReadUserPermissionLv
-
-        member i.WriteUserPermissionLv =
-            impl.WriteUserPermissionLv
+        member i.ReadPermissionLv = impl.ReadPermissionLv
+        member i.WritePermissionLv = impl.WritePermissionLv
+        member i.CommentPermissionLv = impl.CommentPermissionLv
+        member i.ReadUserPermissionLv = impl.ReadUserPermissionLv
+        member i.WriteUserPermissionLv = impl.WriteUserPermissionLv
 
         member i.Id = impl.Id
         member i.Name = impl.Name

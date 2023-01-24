@@ -52,12 +52,11 @@ module IUserModifyPipeline =
                         whenEq 1
                         execute
                     }
-                    with
+                with
                 | 1 -> Some(idVal, targetVal)
                 | _ -> None
 
-            builder.fullyBuild
-            <| fun fail x -> unwrapOrEval (set field x) (fun _ -> fail x)
+            builder.fullyBuild <| fun fail x -> unwrapOrEval (set field x) (fun _ -> fail x)
 
         let udf =
             Dict<_, _>()
@@ -65,20 +64,11 @@ module IUserModifyPipeline =
                 for KV (name, builderItem) in modifyBuilder do
                     dict.Add(name, builderItem.fullyBuild id))
 
-        let name =
-            gen modifyBuilder.Name "user_name"
-
-        let email =
-            gen modifyBuilder.Email "user_email"
-
-        let createTime =
-            gen modifyBuilder.CreateTime "user_create_time"
-
-        let accessTime =
-            gen modifyBuilder.AccessTime "user_access_time"
-
-        let permission =
-            gen modifyBuilder.Permission "user_permission"
+        let name = gen modifyBuilder.Name "user_name"
+        let email = gen modifyBuilder.Email "user_email"
+        let createTime = gen modifyBuilder.CreateTime "user_create_time"
+        let accessTime = gen modifyBuilder.AccessTime "user_access_time"
+        let permission = gen modifyBuilder.Permission "user_permission"
 
         { new IUserModifyPipeline with
             member self.Name a = name a

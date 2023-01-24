@@ -39,11 +39,7 @@ let make
 
                 member i.Item
                     with get name = fmap ((apply ..> snd) user_id) render.[name]
-                    and set name v =
-                        bind
-                        <| v
-                        <| fun v -> fmap (apply (user_id, v)) modify.[name]
-                        |> ignore }
+                    and set name v = v.bind (fun v -> fmap (apply (user_id, v)) modify.[name]) |> ignore }
 
         member self.create user = self.fetch (init.Batch user)
         member self.delete user_id = finalize.Batch user_id }
