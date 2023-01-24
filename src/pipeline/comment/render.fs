@@ -20,6 +20,7 @@ module ICommentRenderPipelineBuilder =
         let body = gen ()
         let binding = gen ()
         let createTime = gen ()
+        let modifyTime = gen ()
         let userId = gen ()
         let permission = gen ()
         let udf = Dict<_, _>() //user defined field
@@ -30,6 +31,7 @@ module ICommentRenderPipelineBuilder =
             member i.Body = body
             member i.Binding = binding
             member i.CreateTime = createTime
+            member i.ModifyTime = modifyTime
             member i.UserId = userId
             member i.Permission = permission
 
@@ -59,18 +61,17 @@ module ICommentRenderPipeline =
             builder.fullyBuild
             <| fun fail id -> unwrapOrEval (get field id) (fun _ -> fail id)
 
-        let body =
-            gen renderBuilder.Body "comment_body"
+        let body = gen renderBuilder.Body "comment_body"
 
         let binding =
             let getBinding id =
                 coerce
                 <%> db {
                     inComment
-                    getFstVal "comment_binding" "comment_id" id
+                    getFstVal "comment_binding_id" "comment_id" id
                     execute
                 }
-                >>= fun (comment_binding: i64) ->
+                >>= fun (comment_binding_id: i64) ->
                         coerce
                         <%> db {
                             inComment
@@ -79,21 +80,17 @@ module ICommentRenderPipeline =
                         }
                         >>= fun (comment_is_reply: bool) ->
                                 if comment_is_reply then
-                                    Some(id, BindComment comment_binding)
+                                    Some(id, BindComment comment_binding_id)
                                 else
-                                    Some(id, BindPost comment_binding)
+                                    Some(id, BindPost comment_binding_id)
 
             renderBuilder.Binding.fullyBuild
             <| fun fail id -> unwrapOrEval (getBinding id) (fun _ -> fail id)
 
-        let createTime =
-            gen renderBuilder.CreateTime "comment_create_time"
-
-        let userId =
-            gen renderBuilder.UserId "user_id"
-
-        let permission =
-            gen renderBuilder.Permission "comment_permission"
+        let createTime = gen renderBuilder.CreateTime "comment_create_time"
+        let modifyTime = gen renderBuilder.CreateTime "comment_modify_time"
+        let userId = gen renderBuilder.UserId "user_id"
+        let permission = gen renderBuilder.Permission "comment_permission"
 
         let udf =
             Dict<_, _>()
@@ -105,6 +102,7 @@ module ICommentRenderPipeline =
             member self.Body a = body a
             member self.Binding a = binding a
             member self.CreateTime a = createTime a
+            member self.ModifyTime a = modifyTime a
             member self.UserId a = userId a
             member self.Permission a = permission a
             member self.Item(name: string) = udf.TryGetValue(name).intoOption' () }

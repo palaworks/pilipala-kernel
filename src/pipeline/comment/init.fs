@@ -25,16 +25,17 @@ module ICommentInitPipeline =
     let make (initBuilder: ICommentInitPipelineBuilder, db: IDbOperationBuilder) =
     
         let data (comment: CommentData) =
-            let comment_binding, comment_is_reply =
+            let comment_binding_id, comment_is_reply =
                 match comment.Binding with
                 | BindPost post_id -> post_id, false
                 | BindComment comment_id -> comment_id, true
 
             let fields: (_ * obj) list =
                 [ ("comment_id", comment.Id)
-                  ("comment_binding", comment_binding)
                   ("comment_body", comment.Body)
                   ("comment_create_time", comment.CreateTime)
+                  ("comment_modify_time", comment.ModifyTime)
+                  ("comment_binding_id", comment_binding_id)
                   ("comment_is_reply", comment_is_reply)
                   ("user_id", comment.UserId)
                   ("comment_permission", comment.Permission) ]

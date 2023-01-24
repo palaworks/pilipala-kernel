@@ -47,6 +47,20 @@ type internal Comment
             commentLogger.error $"Get {nameof self.CreateTime} Failed: Permission denied (comment id: {mapped.Id})"
             |> Err
 
+    member self.ModifyTime =
+        if self.CanRead then
+            Ok(mapped.ModifyTime)
+        else
+            commentLogger.error $"Get {nameof self.ModifyTime} Failed: Permission denied (comment id: {mapped.Id})"
+            |> Err
+
+    member self.Binding =
+        if self.CanRead then
+            Ok(mapped.Binding)
+        else
+            commentLogger.error $"Get {nameof self.Binding} Failed: Permission denied (comment id: {mapped.Id})"
+            |> Err
+
     member self.UserId =
         if self.CanRead then
             Ok(mapped.UserId)
@@ -73,7 +87,7 @@ type internal Comment
         if self.CanRead then
             let sql =
                 $"SELECT comment_id FROM {db.tables.comment} \
-                  WHERE comment_is_reply = true AND comment_binding = {mapped.Id}"
+                  WHERE comment_is_reply = true AND comment_binding_id = {mapped.Id}"
 
             Seq.unfold
             <| fun (list: obj list) ->
@@ -120,16 +134,13 @@ type internal Comment
 
     member self.UpdatePermission(permission: u8) =
         if self.CanWrite then
-            if (permission &&& 48uy >>> 2)
-               <= (permission &&& 12uy) //确保可写即可读
-               && (permission &&& 48uy >>> 4)
-                  <= (permission &&& 3uy) //确保可评即可读
-               && u8 (user.Permission &&& 48us)
-                  >= (permission &&& 48uy) //不允许过度提权
-               && u8 (user.Permission &&& 12us)
-                  >= (permission &&& 12uy)
-               && u8 (user.Permission &&& 3us)
-                  >= (permission &&& 3uy) then
+            if
+                (permission &&& 48uy >>> 2) <= (permission &&& 12uy) //确保可写即可读
+                && (permission &&& 48uy >>> 4) <= (permission &&& 3uy) //确保可评即可读
+                && u8 (user.Permission &&& 48us) >= (permission &&& 48uy) //不允许过度提权
+                && u8 (user.Permission &&& 12us) >= (permission &&& 12uy)
+                && u8 (user.Permission &&& 3us) >= (permission &&& 3uy)
+            then
                 Ok(mapped.Permission <- permission)
             else
                 commentLogger.error
@@ -142,9 +153,12 @@ type internal Comment
 
     member self.NewComment(body: string) =
         if self.CanComment then
+            let now = DateTime.Now
+
             { Id = palaflake.next ()
               Body = body
-              CreateTime = DateTime.Now
+              CreateTime = now
+              ModifyTime = now
               Binding = BindComment mapped.Id
               UserId = user.Id
               Permission =
@@ -179,6 +193,8 @@ type internal Comment
         member i.Id = impl.Id
         member i.Body = impl.Body
         member i.CreateTime = impl.CreateTime
+        member i.ModifyTime = impl.ModifyTime
+        member i.Binding = impl.Binding
         member i.UserId = impl.UserId
         member i.Permission = impl.Permission
 
