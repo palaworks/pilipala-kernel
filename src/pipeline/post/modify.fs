@@ -1,5 +1,6 @@
 namespace pilipala.pipeline.post
 
+open System
 open System.Collections
 open System.Collections.Generic
 open fsharper.op
@@ -56,33 +57,45 @@ module IPostModifyPipeline =
                         whenEq 1
                         execute
                     }
-                    with
+                with
                 | 1 -> Some(idVal, targetVal)
                 | _ -> None
 
-            builder.fullyBuild
-            <| fun fail x -> unwrapOrEval (set field x) (fun _ -> fail x)
+            builder.fullyBuild <| fun fail x -> unwrapOrEval (set field x) (fun _ -> fail x)
 
-        let title =
-            gen modifyBuilder.Title "post_title"
+        let title = gen modifyBuilder.Title "post_title"
 
         let body =
-            gen modifyBuilder.Body "post_body"
+            let set (idVal: i64, targetVal: string) =
+                //TODO 该写法降低了对MySql数据库的兼容性(参数化标识符)，等待DbM补完或移除MySql支持性。
+                let sql =
+                    $"UPDATE {db.tables.post} \
+                      SET    post_body        = :post_body, \
+                             post_modify_time = :post_modify_time \
+                      WHERE  post_id          = :post_id"
 
-        let createTime =
-            gen modifyBuilder.CreateTime "post_create_time"
+                match
+                    db {
+                        query sql [ ("post_body", (targetVal: obj)); ("post_modify_time", (DateTime.Now: obj)) ]
+                        whenEq 1
+                        execute
+                    }
+                with
+                | 1 -> Some(idVal, targetVal)
+                | _ -> None
 
-        let accessTime =
-            gen modifyBuilder.AccessTime "post_access_time"
+            modifyBuilder.Body.fullyBuild
+            <| fun fail x -> unwrapOrEval (set x) (fun _ -> fail x)
 
-        let modifyTime =
-            gen modifyBuilder.ModifyTime "post_modify_time"
+        let createTime = gen modifyBuilder.CreateTime "post_create_time"
 
-        let userId =
-            gen modifyBuilder.UserId "user_id"
+        let accessTime = gen modifyBuilder.AccessTime "post_access_time"
 
-        let permission =
-            gen modifyBuilder.Permission "post_permission"
+        let modifyTime = gen modifyBuilder.ModifyTime "post_modify_time"
+
+        let userId = gen modifyBuilder.UserId "user_id"
+
+        let permission = gen modifyBuilder.Permission "post_permission"
 
         let udf =
             Dict<_, _>()

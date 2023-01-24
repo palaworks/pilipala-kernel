@@ -27,6 +27,10 @@ let make
                     with get () = snd (render.CreateTime comment_id)
                     and set v = modify.CreateTime(comment_id, v) |> ignore
 
+                member i.ModifyTime
+                    with get () = snd (render.ModifyTime comment_id)
+                    and set v = modify.ModifyTime(comment_id, v) |> ignore
+
                 member i.Binding
                     with get () = snd (render.Binding comment_id)
                     and set v = modify.Binding(comment_id, v) |> ignore
@@ -41,11 +45,7 @@ let make
 
                 member i.Item
                     with get name = fmap ((apply ..> snd) comment_id) render.[name]
-                    and set name v =
-                        bind
-                        <| v
-                        <| fun v -> fmap (apply (comment_id, v)) modify.[name]
-                        |> ignore }
+                    and set name v = bind <| v <| (fun v -> fmap (apply (comment_id, v)) modify.[name]) |> ignore }
 
         member self.create comment =
             self.fetch (init.Batch comment)

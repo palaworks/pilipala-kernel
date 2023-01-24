@@ -55,14 +55,13 @@ module ICommentFinalizePipeline =
             } = 1 then
                 { Id = comment_id
                   Body = coerce db_data.["comment_body"]
-
+                  CreateTime = coerce db_data.["comment_create_time"]
+                  ModifyTime = coerce db_data.["comment_modify_time"]
                   Binding =
                       if coerce db_data.["comment_is_reply"] then
-                          BindComment(coerce db_data.["comment_binding"])
+                          BindComment(coerce db_data.["comment_binding_id"])
                       else
-                          BindPost(coerce db_data.["comment_binding"])
-
-                  CreateTime = coerce db_data.["comment_create_time"]
+                          BindPost(coerce db_data.["comment_binding_id"])
                   UserId = coerce db_data.["user_id"]
                   Permission = coerce db_data.["comment_permission"]
                   Props = props }

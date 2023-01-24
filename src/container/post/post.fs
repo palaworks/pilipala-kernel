@@ -97,7 +97,7 @@ type internal Post
         if self.CanRead then
             let sql =
                 $"SELECT comment_id FROM {db.tables.comment} \
-                  WHERE comment_is_reply = false AND comment_binding = {mapped.Id}"
+                  WHERE comment_is_reply = false AND comment_binding_id = {mapped.Id}"
 
             Seq.unfold
             <| fun (list: obj list) ->
@@ -150,16 +150,13 @@ type internal Post
 
     member self.UpdatePermission(permission: u8) =
         if self.CanWrite then
-            if (permission &&& 48uy >>> 2)
-               <= (permission &&& 12uy) //确保可写即可读
-               && (permission &&& 48uy >>> 4)
-                  <= (permission &&& 3uy) //确保可评即可读
-               && u8 (user.Permission &&& 48us)
-                  >= (permission &&& 48uy) //不允许过度提权
-               && u8 (user.Permission &&& 12us)
-                  >= (permission &&& 12uy)
-               && u8 (user.Permission &&& 3us)
-                  >= (permission &&& 3uy) then
+            if
+                (permission &&& 48uy >>> 2) <= (permission &&& 12uy) //确保可写即可读
+                && (permission &&& 48uy >>> 4) <= (permission &&& 3uy) //确保可评即可读
+                && u8 (user.Permission &&& 48us) >= (permission &&& 48uy) //不允许过度提权
+                && u8 (user.Permission &&& 12us) >= (permission &&& 12uy)
+                && u8 (user.Permission &&& 3us) >= (permission &&& 3uy)
+            then
                 Ok(mapped.Permission <- permission)
             else
                 postLogger.error
@@ -172,9 +169,12 @@ type internal Post
 
     member self.NewComment(body: string) =
         if self.CanComment then
+            let now = DateTime.Now
+
             { Id = palaflake.next ()
               Body = body
-              CreateTime = DateTime.Now
+              CreateTime = now
+              ModifyTime = now
               Binding = BindPost mapped.Id
               UserId = user.Id
               Permission =
