@@ -1,5 +1,6 @@
 namespace pilipala
 
+open System
 open Microsoft.Extensions.Logging
 open fsharper.op
 open fsharper.typ
@@ -48,6 +49,7 @@ type App
             mainLogger.info $"User login success: {name}" |> ignore
 
             let mappedUser = mappedUserProvider.fetch id
+            mappedUser.AccessTime <- DateTime.Now //update access time
 
             User(
                 palaflake,
@@ -87,6 +89,7 @@ type App
             mainLogger.info $"User login success: {name}" |> ignore
 
             let mappedUser = mappedUserProvider.fetch id
+            mappedUser.AccessTime <- DateTime.Now //update access time
 
             User(
                 palaflake,
