@@ -126,7 +126,8 @@ type Builder with
                     ))
         .> self.pipeline //use...
         .> fun sc -> //添加已注册日志
-            sc.configureLogging (sc.BuildServiceProvider().GetRequiredService(): LoggerRegister)
+            let sp = sc.BuildServiceProvider()
+            sc.configureLogging (sp.GetRequiredService(): LoggerRegister)
         //before build
         .> fun sc ->
             sc
@@ -144,6 +145,10 @@ type Builder with
                     ): IApp)
                 .BuildServiceProvider()
         .> fun sp ->
+            sp
+                .GetRequiredService<ILogger<Builder>>()
+                .LogInformation $"Lifecycle begin: {AppLifeCycle.BeforeBuild}"
+
             sp //启动BeforeBuild生命周期插件
                 .GetRequiredService<PluginRegister>()
                 .BeforeBuild
@@ -200,6 +205,10 @@ type Builder with
                 |> always acc
             <| sp
         .> fun sp ->
+            sp
+                .GetRequiredService<ILogger<Builder>>()
+                .LogInformation $"Lifecycle begin: {AppLifeCycle.AfterBuild}"
+
             sp.GetRequiredService<IApp>().effect //build
             <| fun app ->
                 sp //启动AfterBuild生命周期插件
@@ -246,4 +255,10 @@ type Builder with
                             .LogInformation $"Plugin loaded: {pluginType.Name}")
                     |> always acc
                 <| sp
+                |> ignore
+
+                sp
+                    .GetRequiredService<ILogger<Builder>>()
+                    .LogInformation "Kernel initialization complete"
+
         |> apply (ServiceCollection())
