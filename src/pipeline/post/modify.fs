@@ -74,9 +74,14 @@ module IPostModifyPipeline =
                              post_modify_time = :post_modify_time \
                       WHERE  post_id          = :post_id"
 
+                let paras: (string * obj) list =
+                    [ ("post_body", targetVal)
+                      ("post_modify_time", DateTime.Now)
+                      ("post_id", idVal) ]
+
                 match
                     db {
-                        query sql [ ("post_body", (targetVal: obj)); ("post_modify_time", (DateTime.Now: obj)) ]
+                        query sql paras
                         whenEq 1
                         execute
                     }
