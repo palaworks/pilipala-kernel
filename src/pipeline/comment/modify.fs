@@ -70,13 +70,14 @@ module ICommentModifyPipeline =
                              comment_modify_time = :comment_modify_time \
                       WHERE  comment_id          = :comment_id"
 
+                let paras: (string * obj) list =
+                    [ ("comment_body", targetVal)
+                      ("comment_modify_time", DateTime.Now)
+                      ("comment_id", idVal) ]
+
                 match
                     db {
-                        query
-                            sql
-                            [ ("comment_body", (targetVal: obj))
-                              ("comment_modify_time", (DateTime.Now: obj)) ]
-
+                        query sql paras
                         whenEq 1
                         execute
                     }
