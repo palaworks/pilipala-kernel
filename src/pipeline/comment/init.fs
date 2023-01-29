@@ -36,8 +36,8 @@ module ICommentInitPipeline =
                   ("comment_modify_time", comment.ModifyTime)
                   ("comment_binding_id", comment_binding_id)
                   ("comment_is_reply", comment_is_reply)
-                  ("user_id", comment.UserId)
-                  ("comment_permission", comment.Permission) ]
+                  ("comment_permission", comment.Permission)
+                  ("user_id", comment.UserId) ]
 
             let aff =
                 db {
