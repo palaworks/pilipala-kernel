@@ -28,8 +28,8 @@ module IPostInitPipeline =
                   ("post_create_time", post.CreateTime)
                   ("post_access_time", post.AccessTime)
                   ("post_modify_time", post.AccessTime)
-                  ("user_id", post.UserId)
-                  ("user_permission", post.Permission) ]
+                  ("post_permission", post.Permission)
+                  ("user_id", post.UserId) ]
 
             let aff =
                 db {
