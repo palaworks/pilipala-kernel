@@ -44,6 +44,7 @@ type App
         with
         | None ->
             mainLogger.error $"User login failed: Invalid user id({id}) or password({pwd})"
+            |> Exception
             |> Err
         | Some (id, name) ->
             mainLogger.info $"User login success: {name}" |> ignore
@@ -84,6 +85,7 @@ type App
         with
         | None ->
             mainLogger.error $"User login failed: Invalid user name({name}) or password({pwd})"
+            |> Exception
             |> Err
         | Some id ->
             mainLogger.info $"User login success: {name}" |> ignore
