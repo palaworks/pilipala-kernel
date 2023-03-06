@@ -41,6 +41,7 @@ type internal Post
             Ok(mapped.Title)
         else
             postLogger.error $"Get {nameof self.Title} Failed: Permission denied (post id: {mapped.Id})"
+            |> Exception
             |> Err
 
     member self.Body =
@@ -48,6 +49,7 @@ type internal Post
             Ok(mapped.Body)
         else
             postLogger.error $"Get {nameof self.Body} Failed: Permission denied (post id: {mapped.Id})"
+            |> Exception
             |> Err
 
     member self.CreateTime =
@@ -55,6 +57,7 @@ type internal Post
             Ok(mapped.CreateTime)
         else
             postLogger.error $"Get {nameof self.CreateTime} Failed: Permission denied (post id: {mapped.Id})"
+            |> Exception
             |> Err
 
     member self.AccessTime =
@@ -62,6 +65,7 @@ type internal Post
             Ok(mapped.AccessTime)
         else
             postLogger.error $"Get {nameof self.AccessTime} Failed: Permission denied (post id: {mapped.Id})"
+            |> Exception
             |> Err
 
     member self.ModifyTime =
@@ -69,6 +73,7 @@ type internal Post
             Ok(mapped.ModifyTime)
         else
             postLogger.error $"Get {nameof self.ModifyTime} Failed: Permission denied (post id: {mapped.Id})"
+            |> Exception
             |> Err
 
     member self.UserId =
@@ -76,6 +81,7 @@ type internal Post
             Ok(mapped.UserId)
         else
             postLogger.error $"Get {nameof self.UserId} Failed: Permission denied (post id: {mapped.Id})"
+            |> Exception
             |> Err
 
     member self.Permission =
@@ -83,6 +89,7 @@ type internal Post
             Ok(mapped.Permission)
         else
             postLogger.error $"Get {nameof self.Permission} Failed: Permission denied (post id: {mapped.Id})"
+            |> Exception
             |> Err
 
     member self.Item
@@ -91,6 +98,7 @@ type internal Post
                 Ok(mapped.[name])
             else
                 postLogger.error $"Get Item.{name} Failed: Permission denied (post id: {mapped.Id})"
+                |> Exception
                 |> Err
 
     member self.Comments =
@@ -124,6 +132,7 @@ type internal Post
             |> Ok
         else
             commentLogger.error $"Get {nameof self.Comments} Failed: Permission denied (post id: {mapped.Id})"
+            |> Exception
             |> Err
 
     member self.UpdateTitle newTitle =
@@ -131,6 +140,7 @@ type internal Post
             Ok(mapped.Title <- newTitle)
         else
             postLogger.error $"Operation {nameof self.UpdateTitle} Failed: Permission denied (post id: {mapped.Id})"
+            |> Exception
             |> Err
 
     member self.UpdateBody newBody =
@@ -138,6 +148,7 @@ type internal Post
             Ok(mapped.Body <- newBody)
         else
             postLogger.error $"Operation {nameof self.UpdateBody} Failed: Permission denied (post id: {mapped.Id})"
+            |> Exception
             |> Err
 
     member self.UpdateItem name v =
@@ -146,6 +157,7 @@ type internal Post
         else
             postLogger.error
                 $"Operation {nameof self.UpdateItem}.{name} Failed: Permission denied (post id: {mapped.Id})"
+            |> Exception
             |> Err
 
     member self.UpdatePermission(permission: u8) =
@@ -161,10 +173,12 @@ type internal Post
             else
                 postLogger.error
                     $"Operation {nameof self.UpdatePermission} Failed: Invalid permission updating (post id: {mapped.Id})"
+                |> Exception
                 |> Err
         else
             postLogger.error
                 $"Operation {nameof self.UpdatePermission} Failed: Permission denied (post id: {mapped.Id})"
+            |> Exception
             |> Err
 
     member self.NewComment(body: string) =
@@ -189,6 +203,7 @@ type internal Post
             |> Ok
         else
             postLogger.error $"Operation {nameof self.NewComment} Failed: Permission denied (post id: {mapped.Id})"
+            |> Exception
             |> Err
 
     member self.Drop() =
@@ -197,6 +212,7 @@ type internal Post
             mappedPostProvider.delete mapped.Id |> Ok
         else
             postLogger.error $"Operation {nameof self.Drop} Failed: Permission denied (post id: {mapped.Id})"
+            |> Exception
             |> Err
 
     interface IPost with

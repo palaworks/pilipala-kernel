@@ -63,7 +63,7 @@ type internal User
                 :> IPost
             |> Ok
         else
-            userLogger.error "Create Post Failed: Permission denied" |> Err
+            userLogger.error "Create Post Failed: Permission denied" |> Exception |> Err
 
     member self.GetPost id =
         if
@@ -73,7 +73,7 @@ type internal User
                 execute
             } = None
         then
-            userLogger.error $"Get Post Failed: Invalid post id({id})" |> Err
+            userLogger.error $"Get Post Failed: Invalid post id({id})" |> Exception |> Err
         else
             Post(
                 palaflake,
@@ -96,7 +96,9 @@ type internal User
                 execute
             } = None
         then
-            userLogger.error $"Get Comment Failed: Invalid comment id({id})" |> Err
+            userLogger.error $"Get Comment Failed: Invalid comment id({id})"
+            |> Exception
+            |> Err
         else
             Comment(palaflake, mappedCommentProvider.fetch id, mappedCommentProvider, db, mapped, commentLogger)
             :> IComment
@@ -121,17 +123,20 @@ type internal User
             $"Operation {nameof self.NewUser} Failed: illegal permission({permission}) \
               (any target permission({permission}) must be lower than creator({self.Name})'s write user permission)"
             |> userLogger.error
+            |> Exception
             |> Err
         //保证可见性>=可评性>=可写性
         elif target_r_lv < target_c_lv then
             $"Operation {nameof self.NewUser} Failed: illegal permission({permission}) \
               (violate constraint: read level >= comment level)"
             |> userLogger.error
+            |> Exception
             |> Err
         elif target_c_lv < target_w_lv then
             $"Operation {nameof self.NewUser} Failed: illegal permission({permission}) \
               (violate constraint: comment level >= write level)"
             |> userLogger.error
+            |> Exception
             |> Err
         //仅限pl_register(wu级别2)及root(wu级别3)创建用户
         elif self.WriteUserPermissionLv >= 2us then
@@ -144,6 +149,7 @@ type internal User
                 <> None
             then
                 userLogger.error $"Operation {nameof self.NewUser} Failed: username({name}) already exists"
+                |> Exception
                 |> Err
             else
                 { Id = palaflake.next ()
@@ -184,6 +190,7 @@ type internal User
                 |> Ok
         else
             userLogger.error $"Operation {nameof self.NewUser} Failed: Permission denied"
+            |> Exception
             |> Err
 
     member self.GetUser id =
@@ -196,6 +203,7 @@ type internal User
                 } = None
             then
                 userLogger.error $"Operation {nameof self.GetUser} Failed: Invalid user id({id})"
+                |> Exception
                 |> Err
             else
                 User(
@@ -214,6 +222,7 @@ type internal User
                 |> Ok
         else
             userLogger.error $"Operation {nameof self.GetUser} Failed: Permission denied (target user id: {id})"
+            |> Exception
             |> Err
 
     member inline private self.GetPostGen(mask: u8) =
@@ -291,6 +300,7 @@ type internal User
         else
             $"Operation {nameof self.UpdateName} Failed: Permission denied"
             |> userLogger.error
+            |> Exception
             |> Err
 
     member self.UpdateEmail newEmail =
@@ -300,6 +310,7 @@ type internal User
         else
             $"Operation {nameof self.UpdateEmail} Failed: Permission denied"
             |> userLogger.error
+            |> Exception
             |> Err
 
     member self.UpdatePermission newPermission =
@@ -321,17 +332,20 @@ type internal User
             $"Operation {nameof self.UpdatePermission} Failed: illegal permission({newPermission}) \
               (any target permission({newPermission}) must be lower than handler({self.Name})'s write user permission)"
             |> userLogger.error
+            |> Exception
             |> Err
         //保证可见性>=可评性>=可写性
         elif target_r_lv < target_c_lv then
             $"Operation {nameof self.UpdatePermission} Failed: illegal permission({newPermission}) \
               (violate constraint: read level >= comment level)"
             |> userLogger.error
+            |> Exception
             |> Err
         elif target_c_lv < target_w_lv then
             $"Operation {nameof self.UpdatePermission} Failed: illegal permission({newPermission}) \
               (violate constraint: comment level >= write level)"
             |> userLogger.error
+            |> Exception
             |> Err
         else
             mapped.Permission <- newPermission
@@ -344,6 +358,7 @@ type internal User
         else
             $"Operation {nameof self.UpdateItem} Failed: Permission denied"
             |> userLogger.error
+            |> Exception
             |> Err
 
     member self.Drop() =
@@ -352,6 +367,7 @@ type internal User
             mappedUserProvider.delete mapped.Id |> Ok
         else
             postLogger.error $"Operation {nameof self.Drop} Failed: Permission denied (post id: {mapped.Id})"
+            |> Exception
             |> Err
 
     interface IUser with

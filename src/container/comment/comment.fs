@@ -38,6 +38,7 @@ type internal Comment
             Ok(mapped.Body)
         else
             commentLogger.error $"Get {nameof self.Body} Failed: Permission denied (comment id: {mapped.Id})"
+            |> Exception
             |> Err
 
     member self.CreateTime =
@@ -45,6 +46,7 @@ type internal Comment
             Ok(mapped.CreateTime)
         else
             commentLogger.error $"Get {nameof self.CreateTime} Failed: Permission denied (comment id: {mapped.Id})"
+            |> Exception
             |> Err
 
     member self.ModifyTime =
@@ -52,6 +54,7 @@ type internal Comment
             Ok(mapped.ModifyTime)
         else
             commentLogger.error $"Get {nameof self.ModifyTime} Failed: Permission denied (comment id: {mapped.Id})"
+            |> Exception
             |> Err
 
     member self.Binding =
@@ -59,6 +62,7 @@ type internal Comment
             Ok(mapped.Binding)
         else
             commentLogger.error $"Get {nameof self.Binding} Failed: Permission denied (comment id: {mapped.Id})"
+            |> Exception
             |> Err
 
     member self.UserId =
@@ -66,6 +70,7 @@ type internal Comment
             Ok(mapped.UserId)
         else
             commentLogger.error $"Get {nameof self.UserId} Failed: Permission denied (comment id: {mapped.Id})"
+            |> Exception
             |> Err
 
     member self.Permission =
@@ -73,6 +78,7 @@ type internal Comment
             Ok(mapped.Permission)
         else
             commentLogger.error $"Get {nameof self.Permission} Failed: Permission denied (comment id: {mapped.Id})"
+            |> Exception
             |> Err
 
     member self.Item
@@ -81,6 +87,7 @@ type internal Comment
                 Ok(mapped.[name])
             else
                 commentLogger.error $"Get Item.{name} Failed: Permission denied (comment id: {mapped.Id})"
+                |> Exception
                 |> Err
 
     member self.Comments =
@@ -114,6 +121,7 @@ type internal Comment
             |> Ok
         else
             commentLogger.error $"Get {nameof self.Comments} Failed: Permission denied (comment id: {mapped.Id})"
+            |> Exception
             |> Err
 
     member self.UpdateBody newBody =
@@ -122,6 +130,7 @@ type internal Comment
         else
             commentLogger.error
                 $"Operation {nameof self.UpdateBody} Failed: Permission denied (comment id: {mapped.Id})"
+            |> Exception
             |> Err
 
     member self.UpdateItem name v =
@@ -130,6 +139,7 @@ type internal Comment
         else
             commentLogger.error
                 $"Operation {nameof self.UpdateItem} Failed: Permission denied (comment id: {mapped.Id})"
+            |> Exception
             |> Err
 
     member self.UpdatePermission(permission: u8) =
@@ -145,10 +155,12 @@ type internal Comment
             else
                 commentLogger.error
                     $"Operation {nameof self.UpdatePermission} Failed: Invalid permission updating (comment id: {mapped.Id})"
+                |> Exception
                 |> Err
         else
             commentLogger.error
                 $"Operation {nameof self.UpdatePermission} Failed: Permission denied (comment id: {mapped.Id})"
+            |> Exception
             |> Err
 
     member self.NewComment(body: string) =
@@ -174,6 +186,7 @@ type internal Comment
         else
             commentLogger.error
                 $"Operation {nameof self.NewComment} Failed: Permission denied (comment id: {mapped.Id})"
+            |> Exception
             |> Err
 
     member self.Drop() =
@@ -182,6 +195,7 @@ type internal Comment
             mappedCommentProvider.delete mapped.Id |> Ok
         else
             commentLogger.error $"Operation {nameof self.Drop} Failed: Permission denied (comment id: {mapped.Id})"
+            |> Exception
             |> Err
 
     interface IComment with
