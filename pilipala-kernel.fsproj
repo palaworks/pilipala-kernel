@@ -43,17 +43,16 @@
 
     <ItemGroup>
         <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="7.0.0" />
-        <PackageReference Include="Microsoft.Extensions.Hosting" Version="7.0.0" />
-        <PackageReference Update="FSharp.Core" Version="7.0.0" />
+        <PackageReference Include="Microsoft.Extensions.Hosting" Version="7.0.1" />
+        <PackageReference Update="FSharp.Core" Version="7.0.300" />
     </ItemGroup>
 
     <ItemGroup>
-        <ProjectReference Include="..\DbManaged\DbManaged.fsproj" />
-        <ProjectReference Include="..\fsharper\fsharper.fsproj" />
+        <ProjectReference Include="..\..\thaumy\DbManaged\DbManaged.fsproj" />
+        <ProjectReference Include="..\..\thaumy\fsharper\fsharper.fsproj" />
         <ProjectReference Include="..\pilipala-sdk\pilipala-frame\pilipala-frame.fsproj" />
         <ProjectReference Include="..\pilipala-sdk\pilipala.data.db-ext\pilipala.data.db-ext.fsproj" />
         <ProjectReference Include="..\pilipala-sdk\pilipala.util\pilipala.util.fsproj" />
-        <ProjectReference Include="..\websocket-sharp\websocket-sharp\websocket-sharp.csproj" />
     </ItemGroup>
 
 </Project>
